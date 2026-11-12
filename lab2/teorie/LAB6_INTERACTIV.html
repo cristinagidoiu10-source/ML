@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 6 interactiv</title>
+<style>
+:root{--bg:#fbfaf7;--card:#ffffff;--ink:#1d1d1b;--ink2:#55544f;--mute:#8a8983;--line:#e4e2da;--acc:#2a78d6;--acc-bg:#e6f1fb;--org:#eb6834;--org-bg:#fdeee6;--ok:#1a8a55;--ok-bg:#e3f4ea;--bad:#c63b3b;--bad-bg:#fbe9e9;--warn-bg:#fdf3dc;--warn:#8a5a00;--grid:#e9e7e0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171716;--card:#201f1e;--ink:#f0efec;--ink2:#c3c2b7;--mute:#8f8e88;--line:#363532;--acc:#4b93e8;--acc-bg:#16304d;--org:#e8743f;--org-bg:#43230f;--ok:#4cc184;--ok-bg:#143322;--bad:#ec6a6a;--bad-bg:#421818;--warn-bg:#3a2c08;--warn:#f0c15a;--grid:#2c2c2a}}
+:root[data-theme="dark"]{--bg:#171716;--card:#201f1e;--ink:#f0efec;--ink2:#c3c2b7;--mute:#8f8e88;--line:#363532;--acc:#4b93e8;--acc-bg:#16304d;--org:#e8743f;--org-bg:#43230f;--ok:#4cc184;--ok-bg:#143322;--bad:#ec6a6a;--bad-bg:#421818;--warn-bg:#3a2c08;--warn:#f0c15a;--grid:#2c2c2a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px 80px}
+header{position:relative}
+header h1{font-size:30px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+header p{color:var(--ink2);margin:0}
+.labs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.labs a{font-size:13px;color:var(--ink2);text-decoration:none;padding:3px 10px;border-radius:6px;border:1px solid var(--line)}
+.labs a.cur{background:var(--acc-bg);color:var(--acc);border-color:var(--acc)}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin:20px -16px 0;padding:8px 16px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+nav a{flex:none;font-size:13px;color:var(--ink2);text-decoration:none;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+nav a:hover{color:var(--ink);border-color:var(--mute)}
+section{margin-top:40px}
+h2{font-size:23px;font-weight:600;margin:0 0 6px;scroll-margin-top:60px}
+h3{font-size:17px;font-weight:600;margin:22px 0 6px}
+p{margin:8px 0}
+.lead{color:var(--ink2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.demo .tag{display:inline-block;font-size:12px;font-weight:600;color:var(--acc);background:var(--acc-bg);border-radius:6px;padding:2px 8px;margin-bottom:8px}
+.say{background:var(--warn-bg);color:var(--ink);border-radius:10px;padding:12px 14px;margin:14px 0}
+.say b{color:var(--warn)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:8px 0}
+.row label{font-size:14px;color:var(--ink2)}
+input[type=range]{flex:1;min-width:160px;accent-color:var(--acc)}
+input[type=text],input[type=number]{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;width:130px}
+button,select{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--mute)}
+button.on{background:var(--acc-bg);border-color:var(--acc);color:var(--acc)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:10px 0}
+.st{background:var(--bg);border-radius:10px;padding:10px 12px}
+.st small{display:block;font-size:12px;color:var(--mute)}
+.st b{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.chart{position:relative;height:280px;margin:8px 0}
+.chart.sm{height:220px}
+.cv{width:100%;max-width:560px;aspect-ratio:1/1;display:block;margin:8px auto;border-radius:10px;border:1px solid var(--line);cursor:crosshair}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{color:var(--ink2);font-weight:600}
+.tw{overflow-x:auto}
+.lg{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--ink2);margin:4px 0}
+.lg span{display:inline-flex;align-items:center;gap:6px}
+.sq{width:11px;height:11px;border-radius:3px;display:inline-block}
+.pill{display:inline-block;font-size:12px;border-radius:999px;padding:1px 9px;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.acc{background:var(--acc-bg);color:var(--acc)}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card)}
+summary{cursor:pointer;font-weight:600}
+details p{color:var(--ink2)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.9em;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:0 4px}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;font-size:13px;line-height:1.5}
+.out{font-size:15px;margin-top:6px}
+.mono{font-variant-numeric:tabular-nums}
+.note{font-size:13px;color:var(--mute)}
+.final{border:2px solid var(--acc)}
+.theme{position:absolute;right:0;top:0}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
+.chip{min-width:34px;text-align:center;padding:6px 4px;border-radius:6px;font-size:13px;background:var(--acc-bg);color:var(--acc);font-variant-numeric:tabular-nums}
+.chip.x{background:var(--bad-bg);color:var(--bad)}
+.chip.m{background:var(--org);color:#fff}
+@media (max-width:600px){header h1{font-size:25px}.theme{position:static;margin-top:10px}}
+
+.net{display:flex;justify-content:space-around;align-items:center;gap:8px;margin:10px 0;min-height:200px}
+.layer{display:flex;flex-direction:column;gap:6px;align-items:center}
+.nr{width:26px;height:26px;border-radius:50%;background:var(--acc);border:2px solid var(--acc)}
+.nr.off{background:transparent;border-color:var(--line);opacity:.6}
+.layer small{font-size:12px;color:var(--mute);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="labs"><a href="TEORIE_INTERACTIVA.html">Teorie generală</a><a href="LAB4_INTERACTIV.html">Lab 4</a><a href="LAB5_INTERACTIV.html">Lab 5</a><a class="cur" href="LAB6_INTERACTIV.html">Lab 6</a></div>
+<h1>Lab 6: rețele neuronale, pe înțeles</h1>
+<p>Neuronul, straturile, pierderea, antrenarea, overfitting-ul, Dropout, seed-urile și de ce, pe setul tău, rețeaua nu merită.</p>
+<button class="theme" id="themeBtn" type="button">Temă: auto</button>
+</header>
+<nav>
+<a href="#neuron">Neuronul</a><a href="#act">Activări</a><a href="#param">Parametri</a><a href="#prep">Pregătirea datelor</a><a href="#loss">Pierderea</a><a href="#gd">Antrenarea</a><a href="#batch">Epocă și batch</a><a href="#hist">Curbele</a><a href="#reg">Dropout și L2</a><a href="#cw">Dezechilibrul</a><a href="#cv">CV și căutare</a><a href="#seed">Seed-uri</a><a href="#vs">Keras vs sklearn</a><a href="#merita">Merită?</a><a href="#q">Întrebări</a>
+</nav>
+
+<section id="neuron">
+<h2>1. Neuronul: o sumă ponderată + o activare</h2>
+<p>Un neuron ia câteva numere, le înmulțește fiecare cu o <b>pondere</b>, adună un <b>bias</b> și trece rezultatul printr-o <b>funcție de activare</b>. Seamănă mult cu regresia logistică.</p>
+<div class="card demo"><span class="tag">Încearcă: un neuron care ghicește dacă acceptă</span>
+<div class="row"><label for="x1">A acceptat campania 5? (0 / 1)</label><input type="range" id="x1" min="0" max="1" step="1" value="1"><b id="x1v"></b></div>
+<div class="row"><label for="x2">Recency (scalat, mare = demult)</label><input type="range" id="x2" min="-2" max="2" step="0.1" value="-1"><b id="x2v"></b></div>
+<div class="row"><label for="w1">Ponderea w₁</label><input type="range" id="w1" min="-3" max="3" step="0.1" value="1.5"><b id="w1v"></b></div>
+<div class="row"><label for="w2">Ponderea w₂</label><input type="range" id="w2" min="-3" max="3" step="0.1" value="-0.8"><b id="w2v"></b></div>
+<div class="row"><label for="bb">Bias b</label><input type="range" id="bb" min="-3" max="3" step="0.1" value="-1.5"><b id="bbv"></b></div>
+<div class="row"><label for="af">Activarea</label><select id="af"><option value="sig">sigmoid</option><option value="relu">ReLU</option><option value="lin">liniară</option></select></div>
+<div class="stats"><div class="st"><small>z = w₁x₁ + w₂x₂ + b</small><b id="nz"></b></div><div class="st"><small>Ieșirea neuronului</small><b id="no"></b></div></div>
+<p class="out" id="nMsg"></p>
+</div>
+<p><b>Stratul</b> = mai mulți neuroni care primesc aceleași intrări. <b>Dense</b> = fiecare neuron e legat de toate ieșirile stratului anterior. <b>MLP</b> = o rețea doar din straturi Dense, tipul potrivit pentru tabele. <b>Keras</b> = biblioteca în care o construiești strat cu strat.</p>
+</section>
+
+<section id="act">
+<h2>2. Funcțiile de activare</h2>
+<div class="row"><button class="ab on" data-a="relu" type="button">ReLU</button><button class="ab" data-a="sig" type="button">sigmoid</button><button class="ab" data-a="lin" type="button">liniară</button></div>
+<div class="chart sm"><canvas id="cAct" role="img" aria-label="Funcția de activare"></canvas></div>
+<p class="out" id="aMsg"></p>
+<p>Fără activări neliniare, oricâte straturi ai pune ar fi echivalente cu <b>unul singur</b>: o compunere de funcții liniare e tot liniară.</p>
+</section>
+
+<section id="param">
+<h2>3. Câți parametri are rețeaua?</h2>
+<p>Un strat Dense cu <b>n</b> intrări și <b>u</b> neuroni are <b>n·u ponderi + u bias-uri</b>.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><label for="pIn">Intrări</label><input type="number" id="pIn" value="30" min="1" max="500"><label for="pH">Straturi ascunse</label><input type="text" id="pH" value="16, 8"></div>
+<div class="row"><button class="pp" data-h="16, 8" type="button">16 → 8 (prima rețea)</button><button class="pp" data-h="32, 16" type="button">32 → 16</button><button class="pp" data-h="256, 256, 128" type="button">256 → 256 → 128 (mare)</button></div>
+<div class="tw"><table id="pT"></table></div>
+<p class="out" id="pMsg"></p>
+</div>
+<p><b>La tine:</b> clasificare cu <b>30</b> de coloane după preprocesare (23 numerice + Education + 6 one-hot) → <b>641</b> de parametri. Regresie cu 20 de coloane → <b>481</b>.</p>
+</section>
+
+<section id="prep">
+<h2>4. Pregătirea datelor pentru Keras</h2>
+<p>Keras vrea o <b>matrice de numere <code>float32</code></b>, fără NaN și fără text:</p>
+<ol>
+<li>aceeași preprocesare ca în L03–L05 (mediană, scalare, ordinal, one-hot), <b>învățată doar pe partea de antrenare</b>;</li>
+<li><code>.astype("float32")</code>;</li>
+<li>la regresie scalezi și <b>ținta</b> (media 0, std 1);</li>
+<li>predicțiile de regresie le transformi înapoi în bani înainte să calculezi MAE.</li>
+</ol>
+<div class="card demo"><span class="tag">De ce trebuie scalată ținta</span>
+<div class="row"><button id="tNo" class="on" type="button">Ținta în bani</button><button id="tYes" type="button">Ținta scalată</button></div>
+<div class="stats"><div class="st"><small>Pierderea MSE la început (rețeaua zice 0)</small><b id="tL"></b></div></div>
+<p class="out" id="tMsg"></p>
+</div>
+</section>
+
+<section id="loss">
+<h2>5. Pierderea (loss): ce minimizează rețeaua</h2>
+<div class="tw"><table>
+<tr><th>Problemă</th><th>Pierdere</th><th>Ce înseamnă</th></tr>
+<tr><td>clasificare</td><td><b>binary cross-entropy</b></td><td>pedepsește tare o probabilitate mare dată clasei greșite</td></tr>
+<tr><td>regresie</td><td>MSE</td><td>greșelile la pătrat, sensibilă la greșelile mari</td></tr>
+<tr><td>regresie</td><td><b>MAE</b></td><td>greșelile fără semn, robustă</td></tr>
+<tr><td>regresie</td><td>Huber</td><td>MSE la greșeli mici, MAE la greșeli mari</td></tr>
+</table></div>
+<div class="card demo"><span class="tag">Încearcă: un client cu o valoare greșită</span>
+<p>10 clienți. Rețeaua cea mai simplă ghicește <b>un singur număr</b> pentru toți. Mută valoarea ultimului client și vezi ce număr alege fiecare pierdere.</p>
+<div class="row"><label for="oV">Ultimul client</label><input type="range" id="oV" min="500" max="10000" step="100" value="600"><b id="oVv" class="mono"></b></div>
+<div class="stats"><div class="st"><small>MSE alege (media)</small><b id="lM"></b></div><div class="st"><small>MAE alege (mediana)</small><b id="lA"></b></div><div class="st"><small>Huber alege</small><b id="lH"></b></div></div>
+<p class="out" id="lMsg"></p>
+</div>
+<p><b>Experimentul din laborator:</b> cu 5% erori simulate în țintă, MSE se strică cel mai mult, iar MAE și Huber rămân aproape la fel. <b>Am ales MAE</b>: e chiar metrica noastră, iar <code>MntTotal</code> are clienți foarte mari.</p>
+</section>
+
+<section id="gd">
+<h2>6. Antrenarea: coborârea pe gradient</h2>
+<p><b>Gradientul</b> = direcția în care pierderea crește cel mai repede. Muți ponderile un pic <b>invers</b>, deci pierderea scade. Repeți. <b>Backpropagation</b> calculează gradientul pentru toate ponderile, de la ieșire spre intrare. <b>Adam</b> = coborâre „inteligentă”, cu pas propriu pentru fiecare pondere.</p>
+<div class="card demo"><span class="tag">Încearcă: rata de învățare = mărimea pasului</span>
+<div class="row"><label for="lr">Rata de învățare</label><input type="range" id="lr" min="0.05" max="1.05" step="0.05" value="0.2"><b id="lrV" class="mono"></b><button id="lrGo" type="button">Fă 15 pași</button></div>
+<div class="chart sm"><canvas id="cGd" role="img" aria-label="Coborârea pe gradient"></canvas></div>
+<p class="out" id="gdMsg"></p>
+</div>
+<p><b>La tine:</b> 0,001 (implicit Adam) și 0,003 în căutare.</p>
+</section>
+
+<section id="batch">
+<h2>7. Epocă și batch</h2>
+<p><b>Epocă</b> = o trecere prin toți clienții de antrenare. <b>Batch</b> = grupul de clienți după care se actualizează ponderile.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><label for="bs">batch_size</label><input type="range" id="bs" min="0" max="5" step="1" value="2"><b id="bsV" class="mono"></b></div>
+<div class="stats"><div class="st"><small>Actualizări pe epocă (1316 clienți)</small><b id="bsU"></b></div><div class="st"><small>Actualizări în 200 de epoci</small><b id="bsT"></b></div></div>
+</div>
+<p><b>La tine:</b> <code>batch_size=32</code> → ~41 de actualizări pe epocă, maxim 200–300 de epoci, oprite mai devreme de <code>EarlyStopping</code>.</p>
+</section>
+
+<section id="hist">
+<h2>8. Curbele din <code>history</code> și oprirea timpurie</h2>
+<p><code>fit(...)</code> întoarce un <code>history</code> cu pierderea pe fiecare epocă. <b>Ambele scad</b> → încă învață. <b>Train scade, validarea crește</b> → overfitting. Minimul validării = epoca ideală.</p>
+<div class="card demo"><span class="tag">Încearcă: curbe reale pe clienții tăi</span>
+<div class="row"><button class="nb on" data-n="mica" type="button">Rețea mică (16 → 8)</button><button class="nb" data-n="mare" type="button">Rețea mare (256 → 256 → 128)</button></div>
+<div class="row"><label for="pat">EarlyStopping patience</label><input type="range" id="pat" min="1" max="40" step="1" value="20"><b id="patV" class="mono"></b></div>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>pierdere pe train</span><span><span class="sq" style="background:var(--org)"></span>pierdere pe validare</span><span><span class="sq" style="background:var(--ink)"></span>unde se oprește / revine</span></div>
+<div class="chart"><canvas id="cH" role="img" aria-label="Curbele de pierdere pe epoci"></canvas></div>
+<p class="out" id="hMsg"></p>
+<p class="note">Recalculat aici cu <code>MLPClassifier</code> din scikit-learn, epocă cu epocă (aceeași idee ca la Keras).</p>
+</div>
+<p><code>EarlyStopping(patience=20, restore_best_weights=True)</code>: se oprește dacă validarea nu se îmbunătățește 20 de epoci la rând și <b>revine</b> la cea mai bună epocă. E aceeași idee ca la HistGB în L05, doar că acolo „pasul” e un arbore, aici o epocă.</p>
+</section>
+
+<section id="reg">
+<h2>9. Dropout și L2: frâne contra tocitului</h2>
+<div class="card demo"><span class="tag">Încearcă: Dropout</span>
+<div class="row"><label for="dr">Cât oprește</label><input type="range" id="dr" min="0" max="0.8" step="0.1" value="0.3"><b id="drV" class="mono"></b><button id="drGo" type="button">Încă un pas de antrenare</button></div>
+<div class="net" id="net"></div>
+<p class="out" id="drMsg"></p>
+</div>
+<p><b>Dropout:</b> la fiecare pas de antrenare, oprește la întâmplare o parte din neuroni. Rețeaua nu se mai poate baza pe un singur neuron, deci învață reguli mai robuste. La <code>predict</code> e dezactivat. <b>L2:</b> adaugă λ·Σw² la pierdere și pedepsește ponderile mari (ca <code>C</code>, dar invers: λ mare = frână tare).</p>
+<p><b>Experimentul din laborator:</b> rețeaua mare (~107 000 de parametri) fără frâne tocește clar. Cu EarlyStopping + Dropout 0,3 sau + L2 1e-3, overfitting-ul e controlat.</p>
+</section>
+
+<section id="cw">
+<h2>10. Dezechilibrul la rețele</h2>
+<p><code>fit(..., class_weight={0: w0, 1: w1})</code>, la fel ca <code>class_weight="balanced"</code> din scikit-learn. Formula: n / (2 · n_clasă).</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><label for="cwN">Câți acceptă din 1316</label><input type="range" id="cwN" min="20" max="658" step="1" value="200"><b id="cwNv" class="mono"></b></div>
+<div class="stats"><div class="st"><small>Ponderea celor care refuză</small><b id="cw0"></b></div><div class="st"><small>Ponderea celor care acceptă</small><b id="cw1"></b></div></div>
+<p class="out" id="cwMsg"></p>
+</div>
+<p><b>La tine:</b> ≈ <b>0,59</b> și <b>3,3</b>. Recall-ul crește mult, precizia scade, iar <b>PR-AUC rămâne aproape la fel</b>: ponderile mută pragul efectiv, nu ordinea clienților. <code>MLPClassifier</code> din scikit-learn <b>nu are</b> <code>class_weight</code>.</p>
+</section>
+
+<section id="cv">
+<h2>11. CV și căutarea pentru o rețea</h2>
+<p>Keras nu merge direct cu <code>cross_validate</code>, așa că bucla se scrie de mână. În <b>fiecare fold</b>:</p>
+<ol>
+<li>preprocesarea (și scalarea țintei) se învață doar pe partea de antrenare a fold-ului;</li>
+<li>15% din ea → pentru <code>EarlyStopping</code>;</li>
+<li>o rețea <b>nouă</b>. Altfel ar continua din ponderile fold-ului anterior, care a văzut datele de validare de acum, deci leakage;</li>
+<li>scorul pe fold-ul de validare.</li>
+</ol>
+<p><b>Căutarea:</b> arhitectura (16) sau (32, 16) × Dropout 0 / 0,3 × lr 0,001 / 0,003 = <b>8 configurații × 3 fold-uri</b> (nu 5, e scump). Câteva minute, față de ~20 s pentru 150 de antrenări HistGB în L05.</p>
+</section>
+
+<section id="seed">
+<h2>12. Seed-urile: același cod, alte scoruri</h2>
+<p>Rețeaua pornește din <b>ponderi aleatoare</b> și amestecă batch-urile la întâmplare. Același cod dă scoruri diferite la fiecare rulare. <code>keras.utils.set_random_seed(SEED)</code> fixează întâmplarea.</p>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>aceeași rețea, alt seed</span><span><span class="sq" style="background:var(--org)"></span>media celor 5 rețele</span><span><span class="sq" style="background:var(--ok)"></span>regresia logistică</span></div>
+<div class="chart sm"><canvas id="cSeed" role="img" aria-label="PR-AUC pe seed-uri"></canvas></div>
+<p class="out" id="sMsg"></p>
+<p class="note">Recalculat aici (MLP 16 → 8 cu oprire timpurie, PR-AUC pe o bucată pusă deoparte din train).</p>
+<p><b>Concluzia:</b> dacă diferența dintre seed-uri e cât diferența dintre configurații, clasamentul configurațiilor e zgomot. Raportezi media pe mai multe seed-uri. <b>Contribuția ta</b>, media a 5 rețele, aduce mai ales <b>stabilitate</b> (aceeași idee ca bagging-ul).</p>
+<p><b>Salvarea:</b> rețeaua cu <code>net.save("model.keras")</code>, preprocesarea separat cu <code>joblib.dump</code>, iar la regresie și scalerul țintei.</p>
+</section>
+
+<section id="vs">
+<h2>13. Keras vs scikit-learn (MLP)</h2>
+<div class="tw"><table>
+<tr><th></th><th>Keras</th><th><code>MLPClassifier</code> / <code>MLPRegressor</code></th></tr>
+<tr><td>definirea</td><td>strat cu strat, orice arhitectură</td><td><code>hidden_layer_sizes=(32, 16)</code></td></tr>
+<tr><td>Dropout</td><td>da</td><td>nu (doar L2 prin <code>alpha</code>)</td></tr>
+<tr><td><code>class_weight</code></td><td>da</td><td><b>nu</b></td></tr>
+<tr><td>pierderi</td><td>orice (MAE, Huber)</td><td>fixe (log-loss / MSE)</td></tr>
+<tr><td>pipeline / CV</td><td>manual</td><td>direct (<code>make_pipe</code>, <code>cross_validate</code>)</td></tr>
+<tr><td>GPU</td><td>da</td><td>nu</td></tr>
+</table></div>
+</section>
+
+<section id="merita">
+<h2>14. Merită o rețea pe setul tău?</h2>
+<div class="card final">
+<p><b>Nu.</b> Cu ~1650 de rânduri și ~25 de coloane, rețeaua în cel mai bun caz <b>egalează</b> regresia logistică și HistGB (diferență nesemnificativă la testul t). În schimb e de zeci de ori mai lentă, depinde de seed și e greu de explicat marketingului.</p>
+<p>Rețelele câștigă la <b>date mari și nestructurate</b> (imagini, text, sunet). Pe tabele mici, modelele liniare și boosting-ul pe arbori rămân alegerea standard.</p>
+</div>
+</section>
+
+<section id="q">
+<h2>15. Întrebări de la profesor</h2>
+<details><summary>Câți parametri are un strat Dense(16) cu 30 de intrări?</summary><p>30 · 16 + 16 = 496.</p></details>
+<details><summary>De ce ieșirea la clasificare are sigmoid, iar la regresie nu are activare?</summary><p>Sigmoid dă o probabilitate între 0 și 1. La regresie ținta poate fi orice număr.</p></details>
+<details><summary>De ce folosești ReLU în straturile ascunse?</summary><p>E simplă și rapidă și nu „se blochează” pentru valori pozitive. Fără o activare neliniară, mai multe straturi ar fi echivalente cu unul singur.</p></details>
+<details><summary>De ce scalezi MntTotal înainte de antrenare?</summary><p>Pierderea ar porni de la sute de mii, iar pasul optimizatorului nu s-ar potrivi. Cu media 0 și std 1, setările implicite funcționează.</p></details>
+<details><summary>Ce arată o curbă val_loss care scade, apoi crește?</summary><p>Overfitting de la minim încolo. EarlyStopping revine la acea epocă.</p></details>
+<details><summary>De ce class_weight nu schimbă mult PR-AUC?</summary><p>Ponderile mută pragul efectiv (mai mulți clienți peste 0,5), dar nu schimbă ordinea scorurilor, pe care o măsoară PR-AUC.</p></details>
+<details><summary>De ce construiești o rețea nouă în fiecare fold?</summary><p>Altfel ar continua din ponderile fold-ului anterior, care a văzut datele de validare ale fold-ului curent, deci leakage.</p></details>
+<details><summary>De ce MAE ca pierdere la regresie?</summary><p>E metrica noastră și e robustă la clienții foarte mari. MSE ar fi trasă după ei.</p></details>
+<details><summary>Ai alege rețeaua pentru campanie?</summary><p>Nu: în cel mai bun caz egalează regresia logistică, dar e mai lentă, instabilă între seed-uri și greu de explicat.</p></details>
+</section>
+<p class="note" style="margin-top:40px">Curbele și seed-urile sunt recalculate pe datele tale cu scikit-learn (MLPClassifier), pentru că pagina nu rulează Keras. Cifrele din tabele sunt din raportul L06 și din teorie.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const f2=v=>v.toFixed(2).replace('.',','), f3=v=>v.toFixed(3).replace('.',','), n0=v=>Math.round(v).toLocaleString('ro-RO');
+(function(){const b=$('themeBtn');if(!b)return;const modes=['auto','light','dark'];let i=0;try{i=Math.max(0,modes.indexOf(localStorage.getItem('th')||'auto'))}catch(e){}
+const ap=()=>{const m=modes[i];if(m==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',m);b.textContent='Temă: '+({auto:'auto',light:'luminoasă',dark:'întunecată'})[m];try{localStorage.setItem('th',m)}catch(e){}};
+b.onclick=()=>{i=(i+1)%3;ap();location.reload()};ap();})();
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const C={acc:css('--acc'),org:css('--org'),mute:css('--mute'),grid:css('--grid'),ink:css('--ink'),ok:css('--ok'),bad:css('--bad'),card:css('--card'),line:css('--line'),gray:'#b4b2a9'};
+const chartsOk=()=>typeof Chart!=='undefined';
+if(chartsOk()){Chart.defaults.color=C.mute;Chart.defaults.font.size=12;Chart.defaults.plugins.legend.display=false;Chart.defaults.maintainAspectRatio=false;Chart.defaults.animation.duration=250}
+const ax=(t,o={})=>Object.assign({title:{display:!!t,text:t},grid:{color:C.grid}},o);
+function mk(id,cfg){if(!chartsOk()){const c=$(id);c.parentNode.innerHTML='<p class="note">Graficul are nevoie de internet (Chart.js).</p>';return null}return new Chart($(id),cfg)}
+function AP(rows){const s=[...rows].sort((a,b)=>b[0]-a[0]);const P=s.filter(r=>r[1]).length;let tp=0,ap=0;s.forEach((r,i)=>{if(r[1]){tp++;ap+=tp/(i+1)}});return P?ap/P:0}
+function lgamma(x){const g=7,c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgamma(1-x);x-=1;let a=c[0];const t=x+g+0.5;for(let i=1;i<9;i++)a+=c[i]/(x+i);return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a)}
+function tpdf(t,v){return Math.exp(lgamma((v+1)/2)-lgamma(v/2))/Math.sqrt(v*Math.PI)*Math.pow(1+t*t/v,-(v+1)/2)}
+function pTwo(t,v){t=Math.abs(t);const n=2000,h=t/n;let s=tpdf(0,v)+tpdf(t,v);for(let i=1;i<n;i++)s+=(i%2?4:2)*tpdf(i*h,v);const area=s*h/3;return Math.max(0,Math.min(1,1-2*area))}
+function seeded(s){return()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296}}
+
+const D={"nn":{"mica":{"train":[0.4541,0.4161,0.3941,0.3769,0.3622,0.3491,0.3364,0.324,0.3115,0.2993,0.2877,0.2777,0.2695,0.2627,0.2567,0.2516,0.2471,0.2432,0.2397,0.2363,0.2332,0.2302,0.2276,0.2249,0.2225,0.2199,0.2176,0.2151,0.2125,0.2099,0.2077,0.2055,0.2031,0.201,0.1989,0.1966,0.1946,0.1925,0.1904,0.1885,0.1866,0.1846,0.1826,0.1808,0.179,0.1771,0.1752,0.1732,0.1715,0.1695,0.1677,0.1659,0.1643,0.1624,0.1608,0.1593,0.1576,0.156,0.1545,0.1528,0.1513,0.1497,0.1481,0.1468,0.1453,0.1438,0.1425,0.1411,0.1397,0.1385,0.1372,0.136,0.1346,0.1334,0.1322,0.131,0.1298,0.1287,0.1275,0.1265,0.1254,0.1243,0.1233,0.1222,0.1213,0.1203,0.1194,0.1184,0.1175,0.1166,0.1157,0.1146,0.1136,0.1127,0.1118,0.1109,0.11,0.1092,0.1084,0.1074,0.1065,0.1058,0.1049,0.104,0.1033,0.1026,0.1019,0.1009,0.1001,0.0996,0.0986,0.0979,0.0971,0.0963,0.0955,0.0948,0.0941,0.0934,0.0927,0.0919,0.0911,0.0904,0.0898,0.089,0.0883,0.0875,0.087,0.0861,0.0857,0.085,0.0842,0.0836,0.083,0.0823,0.0819,0.081,0.0807,0.0802,0.0796,0.0787,0.0783,0.0777,0.0771,0.0764,0.076,0.0751,0.0746,0.0741,0.0737,0.0726],"val":[0.4447,0.4124,0.3948,0.3822,0.3706,0.3613,0.3526,0.3438,0.3354,0.3276,0.3206,0.3151,0.3104,0.307,0.305,0.3032,0.3024,0.302,0.3009,0.2999,0.2996,0.2985,0.2988,0.2988,0.2977,0.2972,0.2962,0.2946,0.2941,0.2938,0.2936,0.2928,0.2935,0.2932,0.2933,0.2934,0.2938,0.294,0.2949,0.2961,0.2963,0.2972,0.2982,0.2988,0.2997,0.3007,0.3031,0.3043,0.3057,0.3067,0.3082,0.3105,0.3125,0.3155,0.3169,0.319,0.3223,0.3242,0.3259,0.3281,0.3306,0.3336,0.3349,0.3374,0.3393,0.342,0.3446,0.3483,0.3511,0.3515,0.3531,0.3557,0.3604,0.3592,0.3633,0.3652,0.3674,0.37,0.3734,0.3746,0.3776,0.3806,0.3806,0.3852,0.3864,0.3875,0.3906,0.3931,0.3951,0.396,0.3987,0.403,0.4049,0.4093,0.4105,0.4131,0.4169,0.4199,0.42,0.4244,0.427,0.4276,0.4295,0.4335,0.436,0.4383,0.4412,0.446,0.4475,0.4495,0.4523,0.4574,0.456,0.4601,0.4631,0.4671,0.469,0.4708,0.4766,0.4772,0.4804,0.4852,0.4886,0.4905,0.4941,0.4985,0.5028,0.504,0.509,0.515,0.5165,0.5215,0.523,0.5242,0.5302,0.5342,0.5349,0.5407,0.5408,0.547,0.5486,0.5494,0.5545,0.559,0.5613,0.566,0.5681,0.5712,0.5739,0.5776],"best":32},"mare":{"train":[0.2745,0.2341,0.1996,0.1718,0.1452,0.118,0.0942,0.0797,0.0765,0.1209,0.0857,0.0607,0.0477,0.0295,0.0238,0.0277,0.0329,0.0236,0.0269,0.0227,0.037,0.0601,0.0459,0.0252,0.1125,0.0898,0.0389,0.0124,0.0228,0.0148,0.0076,0.0088,0.0166,0.0103,0.0101,0.014,0.0229,0.0132,0.0253,0.0441,0.0723,0.0634,0.0127,0.0423,0.0329,0.0083,0.0104,0.0056,0.005,0.0038,0.0038,0.0036,0.0036,0.0035,0.0035,0.0035,0.0035,0.0034,0.0034,0.0034,0.0034,0.0034,0.0034,0.0034,0.0034,0.0034,0.0034,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0033,0.0032,0.0032,0.0033,0.0033,0.0032,0.0032,0.0033,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0036,0.0033,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032,0.0032],"val":[0.3122,0.2992,0.3082,0.3173,0.3339,0.3549,0.3954,0.4671,0.4908,0.7124,0.6458,0.4867,0.6489,0.6187,0.6329,0.6798,0.7239,0.7622,0.804,0.856,0.9134,1.0099,0.8456,0.9521,1.0662,0.7777,0.7672,0.7847,0.8452,1.0082,0.9648,0.9917,1.056,1.0347,1.0044,1.0299,1.0407,1.032,1.0328,1.0436,1.0843,0.7689,0.8331,0.8222,0.9092,0.9389,1.0707,1.0459,1.0822,1.1059,1.125,1.1542,1.1738,1.1909,1.2065,1.2159,1.2296,1.2437,1.2501,1.2624,1.2694,1.2721,1.2804,1.2879,1.2965,1.3055,1.3008,1.31,1.3176,1.3242,1.326,1.3319,1.3361,1.3411,1.345,1.345,1.3462,1.3514,1.3552,1.3566,1.3572,1.3599,1.3647,1.3675,1.3694,1.371,1.3728,1.3744,1.3791,1.3776,1.38,1.3838,1.3784,1.382,1.3852,1.3872,1.3911,1.3915,1.3932,1.3935,1.3981,1.397,1.3988,1.4023,1.4058,1.4068,1.3984,1.402,1.4057,1.4069,1.4055,1.4013,1.3977,1.4026,1.4073,1.4112,1.4163,1.4164,1.4204,1.4227,1.4257,1.4279,1.4316,1.3759,1.3985,1.402,1.4115,1.4233,1.4291,1.4353,1.4365,1.4406,1.4426,1.4494,1.453,1.458,1.4623,1.4647,1.4617,1.465,1.4675,1.4703,1.4727,1.4761,1.4737,1.4773,1.4774,1.4696,1.4774,1.4627],"best":2}},"seeds":[0.529,0.547,0.577,0.41,0.513],"seed_avg":0.585,"lr_hold":0.569,"mnt":[981,2525,1371,310,1274,122,397,185,396,1750,301,167,17,81,491,255,9,99,902,1901,20,58,34,21,377,100,68,418,49,1735,54,58,25,72,1103,26,1574,1829,125,73,841,69,30,165,32,710,80,936,263,109,57,845,1693,535,72,85,1442,1159,542,611,1139,49,382,43,48,1016,1068,395,1445,31,47,1012,51,354,22,446,470,17,34,315,930,95,32,431,101,63,1174,16,55,1385,62,776,145,819,264,1536,507,1346,1073,316,184,22,32,1379,48,1690,313,13,636,1941,10,770,177,1112,751,8,235,358,129,1082,1264,2034,193,907,1336,1179,49,96,19,350,43,57,45,32,497,1662,32,52,99,69,1643,169,81,1245,792,12,57,1895,1674,315,2279,15,1049,1315,586,1228,57,1515,1869,1566,25,15,1295,25,53,1828,20,1072,1612,120,416,1134,485,373,186,957,162,1169,54,679,270,145,1215,1157,1679,93,146,48,96,454,91,1526,863,484,2053,437,629,2092,1060,138,334,1638,22,458,869,683,32,28,915,1804,34,1508,1753,72,294,688,953,51,127,43,1792,138,444,1001,1867,11,1149,130,62,414,1400,601,1155,52,47,1167,486,268,71,1401,882,81,1529,373,68,224,23,59,1168,939,42,38,17,895,263,1691,908,98,57,1092,57,1572,1216,405,241,106,1686,46,1724,1089,1564,1376,1932,2089,1956,545,461,1555,45,2116,1003,33,1483,39,493,1727,16,1504,813,902,492,72,34,56,1039,493,59,590,72,1502,1662,1305,1289,746,638,137,528,1366,798,680,183,1086,44,995,493,141,32,61,71,868,1066,499,406,149,10,100,1364,372,18,103,1743,467,606,694,223,126,185,551,30,58,15,1835,198,42,1991,1782,1688,44,390,1101,46,47,495,1717,318,55,902,45,17,1596,24,1456,23,369,26,965,1106,434,940,2252,211,15,693,778,124,518,306,89,312,49,269,1736,27,216,982,57,1722,1766,17,64,10,1179,232,835,1429,424,564,16,46,133,882,56,17,1461,36,27,54,102,14,8,42,1611,467,172,120,182,1131,53,66,171,16,1196,78,1123,46,69,1088,416,48,62,1383,1388,209,825,324,55,414,187,90,2130,54,25,868,425,398,734,17,1281,694,1101,662,1053,1105,44,38,184,1428,88,1229,284,1588,54,48,779,1250,19,1702,2047,930,1043,1241,1374,1158,1348,92,305,463,664,69,37,75,1722,1923,400,1169,54,1511,1615,504,16,797,1231,470,311,180,10,599,1291,633,122,1193,1600,1052,26,78,63,48,335,18,1795,37,1053,207,2114,825,1376,797,348,889,191,186,55,1192,39,20,99,449,2009,692,1298,78,467,871,36,1701,353,43,48,964,577,102,103,825,44,79,258,194,53,66,1213,725,1250,1242,1459,97,47,67,88,38,25,52,746,8,756,1631,41,401,1029,907,47,50,1826,1038,122,22,34,993,106,15,17,637,62,2069,1573,312,823,39,290,1024,42,176,1957,424,725,800,54,140,1161,45,20,1319,46,50,1117,1102,94,148,20,2352,275,78,1305,35,125,31,1727,38,1307,815,174,877,21,2077,15,201,576,1574,47,160,1143,1335,45,31,55,94,1924,401,407,413,53,71,31,716,436,1772,433,526,1102,2052,90,496,1097,486,240,40,45,664,57,28,903,496,684,213,1147,1375,83,332,17,43,690,88,11,444,877,1600,385,133,151,209,1192,1286,22,1367,747,252,51,119,351,506,18,161,1382,237,257,990,2209,637,223,319,43,1957,67,107,1099,1477,169,1482,23,1538,55,734,910,1188,125,2088,482,66,72,20,315,275,1518,55,14,260,1117,597,76,1919,772,35,401,63,222,1438,415,32,1146,37,1280,494,30,145,182,928,1820,22,1923,53,72,240,653,61,2157,50,49,1416,55,725,165,149,660,91,55,137,421,64,971,1428,2018,1189,978,415,66,2043,1120,156,65,16,1392,995,51,928,1921,57,702,787,605,68,67,66,81,1338,957,26,562,1341,45,302,31,84,2059,18,144,404,1617,436,61,18,441,79,789,121,103,981,270,311,1899,24,20,79,91,152,534,29,637,20,1853,884,1226,306,189,68,957,1377,102,155,44,1511,269,268,49,265,836,322,1453,1598,811,53,277,101,890,1067,801,114,19,943,1427,715,797,1440,21,860,48,70,1396,1461,906,37,689,45,636,724,63,92,467,488,37,612,434,304,175,813,1676,1194,129,1198,76,178,692,87,761,1323,1044,31,29,279,60,231,835,195,1383,397,415,1443,1127,653,62,446,732,747,561,37,929,198,93,1161,67,1677,18,1893,23,409,40,54,326,1084,41,1910,106,730,1182,21,131,246,1930,1109,1910,36,274,973,656,450,2302,64,1908,74,1477,63,81,11,23,1006,1049,468,685,1336,92,914,728,48,1323,850,153,75,152,1215,1650,1085,523,1078,233,20,1198,960,595,1171,1338,135,1495,13,9,59,1040,45,357,44,103,265,749,28,612,634,928,396,2006,102,65,913,244,928,79,221,103,1125,564,91,41,1288,1443,29,24,265,102,1497,217,1474,46,368,1730,191,114,2119,1334,297,107,28,603,989,1572,66,93,137,844,325,61,163,1478,63,711,1234,74,22,18,763,75,948,156,13,1761,460,17,1853,615,396,42,61,56,729,35,38,310,587,1152,990,1168,972,2153,311,371,39,18,122,296,1135,1187,38,52,497,59,43,122,1104,2013,467,237,1152,1464,1091,793,1021,86,21,172,726,2086,1034,1947,84,103,283,44,43,17,1020,218,1616,358,1092,15,331,25,988,860,577,95,86,57,135,41,660,670,94,2008,73,1635,1029,1778,764,14,122,1244,1028,80,282,767,76,1711,422,704,24,90,563,158,1001,655,635,341,115,546,70,11,401,459,139,183,63,507,497,28,1062,1507,1026,530,506,859,1048,41,1651,630,133,1453,65,966,443,35,1870,369,77,134,29,180,443,992,1390,1064,438,405,1173,976,1381,108,128,971,1179,1621,324,227,81,317,404,545,129,1623,96,1363,54,65,24,22,546,557,326,1033,1213,945,820,70,1365,1149,442,1115,1156,895,162,57,21,96,31,44,32,795,823,1241,1680,278,13,1334,573,22,859,28,1808,1143,1103,257,27,20,1644,795,1588,81,654,2087,87,530,13,521,57,41,365,1263,610,49,55,78,1042,62,79,1576,64,1706,45,1631,1345,685,1423,66,89,71,393,1902,235,1501,1574,1097,271,55,42,30,88,173,51,1617,429,490,40,1804,1822,1338,106,1130,46,2440,747,1862,893,34,33,42,467,775,67,1220,28,393,16,1685,275,2231,45,5,460,54,6,84,133,78,1958,361,1816,2257,46,789,22,1211,1479,46,2486,266,576,879,906,44,1581,160,362,95,312,137,41,236,263,882,1253,461,100,1282,70,43,1779,38,23,292,2126,733,367,1544,395,159,1021,758,318,943,1738,144,236,86,1695,1047,165,27,730,1185,1782,1415,976,48,2092,269,736,894,28,1175,428,77,1232,486,820,22,1382,1633,134,2074,46,274,140,219,30,60,106,2525,11,2349,320,46,69,1307,235,30,1034,380,832,1528,1540,58,1319,116,502,23,1138,29,174,622,519,769,1064,691,1615,1065,1004,473,1734,1833,50,1217,39,46,937,54,119,1797,1507,602,73,900,732,606,1250,279,1121,242,83,264,69,507,46,1754,22,65,27,570,401,343,377,721,802,1650,455,1095,132,36,49,805,71,960,300,614,410,22,46,745,1485,347,16,868,1079,170,1655,1150,1482,1958,1395,968,22,270,1512,19,1919,20,215,47,594,211,1065,24,892,26,174,65,521,839,1260,1076,263,46,40,61,32,41,68,47,285,1497,96,1449,139,1815,97,946,916,1536,37,1424,450,15,120,843,76,1665,60,1968,1240,121,1001,449,272,16,1410,809,38,225,1230,75,938,49,2524,1575,708,123,411,293,1196,1169,1580,777,1156,1019,1435,13,985,30,1149,62,2283,60,1627,310,1052,37,209,1918,259,393,316,74,2217,1141,195,244,727,1678,1080,932,177,1853,187,1789,1282,561,116,21,339,587,52,330,266,67,16,758,1148,1730,727,542,805,925,1315,999,222,63,84,882,1190,50,59,1331,632,147,33,62,973,38,1313,18,861,55]};
+const A={sig:z=>1/(1+Math.exp(-z)),relu:z=>Math.max(0,z),lin:z=>z};
+
+/* ---------- neuron ---------- */
+(function(){const ids=['x1','x2','w1','w2','bb'];const u=()=>{const v=ids.map(i=>+$(i).value);ids.forEach((i,k)=>$(i+'v').textContent=f2(v[k]).replace(',00',''));const z=v[2]*v[0]+v[3]*v[1]+v[4];const a=$('af').value,o=A[a](z);
+$('nz').textContent=f2(z);$('no').textContent=f3(o);$('nMsg').textContent=a==='sig'?'Sigmoid: ieșirea e o probabilitate. Aici '+Math.round(o*100)+'% șanse să accepte. Așa arată ieșirea rețelei de clasificare.':a==='relu'?'ReLU: dacă z e negativ, neuronul tace (0). Altfel trece z mai departe. Așa sunt neuronii din straturile ascunse.':'Liniară: ieșirea e chiar z, orice număr. Așa e ieșirea rețelei de regresie.'};ids.forEach(i=>$(i).oninput=u);$('af').onchange=u;u();})();
+
+/* ---------- activations ---------- */
+(function(){const xs=[];for(let x=-6;x<=6.001;x+=0.25)xs.push(+x.toFixed(2));let a='relu';const ch=mk('cAct',{type:'line',data:{labels:xs,datasets:[{data:[],borderColor:C.acc,borderWidth:2,pointRadius:0}]},options:{scales:{x:ax('z',{ticks:{maxTicksLimit:7}}),y:ax('ieșirea')}}});
+const msg={relu:'ReLU = max(0, z). În straturile ascunse: simplă, rapidă.',sig:'sigmoid = 1 / (1 + e⁻ᶻ), mereu între 0 și 1. La ieșire, pentru clasificare: P(Response = 1).',lin:'liniară = z. La ieșire, pentru regresie: orice număr (MntTotal scalat).'};
+const u=()=>{if(ch){ch.data.datasets[0].data=xs.map(A[a]);ch.update()}$('aMsg').textContent=msg[a];document.querySelectorAll('.ab').forEach(b=>b.classList.toggle('on',b.dataset.a===a))};document.querySelectorAll('.ab').forEach(b=>b.onclick=()=>{a=b.dataset.a;u()});u();})();
+
+/* ---------- params ---------- */
+(function(){const u=()=>{const n=Math.max(1,+$('pIn').value||1);const hs=$('pH').value.split(/[,\s]+/).map(Number).filter(x=>x>0);if(!hs.length){$('pMsg').textContent='Scrie câte neuroni are fiecare strat, de exemplu: 16, 8';return}
+const L=[...hs,1];let prev=n,tot=0,h='<tr><th>Strat</th><th>Calcul</th><th>Parametri</th></tr>';L.forEach((u2,i)=>{const p=prev*u2+u2;tot+=p;h+='<tr><td>'+(i===L.length-1?'ieșire (1)':'ascuns '+(i+1)+' ('+u2+')')+'</td><td>'+prev+' · '+u2+' + '+u2+'</td><td>'+n0(p)+'</td></tr>';prev=u2});
+h+='<tr><td><b>Total</b></td><td></td><td><b>'+n0(tot)+'</b></td></tr>';$('pT').innerHTML=h;const r=tot/1316;$('pMsg').innerHTML='Cam <b>'+(r<1?'1 parametru la '+f2(1/r).replace(',00','')+' clienți':f2(r).replace(',00','')+' parametri pe client')+'</b> (1316 clienți de antrenare). '+(r>1?'Rețeaua are mai mulți parametri decât clienți: poate memora tot, deci are nevoie de frâne.':'Chiar și așa, poate memora ușor un set atât de mic.')};
+$('pIn').oninput=u;$('pH').oninput=u;document.querySelectorAll('.pp').forEach(b=>b.onclick=()=>{$('pH').value=b.dataset.h;$('pIn').value=30;u()});u();})();
+
+/* ---------- target scaling ---------- */
+(function(){const Y=D.mnt;const m=Y.reduce((s,x)=>s+x,0)/Y.length,sd=Math.sqrt(Y.reduce((s,x)=>s+(x-m)**2,0)/Y.length);let sc=false;
+const u=()=>{const L=sc?Y.reduce((s,y)=>s+((y-m)/sd)**2,0)/Y.length:Y.reduce((s,y)=>s+y*y,0)/Y.length;$('tL').textContent=sc?f2(L):n0(L);
+$('tMsg').textContent=sc?'Pierderea pornește de la ~1. Setările implicite (learning rate 0,001) sunt făcute pentru numere de mărimea asta.':'Pierderea pornește de la sute de mii. Pașii optimizatorului sunt gândiți pentru numere în jur de 1, deci antrenarea merge foarte prost.';$('tNo').classList.toggle('on',!sc);$('tYes').classList.toggle('on',sc)};
+$('tNo').onclick=()=>{sc=false;u()};$('tYes').onclick=()=>{sc=true;u()};u();})();
+
+/* ---------- loss constant ---------- */
+(function(){const base=[50,120,250,300,396,450,600,800,1000];const u=()=>{const o=+$('oV').value;$('oVv').textContent=n0(o);const a=[...base,o];const mean=a.reduce((s,x)=>s+x,0)/a.length;const s=[...a].sort((x,y)=>x-y),med=(s[4]+s[5])/2;
+let c=med;const dl=300;for(let i=0;i<200;i++){let g=0;a.forEach(x=>{const r=c-x;g+=Math.abs(r)<=dl?r:dl*Math.sign(r)});c-=0.05*g}
+$('lM').textContent=n0(mean);$('lA').textContent=n0(med);$('lH').textContent=n0(c);$('lMsg').textContent=o>3000?'Un singur client greșit trage MSE (media) mult în sus. MAE nu se mișcă, iar Huber se mișcă puțin.':'Fără valori extreme, cele trei sunt apropiate.'};$('oV').oninput=u;u();})();
+
+/* ---------- gradient descent ---------- */
+(function(){const xs=[];for(let x=-3;x<=3.001;x+=0.1)xs.push(+x.toFixed(1));const f=x=>x*x;const ch=mk('cGd',{type:'scatter',data:{datasets:[{type:'line',data:xs.map(x=>({x,y:f(x)})),borderColor:C.gray,borderWidth:2,pointRadius:0},{type:'line',data:[],borderColor:C.org,backgroundColor:C.org,borderWidth:1.5,pointRadius:4}]},options:{scales:{x:ax('ponderea',{type:'linear',min:-3.2,max:3.2}),y:ax('pierderea',{min:0,max:10})}}});
+const run=()=>{const lr=+$('lr').value;$('lrV').textContent=f2(lr);let w=-2.8;const path=[{x:w,y:f(w)}];for(let i=0;i<15;i++){w=w-lr*2*w;w=Math.max(-3.2,Math.min(3.2,w));path.push({x:w,y:Math.min(10,f(w))})}if(ch){ch.data.datasets[1].data=path;ch.update()}
+$('gdMsg').textContent=lr>=1?'Pas prea mare: sare de pe o parte pe alta și nu coboară niciodată (oscilează sau o ia razna).':lr>=0.8?'Pas mare: ajunge, dar sare dintr-o parte în alta.':lr<=0.1?'Pas mic: coboară sigur, dar foarte încet.':'Pas potrivit: coboară repede spre minim.'};$('lr').oninput=run;$('lrGo').onclick=run;run();})();
+
+/* ---------- batch ---------- */
+(function(){const B=[8,16,32,64,128,1316];const u=()=>{const b=B[+$('bs').value];$('bsV').textContent=b===1316?'1316 (tot setul)':b;const up=Math.ceil(1316/b);$('bsU').textContent=n0(up);$('bsT').textContent=n0(up*200)};$('bs').oninput=u;u();})();
+
+/* ---------- history ---------- */
+(function(){let n='mica';const ch=mk('cH',{type:'line',data:{labels:[],datasets:[{data:[],borderColor:C.acc,borderWidth:2,pointRadius:0},{data:[],borderColor:C.org,borderWidth:2,pointRadius:0,borderDash:[6,4]},{type:'scatter',data:[],pointRadius:7,backgroundColor:[C.ink,C.ok]}]},options:{scales:{x:ax('epoca',{type:'linear',min:1,max:150}),y:ax('pierderea (log-loss)')}}});
+const u=()=>{const H=D.nn[n],p=+$('pat').value;$('patV').textContent=p;let best=0,stop=H.val.length-1;for(let i=1;i<H.val.length;i++){if(H.val[i]<H.val[best])best=i;if(i-best>=p){stop=i;break}}
+if(ch){ch.data.datasets[0].data=H.train.map((v,i)=>({x:i+1,y:v}));ch.data.datasets[1].data=H.val.map((v,i)=>({x:i+1,y:v}));ch.data.datasets[2].data=[{x:stop+1,y:H.val[stop]},{x:best+1,y:H.val[best]}];ch.update()}
+$('hMsg').innerHTML='Cea mai bună epocă: <b>'+(best+1)+'</b>. Cu patience '+p+', antrenarea se oprește la epoca <b>'+(stop+1)+'</b> și revine la epoca '+(best+1)+'. '+(n==='mare'?'Rețeaua mare tocește aproape imediat: pierderea pe train coboară spre 0, iar validarea crește mult.':'Rețeaua mică învață câteva zeci de epoci, apoi începe să memoreze.');document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.n===n))};
+document.querySelectorAll('.nb').forEach(b=>b.onclick=()=>{n=b.dataset.n;u()});$('pat').oninput=u;u();})();
+
+/* ---------- dropout ---------- */
+(function(){const Ls=[[5,'intrări'],[8,'ascuns 1'],[6,'ascuns 2'],[1,'ieșire']];let rnd=seeded(5);const u=()=>{const p=+$('dr').value;$('drV').textContent=Math.round(p*100)+'%';let off=0,tot=0;
+$('net').innerHTML=Ls.map(([k,name],li)=>'<div class="layer">'+Array.from({length:k},()=>{const o=(li===1||li===2)&&rnd()<p;if(li===1||li===2){tot++;if(o)off++}return '<div class="nr'+(o?' off':'')+'"></div>'}).join('')+'<small>'+name+'</small></div>').join('');
+$('drMsg').innerHTML='La acest pas sunt opriți <b>'+off+' din '+tot+'</b> neuroni ascunși. La următorul pas vor fi opriți alții. La <code>predict</code> lucrează toți.'};$('dr').oninput=u;$('drGo').onclick=u;u();})();
+
+/* ---------- class weight ---------- */
+(function(){const u=()=>{const p=+$('cwN').value,n=1316,q=n-p;$('cwNv').textContent=p+' ('+Math.round(p/n*100)+'%)';const w0=n/(2*q),w1=n/(2*p);$('cw0').textContent=f2(w0);$('cw1').textContent=f2(w1);
+$('cwMsg').textContent='Un client care acceptă cântărește cât '+f2(w1/w0)+' clienți care refuză. Așa, cele două grupuri contează la fel de mult în total.'};$('cwN').oninput=u;u();})();
+
+/* ---------- seeds ---------- */
+(function(){const S=D.seeds;mk('cSeed',{type:'bar',data:{labels:['seed 0','seed 1','seed 2','seed 3','seed 4','media a 5 rețele','regresie logistică'],datasets:[{data:[...S,D.seed_avg,D.lr_hold],backgroundColor:[...S.map(()=>C.acc),C.org,C.ok],borderRadius:4,barThickness:24}]},options:{scales:{y:ax('PR-AUC',{min:0.3,max:0.7})}}});
+const mn=Math.min(...S),mx=Math.max(...S);$('sMsg').innerHTML='Aceeași rețea, doar alt seed: de la <b>'+f3(mn)+'</b> la <b>'+f3(mx)+'</b>, o diferență de '+f3(mx-mn)+'. Media celor 5 rețele: <b>'+f3(D.seed_avg)+'</b>. Regresia logistică, simplă și stabilă: <b>'+f3(D.lr_hold)+'</b>.';})();
+</script>
+</body>
+</html>

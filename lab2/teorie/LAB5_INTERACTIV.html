@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 5 interactiv</title>
+<style>
+:root{--bg:#fbfaf7;--card:#ffffff;--ink:#1d1d1b;--ink2:#55544f;--mute:#8a8983;--line:#e4e2da;--acc:#2a78d6;--acc-bg:#e6f1fb;--org:#eb6834;--org-bg:#fdeee6;--ok:#1a8a55;--ok-bg:#e3f4ea;--bad:#c63b3b;--bad-bg:#fbe9e9;--warn-bg:#fdf3dc;--warn:#8a5a00;--grid:#e9e7e0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171716;--card:#201f1e;--ink:#f0efec;--ink2:#c3c2b7;--mute:#8f8e88;--line:#363532;--acc:#4b93e8;--acc-bg:#16304d;--org:#e8743f;--org-bg:#43230f;--ok:#4cc184;--ok-bg:#143322;--bad:#ec6a6a;--bad-bg:#421818;--warn-bg:#3a2c08;--warn:#f0c15a;--grid:#2c2c2a}}
+:root[data-theme="dark"]{--bg:#171716;--card:#201f1e;--ink:#f0efec;--ink2:#c3c2b7;--mute:#8f8e88;--line:#363532;--acc:#4b93e8;--acc-bg:#16304d;--org:#e8743f;--org-bg:#43230f;--ok:#4cc184;--ok-bg:#143322;--bad:#ec6a6a;--bad-bg:#421818;--warn-bg:#3a2c08;--warn:#f0c15a;--grid:#2c2c2a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px 80px}
+header{position:relative}
+header h1{font-size:30px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+header p{color:var(--ink2);margin:0}
+.labs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.labs a{font-size:13px;color:var(--ink2);text-decoration:none;padding:3px 10px;border-radius:6px;border:1px solid var(--line)}
+.labs a.cur{background:var(--acc-bg);color:var(--acc);border-color:var(--acc)}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin:20px -16px 0;padding:8px 16px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+nav a{flex:none;font-size:13px;color:var(--ink2);text-decoration:none;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+nav a:hover{color:var(--ink);border-color:var(--mute)}
+section{margin-top:40px}
+h2{font-size:23px;font-weight:600;margin:0 0 6px;scroll-margin-top:60px}
+h3{font-size:17px;font-weight:600;margin:22px 0 6px}
+p{margin:8px 0}
+.lead{color:var(--ink2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.demo .tag{display:inline-block;font-size:12px;font-weight:600;color:var(--acc);background:var(--acc-bg);border-radius:6px;padding:2px 8px;margin-bottom:8px}
+.say{background:var(--warn-bg);color:var(--ink);border-radius:10px;padding:12px 14px;margin:14px 0}
+.say b{color:var(--warn)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:8px 0}
+.row label{font-size:14px;color:var(--ink2)}
+input[type=range]{flex:1;min-width:160px;accent-color:var(--acc)}
+input[type=text],input[type=number]{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;width:130px}
+button,select{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--mute)}
+button.on{background:var(--acc-bg);border-color:var(--acc);color:var(--acc)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:10px 0}
+.st{background:var(--bg);border-radius:10px;padding:10px 12px}
+.st small{display:block;font-size:12px;color:var(--mute)}
+.st b{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.chart{position:relative;height:280px;margin:8px 0}
+.chart.sm{height:220px}
+.cv{width:100%;max-width:560px;aspect-ratio:1/1;display:block;margin:8px auto;border-radius:10px;border:1px solid var(--line);cursor:crosshair}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{color:var(--ink2);font-weight:600}
+.tw{overflow-x:auto}
+.lg{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--ink2);margin:4px 0}
+.lg span{display:inline-flex;align-items:center;gap:6px}
+.sq{width:11px;height:11px;border-radius:3px;display:inline-block}
+.pill{display:inline-block;font-size:12px;border-radius:999px;padding:1px 9px;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.acc{background:var(--acc-bg);color:var(--acc)}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card)}
+summary{cursor:pointer;font-weight:600}
+details p{color:var(--ink2)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.9em;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:0 4px}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;font-size:13px;line-height:1.5}
+.out{font-size:15px;margin-top:6px}
+.mono{font-variant-numeric:tabular-nums}
+.note{font-size:13px;color:var(--mute)}
+.final{border:2px solid var(--acc)}
+.theme{position:absolute;right:0;top:0}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
+.chip{min-width:34px;text-align:center;padding:6px 4px;border-radius:6px;font-size:13px;background:var(--acc-bg);color:var(--acc);font-variant-numeric:tabular-nums}
+.chip.x{background:var(--bad-bg);color:var(--bad)}
+.chip.m{background:var(--org);color:#fff}
+@media (max-width:600px){header h1{font-size:25px}.theme{position:static;margin-top:10px}}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="labs"><a href="TEORIE_INTERACTIVA.html">Teorie generală</a><a href="LAB4_INTERACTIV.html">Lab 4</a><a class="cur" href="LAB5_INTERACTIV.html">Lab 5</a><a href="LAB6_INTERACTIV.html">Lab 6</a></div>
+<h1>Lab 5: ansambluri, testul final, business</h1>
+<p>Mai mulți arbori împreună, boosting, voting, selecția atributelor, testul o singură dată, lift, importanță și profit.</p>
+<button class="theme" id="themeBtn" type="button">Temă: auto</button>
+</header>
+<nav>
+<a href="#ans">Ansambluri</a><a href="#boot">Bootstrap</a><a href="#rf">Random forest</a><a href="#oob">OOB</a><a href="#boost">Boosting</a><a href="#vote">Voting / stacking</a><a href="#dez">Dezechilibru</a><a href="#log">Log pe țintă</a><a href="#rand">Căutare aleatoare</a><a href="#sel">Selecție</a><a href="#test">Testul final</a><a href="#lift">Lift</a><a href="#imp">Importanță</a><a href="#profit">Profit</a><a href="#q">Întrebări</a>
+</nav>
+
+<section id="ans">
+<h2>1. Ansambluri: înțelepciunea mulțimii</h2>
+<p>Un <b>ansamblu</b> = mai multe modele care votează. Merge doar dacă membrii sunt (1) <b>mai buni decât întâmplarea</b> și (2) <b>diferiți</b>, adică greșesc pe clienți diferiți.</p>
+<div class="card demo"><span class="tag">Încearcă: calculatorul de vot</span>
+<div class="row"><label for="vM">Câte modele votează</label><input type="range" id="vM" min="1" max="101" step="2" value="5"><b id="vMv" class="mono"></b></div>
+<div class="row"><label for="vP">Cât de des are dreptate fiecare</label><input type="range" id="vP" min="0.3" max="0.9" step="0.05" value="0.7"><b id="vPv" class="mono"></b></div>
+<div class="row"><label for="vK">Câte sunt copii ale aceluiași model</label><input type="range" id="vK" min="0" max="5" step="1" value="0"><b id="vKv" class="mono"></b></div>
+<div class="stats"><div class="st"><small>Un singur model</small><b id="vOne"></b></div><div class="st"><small>Votul majorității</small><b id="vAll"></b></div></div>
+<p class="out" id="vMsg"></p>
+</div>
+<p><b>Din laborator:</b> 5 modele independente cu p = 0,7 → votul are dreptate în <b>0,837</b> din cazuri. Dacă 3 din 5 sunt copii → <b>0,700</b>, nu mai câștigi nimic. Cu p = 0,45, votul <b>amplifică greșelile</b> (0,16 la 101 modele).</p>
+</section>
+
+<section id="boot">
+<h2>2. Bootstrap și bagging</h2>
+<p><b>Bootstrap</b> = tragi n clienți din n, <b>cu înlocuire</b>: unii apar de 2–3 ori, iar ~37% nu apar deloc (ei sunt „out-of-bag”). <b>Bagging</b> = antrenezi câte un arbore pe fiecare eșantion și faci media lor. Media reduce <b>varianța</b> (tocitul).</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><button id="bOne" type="button">Trage un eșantion bootstrap</button><button id="bMany" type="button">Trage de 1000 de ori</button></div>
+<div class="chips" id="bChips"></div>
+<p class="out" id="bMsg"></p>
+<div class="lg"><span><span class="sq" style="background:var(--org)"></span>tras de mai multe ori</span><span><span class="sq" style="background:var(--acc-bg)"></span>tras o dată</span><span><span class="sq" style="background:var(--bad-bg)"></span>netras = out-of-bag</span></div>
+</div>
+</section>
+
+<section id="rf">
+<h2>3. Random forest și extra-trees</h2>
+<p><b>Random forest</b> = bagging + la fiecare întrebare, arborele poate alege doar dintr-o parte din coloane, aleasă la întâmplare (<code>max_features</code>). Arborii devin mai diferiți, iar media lor e mai bună. <b>Extra-trees</b> alege la întâmplare și pragul întrebării, deci e și mai divers și mai rapid.</p>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>PR-AUC pe o bucată pusă deoparte din train</span></div>
+<div class="chart sm"><canvas id="cRf" role="img" aria-label="PR-AUC în funcție de numărul de arbori"></canvas></div>
+<p class="out" id="rfMsg"></p>
+<div class="tw"><table>
+<tr><th>Model (raport, CV)</th><th>Clasificare PR-AUC</th><th>Regresie MAE</th></tr>
+<tr><td>un singur arbore</td><td>0,324 (train 0,897)</td><td>233,5</td></tr>
+<tr><td>bagging (300 de arbori)</td><td>0,527</td><td>192</td></tr>
+<tr><td>random forest</td><td>0,566</td><td>192</td></tr>
+<tr><td>extra-trees</td><td><b>0,584</b></td><td><b>187,3</b></td></tr>
+</table></div>
+<p>Media arborilor aproape <b>dublează</b> PR-AUC. Pe train, arborele singur și ansamblurile au aceeași eroare. Diferența apare pe validare, deci s-a redus <b>varianța</b>.</p>
+</section>
+
+<section id="oob">
+<h2>4. Scorul out-of-bag (OOB): validare gratuită</h2>
+<p>Fiecare client e prezis doar de arborii care <b>nu l-au văzut</b> (~1/3 dintre ei). Iese o validare fără CV (<code>oob_score=True</code>).</p>
+<ul>
+<li>clasificare: cel mai bun <code>max_features</code> = <b>0,3</b> (PR-AUC OOB 0,599). Mai puține coloane pe întrebare înseamnă arbori mai diferiți.</li>
+<li>regresie: <b>0,5</b> (MAE OOB 186,2). <code>Income</code> trebuie să fie disponibil des, pentru că e de departe cel mai important.</li>
+</ul>
+<p>OOB iese puțin optimist la clasificare (+0,03–0,05 față de CV), dar <b>ordinea</b> valorilor e aceeași, deci e bun pentru o alegere rapidă.</p>
+</section>
+
+<section id="boost">
+<h2>5. Boosting, rata de învățare, oprirea timpurie</h2>
+<p>Arborii se fac <b>pe rând</b>. Fiecare arbore nou învață <b>greșelile rămase</b>. Folosește arbori mici și reduce mai ales <b>bias-ul</b> (modelul prea simplu). <b>HistGB</b> grupează valorile în ~255 de „găleți”, deci e mult mai rapid, acceptă NaN și are oprire timpurie.</p>
+<div class="card demo"><span class="tag">Încearcă: alege rata de învățare η</span>
+<div class="row"><button class="eta" data-e="0.3" type="button">η = 0,3</button><button class="eta on" data-e="0.1" type="button">η = 0,1</button><button class="eta" data-e="0.03" type="button">η = 0,03</button></div>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>pierderea pe validare (log-loss)</span><span><span class="sq" style="background:var(--org)"></span>minimul = unde te oprești</span></div>
+<div class="chart"><canvas id="cGb" role="img" aria-label="Pierderea pe validare după numărul de arbori"></canvas></div>
+<p class="out" id="gbMsg"></p>
+<p class="note">Recalculat pe datele tale (GradientBoosting, 600 de arbori). Iese la fel ca în raport: 29 / 137 / 378.</p>
+</div>
+<p><b>η × numărul de arbori ≈ constant:</b> pași mici cer mai mulți pași. <b>Oprirea timpurie</b> se oprește singură când pierderea pe validare nu mai scade: HistGB a ales <b>67</b> de arbori la clasificare și <b>104</b> la regresie (din max 1000). La regresie am folosit <code>loss="absolute_error"</code>, adică exact MAE, metrica noastră.</p>
+<div class="tw"><table>
+<tr><th>Raport (CV)</th><th>PR-AUC</th><th>MAE</th><th>Timp / antrenare</th></tr>
+<tr><td>random forest</td><td>0,566</td><td>192,2</td><td>~0,9 s</td></tr>
+<tr><td>GradientBoosting</td><td>0,598 (recall 0,384, n-are class_weight)</td><td><b>182,7</b></td><td>~1,4 s</td></tr>
+<tr><td>HistGB (oprire timpurie)</td><td>0,553 → reglat 0,603</td><td>185,5</td><td><b>~0,4 s</b></td></tr>
+</table></div>
+</section>
+
+<section id="vote">
+<h2>6. Voting și stacking</h2>
+<p><b>Voting (soft)</b> = media probabilităților membrilor. <b>Stacking</b> = un meta-model învață <b>cum</b> să combine membrii, pe predicții out-of-fold. Membrii sunt din familii diferite: regresie logistică, SVM calibrat, HistGB.</p>
+<div class="card demo"><span class="tag">Încearcă: alege cine votează</span>
+<div class="row"><label><input type="checkbox" class="vm" data-i="0" checked> regresie logistică</label><label><input type="checkbox" class="vm" data-i="1" checked> SVM calibrat</label><label><input type="checkbox" class="vm" data-i="2" checked> HistGB</label></div>
+<div class="tw"><table id="vT"></table></div>
+<p class="note">8 clienți reali din test, aleși pentru că modelele nu sunt de acord pe ei. Doar ca ilustrare: decizia s-a luat pe CV, nu pe test.</p>
+</div>
+<div class="tw"><table>
+<tr><th>Raport (CV)</th><th>Clasificare PR-AUC</th><th>Regresie MAE</th></tr>
+<tr><td>cel mai bun membru</td><td>0,609 (SVM calibrat)</td><td>192,2 (random forest)</td></tr>
+<tr><td>voting</td><td><b>0,630</b> ± 0,048</td><td>193,0</td></tr>
+<tr><td>stacking</td><td>0,625 ± 0,044</td><td><b>186,1</b></td></tr>
+</table></div>
+<p>Câștigul (+0,02) e <b>sub o deviație standard</b>, iar stacking-ul e de 5–9 s pe antrenare. Ponderile meta-modelului: logistica 2,71 și HistGB 2,73, SVM doar 0,85 (spune același lucru ca logistica).</p>
+</section>
+
+<section id="dez">
+<h2>7. Dezechilibrul la ansambluri</h2>
+<div class="tw"><table>
+<tr><th>Strategie</th><th>Recall</th><th>F1</th><th>PR-AUC</th></tr>
+<tr><td>RF fără ponderi</td><td><span class="pill bad">0,160</span></td><td>—</td><td>0,569</td></tr>
+<tr><td>RF <code>class_weight="balanced"</code></td><td><span class="pill ok">0,636</span></td><td>0,523</td><td>~0,57</td></tr>
+<tr><td><code>BalancedRandomForest</code></td><td>0,680</td><td>0,542</td><td>0,545</td></tr>
+</table></div>
+<p>Fără ponderi, RF <b>ordonează</b> bine (PR-AUC aproape la fel), dar la pragul 0,5 ratează 84% dintre clienții interesați. Am ales <code>class_weight="balanced"</code>: același PR-AUC, recall de 4 ori mai mare.</p>
+</section>
+
+<section id="log">
+<h2>8. Logaritmul țintei: de ce NU</h2>
+<p>Antrenezi pe log(1 + y), apoi transformi predicția înapoi cu exp(p) − 1. Ajută când ținta e foarte asimetrică.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><button id="lgO" class="on" type="button"><code>MntTotal</code> original</button><button id="lgL" type="button">log(1 + <code>MntTotal</code>)</button></div>
+<div class="chart sm"><canvas id="cLg" role="img" aria-label="Histograma țintei"></canvas></div>
+<p class="out" id="lgMsg"></p>
+</div>
+<div class="tw"><table>
+<tr><th>Model (raport, MAE)</th><th>Țintă originală</th><th>Țintă log</th></tr>
+<tr><td>random forest</td><td>192,2</td><td>192,3 (egal)</td></tr>
+<tr><td>HistGB</td><td><b>185,5</b></td><td>200,4 (mai rău)</td></tr>
+<tr><td>regresie liniară</td><td>233</td><td>394, R² −19 (catastrofal)</td></tr>
+</table></div>
+<p><b>De ce nu ajută:</b> skew-ul e doar moderat (0,87). Arborilor nu le pasă de transformări care păstrează ordinea. Pe scara log optimizezi eroarea <b>relativă</b>, dar noi măsurăm MAE în bani. La regresia liniară, exp amplifică orice greșeală. <b>Deci nu transformăm ținta.</b></p>
+</section>
+
+<section id="rand">
+<h2>9. Căutarea aleatoare (<code>RandomizedSearchCV</code>)</h2>
+<p>În loc să încerce <b>toate</b> combinațiile (grid), încearcă <b>n_iter</b> combinații trase la întâmplare. Cu același buget, explorează mai multe valori pentru fiecare parametru.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><button id="rNew" type="button">Trage alte 9 puncte aleatoare</button></div>
+<div class="lg"><span><span class="sq" style="background:var(--org)"></span>grid: 3 × 3</span><span><span class="sq" style="background:var(--acc)"></span>aleator: 9 încercări</span><span>zona verde = unde e de fapt scorul bun</span></div>
+<canvas id="cvRand" class="cv" width="560" height="380" style="aspect-ratio:auto" role="img" aria-label="Grid vs aleator"></canvas>
+<p class="out" id="rMsg"></p>
+</div>
+<p><b>La tine (HistGB, 30 de încercări × 5 fold-uri):</b> clasificare 0,553 → <b>0,603</b>. Cheia a fost <code>min_samples_leaf = 71</code>: frunze mari, deci nu mai memorează. Chiar și reglat, doar ajunge regresia logistică (0,601). Regresie: 185,5 → 182,5 (sub zgomot). Setările implicite erau deja bune.</p>
+</section>
+
+<section id="sel">
+<h2>10. Selecția atributelor</h2>
+<div class="tw"><table>
+<tr><th>Familie</th><th>Cum alege</th><th>La tine</th></tr>
+<tr><td>Filtru (<code>SelectKBest</code>)</td><td>notează fiecare coloană separat</td><td>cel mai bun: k = toate (0,601). Cu 5 coloane: 0,345</td></tr>
+<tr><td>Încorporată (L1)</td><td>modelul pune unele ponderi exact 0</td><td>păstrează 18 din 30, PR-AUC 0,607 (egal)</td></tr>
+<tr><td>Importanța din RF</td><td>păstrează coloanele importante</td><td>regresie: 2 din 20 (<code>Income</code> = 80%), MAE mai rău</td></tr>
+</table></div>
+<div class="say"><b>Regula:</b> selecția e un pas în pipeline, deci se reînvață în fiecare fold. Altfel e leakage: cu zgomot pur poți obține 0,78 în loc de 0,50. <b>Decizia:</b> fără selecție, pentru că nu ajută și avem doar ~25 de coloane.</div>
+</section>
+
+<section id="test">
+<h2>11. Testul final și intervalul de încredere</h2>
+<p><b>Pașii:</b> (1) alegi modelul din tabelul CV; (2) alegi pragul pe OOF din train; (3) antrenezi pe tot train-ul; (4) evaluezi <b>o singură dată</b> pe test.</p>
+<p><b>Intervalul de încredere</b> vine din <b>bootstrap pe test</b>: reeșantionezi cei 412 clienți de 2000 de ori și recalculezi PR-AUC de fiecare dată.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><button id="ciRun" type="button">Rulează bootstrap-ul (2000 de reeșantionări)</button></div>
+<div class="chart sm"><canvas id="cCi" role="img" aria-label="Distribuția PR-AUC pe bootstrap"></canvas></div>
+<div class="stats"><div class="st"><small>PR-AUC pe test</small><b id="ciAP"></b></div><div class="st"><small>IC 95%: de la</small><b id="ciLo">—</b></div><div class="st"><small>până la</small><b id="ciHi">—</b></div></div>
+<p class="out" id="ciMsg"></p>
+</div>
+<div class="tw"><table>
+<tr><th></th><th>CV</th><th>Test</th><th>IC 95% (raport)</th></tr>
+<tr><td>Clasificare, PR-AUC (regresie logistică)</td><td>0,601</td><td><b>0,744</b></td><td>0,633 – 0,857</td></tr>
+<tr><td>Regresie, MAE (HistGB)</td><td>185,5</td><td><b>160,0</b></td><td>144,7 – 176,0</td></tr>
+</table></div>
+<p>Testul iese <b>mai bun</b> decât CV-ul: cu doar 63 de clienți care acceptă, câțiva clienți schimbă mult scorul. Intervalul larg arată exact această incertitudine. <b>Nu am modificat nimic după test.</b></p>
+</section>
+
+<section id="lift">
+<h2>12. Curba de câștig și lift-ul</h2>
+<p>Ordonezi clienții după probabilitate. Pe orizontală: ce procent contactezi. Pe verticală: ce procent dintre cei care acceptă găsești. <b>Lift</b> = de câte ori ești mai bun decât la întâmplare.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><label for="lf">Contactez primii</label><input type="range" id="lf" min="5" max="100" step="5" value="20"><b id="lfV" class="mono"></b></div>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>modelul</span><span><span class="sq" style="background:#b4b2a9"></span>la întâmplare</span></div>
+<div class="chart"><canvas id="cLift" role="img" aria-label="Curba de câștig"></canvas></div>
+<div class="stats"><div class="st"><small>Găsesc din cei care acceptă</small><b id="lfF"></b></div><div class="st"><small>Lift</small><b id="lfL"></b></div></div>
+</div>
+<p><b>În raport:</b> primii <b>20%</b> conțin <b>79%</b> dintre cei care acceptă → <b>lift@20% = 3,97</b>. Cu o cincime din costul campaniei obții patru cincimi din răspunsuri.</p>
+</section>
+
+<section id="imp">
+<h2>13. Importanța atributelor (prin permutare)</h2>
+<p>Amesteci la întâmplare valorile unei coloane (pe test) și vezi <b>cât scade scorul</b>. Dacă scade mult, coloana contează. Merge pentru orice model.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><button id="iC" class="on" type="button">Clasificare (scăderea PR-AUC)</button><button id="iR" type="button">Regresie (creșterea MAE)</button></div>
+<div class="chart" style="height:320px"><canvas id="cImp" role="img" aria-label="Importanța prin permutare"></canvas></div>
+<p class="out" id="iMsg"></p>
+</div>
+<p><b>MDI</b> (importanța internă a arborilor) e rapidă, dar <b>favorizează coloanele cu multe valori</b>. La tine dă aceeași ordine, dar îi dă importanță și lui <code>Recency</code> la regresie, unde la permutare nu contează.</p>
+</section>
+
+<section id="profit">
+<h2>14. Metrica de business: profitul</h2>
+<p><b>Profit = 11 × (contactați care acceptă) − 3 × (contactați).</b> Un telefon merită doar dacă clientul are peste 3 / 11 ≈ 27% șanse reale.</p>
+<div class="card demo"><span class="tag">Încearcă: mută pragul</span>
+<div class="row"><label for="pf">Prag</label><input type="range" id="pf" min="0" max="0.95" step="0.01" value="0.59"><b id="pfV" class="mono"></b></div>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>train (OOF): aici alegi</span><span><span class="sq" style="background:var(--org)"></span>test: doar verifici</span></div>
+<div class="chart"><canvas id="cPf" role="img" aria-label="Profitul pe client în funcție de prag"></canvas></div>
+<div class="stats"><div class="st"><small>Profit / client, train (OOF)</small><b id="pfT"></b></div><div class="st"><small>Profit / client, test</small><b id="pfE"></b></div><div class="st"><small>Contactați pe test</small><b id="pfN"></b></div></div>
+<p class="out" id="pfMsg"></p>
+</div>
+<div class="tw"><table>
+<tr><th>Strategie (raport)</th><th>Train OOF</th><th>Test</th></tr>
+<tr><td>contactezi pe toată lumea</td><td><span class="pill bad">−1,33</span></td><td>pierdere</td></tr>
+<tr><td>prag max profit (0,59) = prag max F1</td><td><b>+0,52</b></td><td><b>+0,74</b></td></tr>
+<tr><td>prag recall ≥ 0,75 (0,53)</td><td>+0,49</td><td>+0,71</td></tr>
+</table></div>
+<p>Pragul 0,59 e mult peste 0,27 pentru că <code>class_weight="balanced"</code> umflă probabilitățile. Pe scara modelului, 0,59 corespunde unei probabilități reale aproape de 0,27.</p>
+</section>
+
+<section id="q">
+<h2>15. Modelele finale și întrebări</h2>
+<div class="card final">
+<p><b>Clasificare → regresia logistică</b>: egală cu voting-ul (p = 0,275), dar de 20× mai rapidă, cu probabilități directe și ponderi explicabile. Test: PR-AUC 0,744, recall 0,857, precizie 0,535, ROC-AUC 0,917.</p>
+<p><b>Regresie → HistGB</b>: primul în tabel, de 20× mai rapid decât stacking-ul. Test: MAE 160, R² 0,826.</p>
+</div>
+<details><summary>De ce random forest e mai bun decât un singur arbore?</summary><p>Media multor arbori diferiți anulează greșelile întâmplătoare ale fiecăruia. Reduce varianța (tocitul): PR-AUC 0,324 → 0,566.</p></details>
+<details><summary>Ce diferență e între bagging și boosting?</summary><p>Bagging: arbori mari, făcuți separat, care votează (reduce varianța). Boosting: arbori mici, făcuți pe rând, fiecare corectează greșelile celor dinainte (reduce bias-ul).</p></details>
+<details><summary>Ce e scorul OOB?</summary><p>Fiecare client e prezis doar de arborii care nu l-au văzut. E o validare gratuită, fără CV.</p></details>
+<details><summary>De ce rata de învățare mică cere mai mulți arbori?</summary><p>Fiecare arbore adaugă doar o bucățică din corectură. Cu pași mici ai nevoie de mai mulți pași (29 la 0,3, 378 la 0,03).</p></details>
+<details><summary>De ce n-ai ales voting-ul, deși are 0,630?</summary><p>+0,02 e sub zgomot (p = 0,275), iar modelul e mult mai complicat și mai lent. La scor egal, alegem modelul mai simplu.</p></details>
+<details><summary>De ce nu ai transformat ținta cu log?</summary><p>N-a ajutat: arborii sunt insensibili, iar regresia liniară s-a stricat (R² −19). Skew-ul e doar 0,87.</p></details>
+<details><summary>De ce nu ai făcut selecție de atribute?</summary><p>Nu a îmbunătățit semnificativ nimic, iar avem doar ~25 de coloane.</p></details>
+<details><summary>De ce testul iese mai bun decât CV-ul?</summary><p>Întâmplare: doar 63 de clienți care acceptă în test. Intervalul de încredere 0,63–0,86 arată incertitudinea. N-am schimbat nimic după test.</p></details>
+<details><summary>Ce înseamnă lift@20% = 3,97?</summary><p>Primii 20% clienți după scor conțin de ~4 ori mai mulți clienți care acceptă decât 20% luați la întâmplare (79% din total).</p></details>
+<details><summary>Cum se calculează importanța prin permutare?</summary><p>Amesteci o coloană și vezi cât scade scorul. La regresie, fără <code>Income</code> MAE crește cu 366.</p></details>
+</section>
+<p class="note" style="margin-top:40px">Exemplele „Încearcă” sunt calculate pe datele tale (scikit-learn, seed 42) și pot diferi puțin de raportul L05. Cifrele din tabele sunt din raport.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const f2=v=>v.toFixed(2).replace('.',','), f3=v=>v.toFixed(3).replace('.',','), n0=v=>Math.round(v).toLocaleString('ro-RO');
+(function(){const b=$('themeBtn');if(!b)return;const modes=['auto','light','dark'];let i=0;try{i=Math.max(0,modes.indexOf(localStorage.getItem('th')||'auto'))}catch(e){}
+const ap=()=>{const m=modes[i];if(m==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',m);b.textContent='Temă: '+({auto:'auto',light:'luminoasă',dark:'întunecată'})[m];try{localStorage.setItem('th',m)}catch(e){}};
+b.onclick=()=>{i=(i+1)%3;ap();location.reload()};ap();})();
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const C={acc:css('--acc'),org:css('--org'),mute:css('--mute'),grid:css('--grid'),ink:css('--ink'),ok:css('--ok'),bad:css('--bad'),card:css('--card'),line:css('--line'),gray:'#b4b2a9'};
+const chartsOk=()=>typeof Chart!=='undefined';
+if(chartsOk()){Chart.defaults.color=C.mute;Chart.defaults.font.size=12;Chart.defaults.plugins.legend.display=false;Chart.defaults.maintainAspectRatio=false;Chart.defaults.animation.duration=250}
+const ax=(t,o={})=>Object.assign({title:{display:!!t,text:t},grid:{color:C.grid}},o);
+function mk(id,cfg){if(!chartsOk()){const c=$(id);c.parentNode.innerHTML='<p class="note">Graficul are nevoie de internet (Chart.js).</p>';return null}return new Chart($(id),cfg)}
+function AP(rows){const s=[...rows].sort((a,b)=>b[0]-a[0]);const P=s.filter(r=>r[1]).length;let tp=0,ap=0;s.forEach((r,i)=>{if(r[1]){tp++;ap+=tp/(i+1)}});return P?ap/P:0}
+function lgamma(x){const g=7,c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgamma(1-x);x-=1;let a=c[0];const t=x+g+0.5;for(let i=1;i<9;i++)a+=c[i]/(x+i);return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a)}
+function tpdf(t,v){return Math.exp(lgamma((v+1)/2)-lgamma(v/2))/Math.sqrt(v*Math.PI)*Math.pow(1+t*t/v,-(v+1)/2)}
+function pTwo(t,v){t=Math.abs(t);const n=2000,h=t/n;let s=tpdf(0,v)+tpdf(t,v);for(let i=1;i<n;i++)s+=(i%2?4:2)*tpdf(i*h,v);const area=s*h/3;return Math.max(0,Math.min(1,1-2*area))}
+function seeded(s){return()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296}}
+
+const D={"rf_curve":[[1,0.413],[2,0.476],[3,0.448],[5,0.47],[8,0.459],[12,0.468],[20,0.496],[30,0.488],[50,0.503],[75,0.51],[100,0.513],[150,0.503],[200,0.505],[300,0.519]],"gb":{"0.3":{"loss":[0.3856,0.3353,0.3177,0.3153,0.3186,0.3086,0.3075,0.3106,0.3121,0.3111,0.3111,0.3127,0.3135,0.3209,0.3226,0.3248,0.3267,0.3294,0.3327,0.3366,0.3432,0.3427,0.3427,0.3471,0.3524,0.3587,0.359,0.3611,0.3671,0.3696,0.3769,0.381,0.3848,0.3881,0.3884,0.3957,0.3955,0.3967,0.4021,0.4071,0.4138,0.4153,0.4227,0.4247,0.4273,0.4282,0.4325,0.4384,0.4388,0.4406,0.445,0.4505,0.4518,0.4588,0.4623,0.4618,0.4637,0.4638,0.4714,0.4774,0.4876,0.4909,0.49,0.4936,0.4991,0.5032,0.5061,0.5135,0.5175,0.5189,0.5208,0.5285,0.5318,0.5379,0.5436,0.548,0.5508,0.5525,0.5579,0.5597,0.5621,0.5664,0.5686,0.5737,0.5737,0.5745,0.5779,0.5849,0.5887,0.588,0.588,0.5925,0.5976,0.5969,0.6043,0.6054,0.6106,0.611,0.6113,0.6167,0.6223,0.6226,0.6239,0.6298,0.6334,0.6388,0.6423,0.6473,0.6476,0.651,0.6588,0.6591,0.6646,0.6622,0.6676,0.6724,0.6757,0.6802,0.6857,0.6909],"best":29},"0.1":{"loss":[0.4093,0.368,0.3511,0.3428,0.3383,0.3328,0.3257,0.3222,0.3169,0.3148,0.3114,0.3099,0.3081,0.306,0.3026,0.2999,0.3011,0.3026,0.3027,0.3029,0.3016,0.3031,0.3028,0.3036,0.3024,0.3003,0.3019,0.3007,0.3006,0.3006,0.3029,0.3035,0.3033,0.3036,0.3041,0.305,0.3056,0.3066,0.3078,0.3092,0.3101,0.312,0.3093,0.3107,0.3103,0.311,0.3137,0.3151,0.3143,0.3148,0.3152,0.3168,0.3172,0.3186,0.3199,0.3194,0.319,0.3216,0.324,0.3246,0.3241,0.3231,0.3255,0.3254,0.3245,0.3255,0.3256,0.3269,0.3301,0.3331,0.3346,0.335,0.3363,0.3396,0.3405,0.3428,0.343,0.3431,0.3447,0.3466,0.3471,0.3482,0.3502,0.3525,0.3533,0.3527,0.3524,0.3536,0.3547,0.3548,0.3556,0.355,0.357,0.3572,0.3586,0.3606,0.3624,0.3639,0.365,0.3671,0.3677,0.3705,0.3709,0.3721,0.3713,0.3714,0.373,0.3747,0.3762,0.3779,0.3791,0.3795,0.3801,0.3811,0.3821,0.3835,0.3828,0.3846,0.3855,0.3865],"best":137},"0.03":{"loss":[0.4203,0.4012,0.3866,0.3777,0.3697,0.3629,0.3583,0.353,0.3505,0.3476,0.3443,0.3417,0.3382,0.3371,0.3346,0.3314,0.3278,0.3266,0.3241,0.3229,0.3217,0.3196,0.3182,0.3175,0.3166,0.3158,0.3139,0.3126,0.312,0.311,0.3105,0.3093,0.3091,0.3078,0.3073,0.3068,0.3065,0.3061,0.3055,0.3057,0.3048,0.3049,0.304,0.3039,0.3029,0.3026,0.3026,0.3022,0.3026,0.302,0.3018,0.3019,0.3019,0.3022,0.302,0.3019,0.3018,0.302,0.3014,0.3015,0.3017,0.3012,0.3015,0.3011,0.3016,0.3007,0.3005,0.3003,0.3003,0.3,0.3,0.3003,0.3001,0.3001,0.2993,0.2989,0.2986,0.2987,0.2999,0.2995,0.2987,0.299,0.2992,0.2997,0.3004,0.3006,0.3009,0.3008,0.3008,0.3013,0.3016,0.3019,0.3021,0.3023,0.302,0.302,0.3023,0.3022,0.3021,0.3024,0.302,0.3022,0.3027,0.3026,0.3029,0.3034,0.3036,0.3036,0.304,0.3038,0.3042,0.3039,0.3041,0.3046,0.3049,0.3052,0.3058,0.3061,0.3059,0.3058],"best":378}},"vote_rows":[[0.85,0.27,0.03,0],[0.95,0.21,0.72,1],[0.79,0.4,0.07,1],[0.61,0.13,0.82,0],[0.38,0.19,0.86,0],[0.99,0.68,0.35,1],[0.24,0.07,0.72,1],[0.81,0.24,0.17,1]],"test":[[0.008,0],[0.988,1],[0.96,1],[0.761,1],[0.792,1],[0.375,0],[0.992,1],[0.126,0],[0.043,0],[0.803,0],[0.098,0],[0.699,0],[0.019,0],[0.005,0],[0.01,0],[0.99,1],[0.043,0],[0.086,0],[0.256,1],[0.043,0],[0.572,0],[0.54,0],[0.129,0],[0.945,1],[0.189,0],[0.404,0],[0.98,1],[0.151,0],[0.008,0],[0.647,1],[0.069,0],[0.011,0],[0.003,0],[0.45,0],[0.066,0],[0.542,1],[0.826,1],[0.883,1],[0.132,0],[0.787,0],[0.022,0],[0.347,0],[0.582,0],[0.365,0],[0.024,0],[0.997,1],[0.248,0],[0.983,1],[0.039,0],[0.864,1],[0.828,0],[0.046,0],[0.965,1],[0.012,0],[0.07,0],[0.855,1],[0.069,1],[0.427,0],[0.172,0],[0.274,0],[0.776,0],[0.185,0],[0.276,0],[0.449,0],[0.085,0],[0.389,0],[0.208,0],[0.032,0],[0.195,0],[0.02,0],[0.005,0],[0.193,0],[0.785,1],[0.995,1],[0.124,0],[0.365,0],[0.072,0],[0.51,0],[0.461,0],[0.312,0],[0.255,0],[0.197,0],[0.468,0],[0.006,0],[0.047,0],[0.486,0],[0.039,0],[0.794,0],[0.01,0],[0.418,0],[0.88,1],[0.39,0],[0.137,0],[0.416,0],[0.344,0],[0.312,0],[0.727,0],[0.799,0],[0.347,0],[0.005,0],[0.074,0],[0.048,0],[0.486,1],[0.153,0],[0.226,0],[0.513,0],[0.125,0],[0.061,0],[0.558,0],[0.985,1],[0.638,1],[0.805,1],[0.028,0],[0.636,0],[0.022,0],[0.846,1],[0.022,0],[0.017,0],[0.035,0],[0.089,0],[0.953,1],[0.572,0],[0.087,0],[0.162,0],[0.051,0],[0.153,0],[0.129,0],[0.009,0],[0.165,0],[0.894,0],[0.121,0],[0.23,0],[0.009,0],[0.017,0],[0.682,1],[0.435,0],[0.165,0],[0.095,0],[0.072,0],[0.289,0],[0.506,0],[0.485,0],[0.122,0],[0.277,0],[0.176,0],[0.093,0],[0.011,0],[0.145,1],[0.995,1],[0.056,0],[0.005,0],[0.274,0],[0.824,0],[0.199,0],[0.349,1],[0.008,0],[0.019,0],[0.219,0],[0.047,0],[0.011,0],[0.333,0],[0.998,1],[1.0,0],[0.01,0],[0.15,0],[0.661,0],[0.316,0],[0.021,0],[0.022,0],[0.993,1],[0.178,0],[0.057,0],[0.76,0],[0.965,1],[0.127,0],[0.711,0],[0.668,0],[0.113,0],[0.04,0],[0.08,0],[0.349,0],[0.079,0],[0.188,0],[0.243,1],[0.313,0],[0.121,0],[0.008,0],[0.013,0],[0.058,0],[0.001,0],[0.14,0],[0.848,0],[0.021,1],[0.007,0],[0.055,0],[0.311,0],[0.089,0],[0.994,1],[0.058,0],[0.097,0],[0.259,0],[0.931,1],[0.027,0],[0.983,1],[0.106,0],[0.366,0],[0.069,0],[0.297,0],[0.377,0],[0.261,0],[0.408,0],[0.415,0],[0.014,0],[0.011,0],[0.793,1],[0.117,0],[0.084,0],[0.638,0],[1.0,1],[0.007,0],[0.94,1],[0.334,0],[0.157,0],[0.074,0],[0.464,0],[0.497,0],[0.04,0],[0.004,0],[0.396,0],[0.519,0],[0.156,0],[0.085,0],[0.039,0],[0.875,0],[0.094,0],[0.141,0],[0.992,1],[0.128,0],[0.11,0],[0.505,0],[0.489,0],[0.376,0],[0.717,1],[0.188,0],[0.396,0],[0.785,0],[0.802,1],[0.975,1],[0.108,0],[0.222,0],[0.083,0],[0.807,1],[0.189,0],[0.04,0],[0.362,0],[0.005,0],[0.916,1],[0.053,0],[0.196,0],[0.055,0],[0.683,0],[0.08,0],[0.015,0],[0.057,0],[0.073,0],[0.039,0],[0.491,0],[0.1,0],[0.005,0],[0.234,1],[0.088,0],[0.112,0],[0.494,0],[0.004,0],[0.134,0],[0.217,0],[0.712,0],[0.291,0],[0.009,0],[0.634,1],[0.089,0],[0.057,0],[0.062,0],[0.285,0],[0.672,0],[0.917,1],[0.131,0],[0.205,0],[0.339,0],[0.638,0],[0.025,0],[0.284,0],[0.208,0],[0.033,0],[0.541,1],[0.09,0],[0.003,0],[0.307,0],[0.609,0],[0.942,1],[0.025,0],[0.175,0],[0.001,0],[0.248,0],[0.377,0],[0.501,0],[0.146,0],[0.035,0],[0.165,0],[0.024,0],[0.058,0],[0.264,0],[0.011,0],[0.401,0],[0.763,0],[0.402,0],[0.074,0],[0.703,0],[0.042,0],[0.016,0],[0.176,0],[0.011,0],[0.048,0],[0.807,0],[0.007,0],[0.225,0],[0.026,0],[0.523,0],[0.678,1],[0.028,0],[0.444,1],[0.231,0],[0.373,0],[0.642,0],[0.07,0],[0.186,0],[0.135,0],[0.102,0],[0.057,0],[0.036,0],[0.417,0],[0.045,0],[0.079,0],[0.051,0],[0.075,0],[0.133,0],[0.247,0],[0.049,0],[0.847,0],[0.035,0],[0.357,0],[0.961,1],[0.01,0],[0.302,0],[0.234,0],[0.03,0],[0.893,0],[0.611,0],[0.054,0],[0.009,0],[0.916,1],[0.891,1],[0.004,0],[0.555,0],[0.765,0],[0.528,0],[0.034,0],[0.524,0],[0.968,1],[0.956,0],[0.159,0],[0.153,0],[0.581,0],[0.676,1],[0.735,0],[0.526,0],[0.438,0],[0.061,0],[0.532,0],[0.635,0],[0.131,0],[0.195,0],[0.009,0],[0.847,0],[0.095,0],[0.028,0],[0.348,0],[0.025,0],[0.588,0],[0.283,0],[0.458,0],[0.039,0],[0.143,0],[0.026,0],[0.009,0],[0.544,0],[0.41,0],[0.149,0],[0.889,1],[0.015,0],[0.101,0],[0.203,0],[0.3,0],[0.029,0],[0.049,0],[0.099,0],[0.188,0],[0.02,0],[0.059,0],[0.235,0],[0.065,0],[0.624,1]],"oof":[[0.188,0],[0.775,0],[0.081,0],[0.03,0],[0.012,0],[0.214,0],[0.451,0],[0.63,1],[0.784,1],[0.198,0],[0.051,0],[0.06,0],[0.503,0],[0.169,0],[0.119,0],[0.048,0],[0.493,0],[0.35,0],[0.013,0],[0.072,0],[1.0,1],[0.542,0],[0.81,0],[0.21,0],[0.419,1],[0.34,0],[0.382,0],[0.038,0],[0.741,0],[0.016,0],[0.028,0],[0.186,0],[0.006,0],[0.026,0],[0.167,0],[0.073,1],[0.754,0],[0.404,1],[0.032,0],[0.989,1],[0.184,0],[0.273,0],[0.442,0],[0.391,1],[0.08,0],[0.168,0],[0.01,0],[0.962,1],[0.945,1],[0.553,0],[0.226,0],[0.973,1],[0.046,0],[0.051,0],[0.061,0],[0.058,0],[0.457,1],[0.151,0],[0.123,0],[0.084,0],[0.627,0],[0.021,0],[0.089,0],[0.069,0],[0.048,0],[0.111,0],[0.229,0],[0.001,0],[0.143,0],[0.018,0],[0.954,0],[0.736,1],[0.087,0],[1.0,0],[0.321,1],[0.839,0],[0.38,0],[0.785,0],[0.525,0],[0.16,0],[0.012,0],[0.136,0],[0.203,0],[0.105,0],[0.277,0],[0.14,0],[0.023,0],[0.029,0],[0.365,0],[0.473,0],[0.609,0],[0.869,1],[0.24,0],[0.505,0],[0.172,1],[0.324,0],[0.009,0],[0.938,1],[0.484,0],[0.513,1],[0.467,0],[0.504,0],[0.668,0],[0.412,0],[0.93,1],[0.246,0],[0.628,0],[0.441,0],[0.342,0],[0.091,0],[0.013,0],[0.891,1],[0.043,0],[0.248,0],[0.131,0],[0.343,0],[0.608,0],[0.057,0],[0.531,0],[0.026,0],[0.179,0],[0.799,0],[0.046,0],[0.098,0],[0.097,0],[0.051,0],[0.333,0],[0.197,0],[0.004,0],[0.213,0],[0.456,0],[0.07,0],[0.06,0],[0.054,0],[0.923,0],[0.003,0],[0.032,0],[0.033,0],[0.003,0],[0.169,0],[0.008,0],[0.005,0],[0.532,0],[0.593,1],[0.002,0],[0.406,0],[0.585,0],[0.083,0],[0.008,0],[0.106,0],[0.221,0],[0.193,0],[0.204,0],[0.526,0],[0.336,0],[0.215,0],[0.981,0],[0.002,0],[0.136,0],[0.069,0],[0.012,0],[0.13,0],[0.096,0],[0.161,0],[0.089,0],[0.019,0],[0.206,0],[0.644,1],[0.923,1],[0.452,1],[0.516,1],[0.704,0],[0.608,0],[0.999,1],[0.737,0],[0.654,0],[0.816,0],[0.078,0],[0.099,0],[0.207,0],[0.148,0],[0.652,0],[0.112,0],[0.228,0],[0.039,0],[0.083,0],[0.04,0],[0.49,1],[0.501,0],[0.075,0],[0.819,0],[0.144,0],[0.134,0],[0.332,1],[0.2,0],[0.194,0],[0.012,0],[0.007,0],[0.136,0],[0.265,0],[0.201,0],[0.411,0],[0.008,0],[0.628,0],[0.472,1],[0.183,0],[0.944,1],[0.383,0],[0.055,0],[0.028,0],[0.232,0],[0.97,1],[0.423,0],[0.424,0],[0.703,0],[0.027,0],[1.0,1],[0.7,0],[0.05,0],[0.26,0],[0.998,1],[0.312,0],[0.09,0],[0.557,0],[0.56,0],[0.201,0],[0.322,0],[0.311,0],[0.84,0],[0.131,0],[0.356,0],[0.024,0],[0.914,0],[0.049,0],[0.894,0],[0.673,1],[0.033,0],[0.004,0],[0.005,0],[0.566,0],[0.065,0],[0.91,1],[0.01,0],[0.04,0],[0.494,0],[0.789,0],[0.889,1],[0.24,0],[0.104,0],[0.454,0],[0.103,0],[0.668,0],[0.647,1],[0.236,0],[0.85,0],[0.086,0],[0.93,0],[0.73,0],[0.056,0],[0.177,0],[0.242,0],[0.321,0],[0.109,0],[0.269,0],[0.69,0],[0.857,0],[0.033,0],[0.008,0],[0.608,1],[0.351,0],[0.013,0],[0.018,0],[0.953,0],[0.564,1],[0.955,1],[0.06,0],[0.008,0],[0.254,0],[0.015,0],[0.006,0],[0.135,0],[0.076,0],[0.363,0],[0.006,0],[0.038,0],[0.324,0],[0.747,1],[0.23,0],[0.183,0],[0.08,0],[0.071,0],[0.932,1],[0.022,0],[0.463,0],[0.56,0],[0.014,0],[0.107,0],[0.584,0],[0.006,0],[0.014,0],[0.056,0],[0.212,0],[0.372,0],[0.841,0],[0.483,0],[0.089,0],[0.249,0],[0.524,0],[0.008,0],[0.014,0],[0.042,0],[0.99,1],[0.592,0],[0.122,0],[0.009,0],[0.194,0],[0.288,0],[0.193,0],[0.313,0],[0.297,0],[0.008,0],[0.944,0],[0.458,0],[0.083,0],[0.024,0],[0.554,0],[0.565,0],[0.053,0],[0.044,0],[0.935,0],[0.124,0],[0.444,1],[0.001,0],[0.099,1],[0.932,0],[0.597,0],[0.523,0],[0.013,0],[0.432,1],[0.069,0],[0.028,0],[0.35,0],[0.039,0],[0.34,0],[0.194,0],[0.011,0],[0.068,0],[0.166,0],[0.005,0],[0.099,0],[0.002,0],[0.012,0],[0.513,0],[0.287,1],[0.125,0],[0.036,0],[0.951,1],[0.999,1],[0.999,1],[0.315,1],[0.305,0],[0.728,1],[0.727,1],[0.232,0],[0.963,0],[0.145,0],[0.041,0],[0.667,0],[0.578,0],[0.058,0],[0.197,0],[0.352,0],[0.038,0],[0.152,0],[0.233,0],[0.022,0],[0.087,0],[0.63,1],[0.057,0],[0.209,0],[0.019,0],[0.015,0],[0.612,0],[0.295,0],[0.092,0],[0.004,0],[0.752,0],[0.101,0],[0.948,1],[0.433,0],[0.006,0],[0.019,0],[0.044,0],[0.244,0],[0.044,0],[0.496,0],[0.679,1],[0.027,0],[0.361,0],[0.748,0],[0.239,0],[0.204,0],[0.204,0],[0.034,0],[0.378,0],[0.075,0],[0.788,1],[0.043,0],[0.015,0],[0.024,0],[0.092,0],[0.19,0],[0.507,0],[0.167,0],[0.301,0],[0.064,0],[0.024,0],[0.498,0],[0.032,0],[0.884,1],[0.007,0],[0.088,0],[0.012,0],[0.268,0],[0.432,0],[0.521,1],[0.122,0],[0.698,0],[0.053,0],[0.651,0],[0.012,0],[0.078,0],[0.154,0],[0.88,0],[0.981,1],[0.172,0],[0.478,0],[0.522,1],[0.001,0],[0.176,0],[0.417,0],[0.105,0],[0.775,0],[0.079,0],[0.045,0],[0.234,0],[0.057,0],[0.075,0],[0.346,0],[0.906,1],[0.984,1],[0.883,1],[0.672,0],[0.562,0],[0.135,1],[0.612,0],[0.093,0],[0.051,0],[0.102,0],[0.024,0],[0.043,0],[0.987,1],[0.775,0],[0.281,0],[0.176,0],[0.541,0],[0.132,0],[0.185,0],[0.084,0],[0.07,0],[0.472,0],[0.641,1],[0.012,0],[0.655,0],[0.251,0],[0.522,0],[0.041,0],[0.046,0],[0.007,0],[0.518,1],[0.925,1],[0.091,0],[0.793,1],[0.214,0],[0.002,0],[0.084,0],[0.315,0],[0.152,0],[0.584,0],[0.454,0],[0.852,1],[0.034,0],[0.098,0],[0.979,1],[0.34,0],[0.027,0],[0.128,0],[0.333,0],[0.758,1],[0.704,0],[0.67,0],[0.446,0],[0.511,0],[0.102,0],[0.864,1],[0.936,1],[0.485,1],[0.269,0],[0.745,0],[0.214,0],[0.048,0],[0.554,0],[0.196,0],[0.99,1],[0.665,0],[0.989,1],[0.161,0],[0.146,0],[0.443,0],[0.126,0],[0.655,0],[0.132,0],[0.1,0],[0.007,0],[0.005,0],[0.171,0],[0.009,0],[0.489,0],[0.61,1],[0.393,0],[0.048,0],[0.105,0],[0.141,0],[0.063,0],[0.189,1],[0.047,0],[0.977,1],[0.075,0],[0.507,0],[0.069,0],[0.101,0],[0.185,1],[0.236,0],[0.363,0],[0.558,0],[0.331,0],[0.996,1],[0.595,1],[0.12,0],[0.039,0],[0.476,0],[0.131,0],[0.015,0],[0.692,1],[0.093,0],[0.737,0],[0.963,0],[0.992,1],[0.038,0],[0.966,1],[0.046,0],[0.525,1],[0.014,0],[0.57,0],[0.002,0],[0.238,0],[0.698,0],[0.043,0],[0.141,0],[0.135,0],[0.002,0],[0.849,0],[0.044,0],[0.712,1],[0.238,0],[0.95,1],[0.374,0],[0.038,0],[0.035,0],[0.758,0],[0.02,0],[0.717,0],[0.195,0],[0.197,1],[0.961,1],[0.074,0],[0.013,0],[0.006,0],[0.285,0],[0.356,0],[0.263,0],[0.838,0],[0.101,0],[0.121,1],[0.029,0],[0.722,0],[0.067,0],[0.11,0],[0.461,0],[0.063,0],[0.005,0],[0.486,0],[0.98,1],[0.061,0],[0.009,0],[0.267,0],[0.102,0],[0.006,0],[0.094,0],[0.777,1],[0.865,1],[0.386,0],[0.256,0],[0.938,1],[0.542,0],[0.402,0],[0.091,0],[0.07,0],[0.076,0],[0.575,0],[0.827,0],[0.389,0],[0.03,0],[0.993,1],[0.144,0],[0.021,0],[0.015,0],[0.136,0],[0.091,0],[0.006,0],[0.068,0],[0.28,0],[0.546,0],[0.007,0],[0.611,1],[0.072,0],[0.064,0],[0.042,0],[0.006,0],[0.976,1],[0.074,0],[0.032,0],[0.315,0],[0.619,0],[0.346,0],[0.706,1],[0.167,0],[0.437,0],[0.908,1],[0.07,0],[0.087,0],[0.131,0],[0.151,0],[0.126,0],[0.012,0],[0.007,0],[0.558,0],[0.976,1],[0.042,0],[0.002,0],[0.154,0],[0.012,0],[0.635,1],[0.41,0],[0.079,0],[0.02,0],[0.917,1],[0.003,0],[0.018,0],[0.459,0],[0.04,0],[0.111,0],[0.029,0],[0.764,0],[0.24,0],[0.964,1],[0.004,0],[0.038,0],[0.027,0],[0.039,0],[0.259,1],[0.035,0],[0.183,0],[0.15,0],[0.003,0],[0.845,1],[0.566,0],[0.143,0],[0.192,0],[0.015,0],[0.183,0],[0.207,0],[0.389,0],[0.984,0],[0.046,0],[0.905,1],[0.747,0],[0.232,0],[0.063,0],[0.541,0],[0.499,0],[0.14,1],[0.086,0],[0.174,0],[0.89,0],[0.121,0],[0.339,0],[0.01,0],[0.455,0],[0.028,0],[0.008,0],[0.374,0],[0.029,0],[0.187,0],[0.137,0],[0.007,0],[0.076,0],[0.063,0],[0.123,0],[0.017,0],[0.202,0],[0.022,0],[0.03,0],[0.104,0],[0.92,0],[0.026,0],[0.146,0],[0.751,0],[0.136,0],[0.078,0],[0.309,0],[0.018,0],[0.467,0],[0.516,0],[0.456,0],[0.888,0],[0.006,0],[0.011,0],[0.019,0],[0.815,0],[0.14,0],[0.937,1],[0.444,0],[0.648,0],[0.159,0],[0.059,0],[0.068,0],[0.099,0],[0.996,0],[0.024,0],[0.005,0],[0.145,0],[0.609,0],[0.385,0],[0.085,0],[0.026,0],[0.691,1],[0.01,0],[0.056,0],[0.392,0],[0.672,0],[0.057,0],[0.364,0],[0.367,0],[0.449,0],[0.303,0],[0.114,0],[0.007,0],[0.762,1],[0.301,0],[0.461,0],[0.263,0],[0.099,0],[0.326,0],[0.737,0],[0.079,0],[0.21,0],[0.014,0],[0.038,0],[0.06,0],[0.849,1],[0.823,1],[0.455,0],[0.377,0],[0.45,0],[0.43,0],[0.397,1],[0.12,0],[0.475,0],[0.231,0],[0.925,1],[0.323,0],[0.308,0],[0.921,0],[0.55,1],[0.199,0],[0.703,1],[0.94,0],[0.166,0],[0.252,0],[0.274,0],[0.805,1],[0.996,1],[0.015,0],[0.563,0],[0.24,0],[0.162,0],[0.248,0],[0.43,0],[0.46,0],[0.225,0],[0.386,0],[0.564,0],[0.901,0],[0.034,0],[0.02,0],[0.018,0],[0.337,0],[0.564,1],[0.116,0],[0.111,0],[0.406,0],[0.015,0],[0.315,0],[0.068,0],[0.753,0],[0.266,0],[0.292,0],[0.061,0],[0.021,0],[0.194,0],[0.01,0],[0.402,0],[0.184,0],[0.497,0],[0.892,0],[0.92,1],[0.206,0],[0.282,1],[0.343,0],[0.735,0],[0.082,0],[0.017,0],[0.015,0],[0.144,0],[0.755,0],[0.376,0],[0.046,0],[0.105,0],[0.187,0],[0.137,0],[0.678,0],[0.826,0],[0.012,0],[0.309,0],[0.089,0],[0.322,0],[0.859,0],[0.076,0],[0.951,1],[0.035,0],[0.782,0],[0.11,0],[0.828,0],[0.049,0],[0.519,0],[0.094,0],[0.046,0],[0.971,1],[0.411,0],[0.056,0],[0.026,0],[0.182,0],[0.004,0],[0.063,0],[0.836,0],[0.29,0],[0.016,0],[0.981,1],[0.981,1],[0.443,1],[0.343,0],[0.111,0],[0.175,0],[0.773,1],[0.09,0],[0.027,0],[0.269,0],[0.118,0],[0.08,0],[0.043,0],[0.008,0],[0.814,0],[0.996,1],[0.193,1],[0.146,0],[0.094,0],[0.984,0],[0.217,0],[0.915,1],[0.117,0],[0.517,0],[0.189,0],[0.952,1],[0.092,0],[0.308,0],[0.32,0],[0.272,1],[0.837,1],[0.012,0],[0.181,0],[0.073,0],[0.496,1],[0.29,0],[0.059,0],[0.02,0],[0.035,0],[0.007,0],[0.879,1],[0.275,0],[0.989,1],[0.391,0],[0.694,0],[0.6,1],[0.113,0],[0.234,0],[0.134,0],[0.002,0],[0.017,0],[0.026,0],[0.055,0],[0.305,0],[0.547,0],[0.046,0],[0.014,0],[0.174,0],[0.007,0],[0.347,1],[0.183,0],[0.037,0],[0.207,0],[0.196,0],[0.067,0],[0.455,1],[0.13,0],[0.143,0],[0.118,1],[0.023,0],[0.147,0],[0.041,0],[0.064,0],[0.102,1],[0.92,1],[0.972,0],[0.731,0],[0.384,0],[0.504,0],[0.346,0],[0.159,0],[0.151,0],[0.837,1],[0.137,0],[0.117,0],[0.675,0],[0.036,0],[0.66,0],[0.401,0],[0.02,0],[0.002,0],[0.232,0],[0.071,0],[0.154,0],[0.054,0],[0.816,0],[0.642,1],[0.042,0],[0.064,0],[0.622,0],[0.069,0],[0.126,0],[0.169,0],[0.754,0],[0.169,0],[0.191,0],[0.078,0],[0.476,1],[0.995,1],[0.045,0],[0.033,0],[0.299,0],[0.07,0],[0.526,0],[0.425,0],[0.763,0],[0.992,0],[0.184,0],[0.402,0],[0.482,0],[0.305,0],[0.108,0],[0.163,0],[0.647,0],[0.01,0],[0.41,0],[0.099,0],[0.019,0],[0.092,0],[0.174,0],[0.999,1],[0.121,0],[0.824,0],[0.153,0],[0.406,0],[0.034,0],[0.471,0],[0.104,0],[0.342,0],[0.959,0],[0.005,0],[0.31,0],[0.017,0],[0.668,0],[0.583,0],[0.375,0],[0.134,0],[0.07,0],[0.013,0],[0.561,1],[0.022,0],[0.073,0],[0.031,0],[0.163,0],[0.565,0],[0.128,0],[0.291,0],[0.019,0],[0.041,0],[0.028,0],[0.372,0],[0.211,0],[0.096,0],[0.079,0],[0.997,0],[0.246,0],[0.404,0],[0.145,0],[0.295,0],[0.39,1],[0.026,0],[0.484,0],[0.926,0],[0.858,0],[0.009,0],[0.013,0],[0.021,0],[0.19,0],[0.022,0],[0.066,0],[0.914,0],[0.243,0],[0.122,1],[0.121,0],[0.537,1],[0.096,0],[0.715,0],[0.196,0],[0.93,0],[0.227,0],[0.107,0],[0.011,0],[0.008,0],[0.048,0],[0.245,0],[0.056,0],[0.462,0],[0.073,0],[0.107,0],[0.087,0],[0.939,1],[0.121,0],[0.184,0],[0.98,0],[0.072,0],[0.268,0],[0.046,0],[0.968,1],[0.401,0],[0.898,0],[0.814,0],[0.147,0],[0.937,1],[0.233,0],[0.006,0],[0.238,0],[0.01,0],[0.081,0],[0.024,0],[0.023,0],[0.367,0],[0.857,0],[0.882,1],[0.061,0],[0.002,0],[0.727,0],[0.174,0],[0.01,0],[0.704,0],[0.099,0],[0.298,0],[0.218,0],[0.028,0],[0.044,0],[0.005,0],[0.274,0],[0.033,0],[0.986,1],[0.713,0],[0.004,0],[0.006,0],[0.009,0],[0.824,0],[0.08,0],[0.802,0],[0.739,1],[0.943,1],[0.367,0],[0.336,0],[0.042,0],[0.022,0],[0.061,0],[0.334,0],[0.868,0],[0.591,1],[0.917,1],[0.707,1],[0.303,0],[0.981,1],[0.082,0],[0.013,0],[0.216,0],[0.968,1],[0.393,0],[0.017,0],[0.248,0],[0.144,0],[0.02,0],[0.599,0],[0.423,0],[0.065,1],[0.921,1],[0.313,0],[0.642,0],[0.05,0],[0.442,0],[0.196,0],[0.502,0],[0.705,0],[0.073,0],[0.018,0],[0.45,0],[0.033,0],[0.068,0],[0.113,0],[0.514,1],[0.058,0],[0.064,0],[0.932,0],[0.86,0],[0.077,0],[0.636,1],[0.103,0],[0.155,0],[0.236,0],[0.391,0],[0.699,1],[0.11,0],[0.61,0],[0.618,1],[0.072,0],[0.802,1],[0.321,0],[0.462,0],[0.852,0],[0.264,0],[0.418,1],[0.003,0],[0.029,0],[0.176,0],[0.048,0],[0.35,0],[0.49,0],[0.949,1],[0.087,0],[0.816,1],[0.025,0],[0.944,0],[0.028,0],[0.375,0],[0.583,0],[0.614,1],[0.017,0],[0.072,0],[0.235,0],[0.026,0],[0.526,0],[0.17,0],[0.585,0],[0.061,0],[0.044,0],[0.021,0],[0.292,0],[0.065,0],[0.933,1],[0.339,0],[0.493,0],[0.733,1],[0.057,0],[0.011,0],[0.198,0],[0.451,0],[0.273,1],[0.676,0],[0.159,1],[0.045,0],[0.802,0],[0.063,0],[0.77,1],[0.119,0],[0.024,0],[0.083,0],[0.953,1],[0.243,1],[0.578,0],[0.015,0],[0.641,1],[0.984,1],[0.054,0],[0.438,0],[0.033,0],[0.503,0],[0.147,0],[0.347,0],[0.224,0],[0.226,0],[0.621,1],[0.227,0],[0.223,0],[0.391,0],[0.438,0],[0.082,0],[0.173,0],[0.058,0],[0.045,0],[0.542,1],[0.766,1],[0.994,0],[0.973,1],[0.938,0],[0.016,0],[0.015,0],[0.764,0],[0.963,1],[0.256,0],[0.015,0],[0.06,0],[0.941,0],[0.795,1],[0.003,0],[0.611,0],[0.822,0],[0.408,0],[0.02,0],[0.656,0],[0.902,0],[0.133,0],[0.008,0],[0.721,1],[0.034,0],[0.222,0],[0.063,0],[0.009,0],[0.812,1],[0.969,1],[0.133,0],[0.186,0],[0.295,0],[0.01,0],[0.005,0],[0.685,0],[0.054,0],[0.341,0],[0.094,0],[0.077,0],[0.062,0],[0.024,0],[0.195,0],[0.441,0],[0.116,0],[0.53,0],[0.603,0],[0.234,0],[0.051,0],[0.542,0],[0.949,1],[0.468,0],[0.231,0],[0.073,0],[0.579,0],[0.386,0],[0.034,0],[0.253,0],[0.434,0],[0.424,1],[0.115,0],[0.003,0],[0.894,1],[0.803,1],[0.029,0],[0.911,0],[0.072,0],[0.156,0],[0.096,0],[0.178,0],[0.019,0],[0.188,0],[0.042,0],[0.248,0],[0.113,0],[0.253,0],[0.622,1],[0.095,0],[0.049,0],[0.866,1],[0.79,1],[0.283,0],[0.901,1],[0.123,0],[0.007,0],[0.279,0],[0.021,0],[0.347,0],[0.468,0],[0.289,0],[0.398,0],[0.946,1],[0.068,0],[0.488,0],[0.896,0],[0.604,1],[0.914,0],[0.265,0],[0.911,0],[0.732,1],[0.99,0],[0.781,0],[0.507,1],[0.018,0],[0.98,1],[0.62,0],[0.626,0],[0.437,1],[0.048,0],[0.024,0],[0.918,0],[0.654,0],[0.343,0],[0.278,0],[0.7,0],[0.545,1],[0.032,0],[0.228,0],[0.012,0],[0.035,0],[0.95,1],[0.268,0],[0.464,1],[0.897,1],[0.651,0],[0.224,0],[0.026,0],[0.569,0],[0.041,0],[0.01,0],[0.312,0],[0.357,0],[0.996,0],[0.959,1],[0.388,0],[0.994,1],[0.98,0],[0.416,0],[0.075,0],[0.063,0],[0.982,1],[0.124,0],[0.879,1],[0.877,0],[0.221,1],[0.076,0],[0.252,0],[0.374,0],[0.235,0],[0.924,1],[0.011,0],[0.645,1],[0.111,0],[0.554,0],[0.003,0],[0.092,0],[0.063,0],[0.988,1],[0.636,0],[0.03,0],[0.123,0],[0.161,0],[0.215,0],[0.458,0],[0.041,0],[0.464,0],[0.036,0],[0.556,1],[0.971,1],[0.335,0],[0.066,0],[0.791,1],[0.151,0],[0.626,0],[0.837,0],[0.013,0],[0.056,0],[0.098,0],[0.842,0],[0.413,0],[0.063,0],[0.943,1],[0.114,0],[0.113,0],[0.208,0],[0.212,0],[0.022,0],[0.977,1],[0.029,0],[0.054,0],[0.038,0],[0.483,0],[0.246,0],[0.219,0],[0.097,0],[0.734,0],[0.518,1],[0.158,0],[0.798,0],[0.076,0],[0.054,0],[0.216,0],[0.994,1],[0.938,1],[0.343,0],[0.137,0],[0.033,0],[0.575,0],[0.094,0],[0.06,0],[0.195,0],[0.765,0],[0.039,0],[0.171,0],[0.103,0],[0.115,0],[0.084,0],[0.126,0],[0.029,0],[0.228,0],[1.0,0],[0.1,0],[0.724,1],[0.164,0],[0.157,0],[0.819,0],[0.079,0],[0.095,0],[0.196,0],[0.027,0],[0.162,1],[0.394,0],[0.31,0],[0.585,1],[0.414,0],[0.513,0],[0.215,0],[0.216,0],[0.907,0],[0.042,0],[0.095,0],[0.009,0],[0.037,0],[0.984,1],[0.043,0],[0.243,1],[0.039,0],[0.037,0],[0.183,0],[0.021,0],[0.755,0],[0.859,0],[0.092,0],[0.485,0],[0.011,0],[0.141,0],[0.222,0],[0.265,0],[0.442,1],[0.059,0],[0.404,0],[0.618,0],[0.936,1],[0.01,0],[0.076,0],[0.763,0],[0.138,0],[0.057,0],[0.773,1],[0.823,0],[0.194,0],[0.776,0],[0.05,0],[0.353,1],[0.259,0],[0.821,0],[0.163,0],[0.023,0],[0.422,0],[0.472,0],[0.046,0],[0.083,0],[0.019,0],[0.226,0],[0.999,1],[0.026,0],[0.99,1],[0.106,0],[0.077,0],[0.932,0],[0.043,0],[0.38,0],[0.142,0],[0.505,0],[0.01,0],[0.003,0],[0.02,0],[0.401,0],[0.405,0],[0.941,0],[0.113,0],[0.085,0],[0.853,1],[0.766,1],[0.409,0],[0.413,0],[0.229,1],[0.006,0],[0.558,1],[0.225,1],[0.023,0],[0.147,0],[0.06,0],[0.327,0],[0.395,0],[0.064,0],[0.006,0],[0.201,0],[0.867,0],[0.72,0],[0.388,0],[0.052,0],[0.024,0],[0.713,0],[0.497,1],[0.349,0],[0.104,0],[0.028,0],[0.241,0],[0.086,0],[0.007,0],[0.256,0],[0.905,1],[0.025,0],[0.047,0],[0.015,0],[0.343,0],[0.106,0],[1.0,1],[0.041,0],[0.908,1],[0.002,0],[0.523,0],[0.209,0],[0.023,0],[0.69,0],[0.148,0],[0.241,0],[0.548,0],[0.042,0],[0.446,0],[0.037,0],[0.377,0],[0.352,0],[0.565,0],[0.874,0],[0.026,0],[0.002,0],[0.082,0],[0.199,0],[0.022,0],[0.194,0],[0.17,0],[0.06,0],[0.547,0],[0.346,0],[0.155,0],[0.234,0],[0.236,0],[0.068,0],[0.441,0],[0.344,0],[0.233,0],[0.275,0],[0.476,0],[0.011,0],[0.343,0],[0.045,0],[0.101,0],[0.22,0],[0.397,0],[0.832,0],[0.903,1],[0.011,0],[0.04,0],[0.008,0],[0.088,0],[0.124,0],[0.909,0],[0.079,0],[0.042,0],[0.01,0],[0.427,0]],"imp_c":[["Recency",0.111],["AcceptedCmp5",0.096],["AcceptedCmp3",0.092],["MntMeatProducts",0.087],["NumCatalogPurchases",0.084],["Customer_Days",0.074],["Teenhome",0.071],["Marital_Status",0.066],["AcceptedCmp1",0.05],["Education",0.043]],"imp_r":[["Income",366.1],["Customer_Days",36.6],["Kidhome",21.6],["Teenhome",16.3],["NumWebVisitsMonth",9.2],["AcceptedCmp5",3.0],["AcceptedCmp1",2.4],["AcceptedCmp3",2.0]],"mnt":[981,2525,1371,310,1274,122,397,185,396,1750,301,167,17,81,491,255,9,99,902,1901,20,58,34,21,377,100,68,418,49,1735,54,58,25,72,1103,26,1574,1829,125,73,841,69,30,165,32,710,80,936,263,109,57,845,1693,535,72,85,1442,1159,542,611,1139,49,382,43,48,1016,1068,395,1445,31,47,1012,51,354,22,446,470,17,34,315,930,95,32,431,101,63,1174,16,55,1385,62,776,145,819,264,1536,507,1346,1073,316,184,22,32,1379,48,1690,313,13,636,1941,10,770,177,1112,751,8,235,358,129,1082,1264,2034,193,907,1336,1179,49,96,19,350,43,57,45,32,497,1662,32,52,99,69,1643,169,81,1245,792,12,57,1895,1674,315,2279,15,1049,1315,586,1228,57,1515,1869,1566,25,15,1295,25,53,1828,20,1072,1612,120,416,1134,485,373,186,957,162,1169,54,679,270,145,1215,1157,1679,93,146,48,96,454,91,1526,863,484,2053,437,629,2092,1060,138,334,1638,22,458,869,683,32,28,915,1804,34,1508,1753,72,294,688,953,51,127,43,1792,138,444,1001,1867,11,1149,130,62,414,1400,601,1155,52,47,1167,486,268,71,1401,882,81,1529,373,68,224,23,59,1168,939,42,38,17,895,263,1691,908,98,57,1092,57,1572,1216,405,241,106,1686,46,1724,1089,1564,1376,1932,2089,1956,545,461,1555,45,2116,1003,33,1483,39,493,1727,16,1504,813,902,492,72,34,56,1039,493,59,590,72,1502,1662,1305,1289,746,638,137,528,1366,798,680,183,1086,44,995,493,141,32,61,71,868,1066,499,406,149,10,100,1364,372,18,103,1743,467,606,694,223,126,185,551,30,58,15,1835,198,42,1991,1782,1688,44,390,1101,46,47,495,1717,318,55,902,45,17,1596,24,1456,23,369,26,965,1106,434,940,2252,211,15,693,778,124,518,306,89,312,49,269,1736,27,216,982,57,1722,1766,17,64,10,1179,232,835,1429,424,564,16,46,133,882,56,17,1461,36,27,54,102,14,8,42,1611,467,172,120,182,1131,53,66,171,16,1196,78,1123,46,69,1088,416,48,62,1383,1388,209,825,324,55,414,187,90,2130,54,25,868,425,398,734,17,1281,694,1101,662,1053,1105,44,38,184,1428,88,1229,284,1588,54,48,779,1250,19,1702,2047,930,1043,1241,1374,1158,1348,92,305,463,664,69,37,75,1722,1923,400,1169,54,1511,1615,504,16,797,1231,470,311,180,10,599,1291,633,122,1193,1600,1052,26,78,63,48,335,18,1795,37,1053,207,2114,825,1376,797,348,889,191,186,55,1192,39,20,99,449,2009,692,1298,78,467,871,36,1701,353,43,48,964,577,102,103,825,44,79,258,194,53,66,1213,725,1250,1242,1459,97,47,67,88,38,25,52,746,8,756,1631,41,401,1029,907,47,50,1826,1038,122,22,34,993,106,15,17,637,62,2069,1573,312,823,39,290,1024,42,176,1957,424,725,800,54,140,1161,45,20,1319,46,50,1117,1102,94,148,20,2352,275,78,1305,35,125,31,1727,38,1307,815,174,877,21,2077,15,201,576,1574,47,160,1143,1335,45,31,55,94,1924,401,407,413,53,71,31,716,436,1772,433,526,1102,2052,90,496,1097,486,240,40,45,664,57,28,903,496,684,213,1147,1375,83,332,17,43,690,88,11,444,877,1600,385,133,151,209,1192,1286,22,1367,747,252,51,119,351,506,18,161,1382,237,257,990,2209,637,223,319,43,1957,67,107,1099,1477,169,1482,23,1538,55,734,910,1188,125,2088,482,66,72,20,315,275,1518,55,14,260,1117,597,76,1919,772,35,401,63,222,1438,415,32,1146,37,1280,494,30,145,182,928,1820,22,1923,53,72,240,653,61,2157,50,49,1416,55,725,165,149,660,91,55,137,421,64,971,1428,2018,1189,978,415,66,2043,1120,156,65,16,1392,995,51,928,1921,57,702,787,605,68,67,66,81,1338,957,26,562,1341,45,302,31,84,2059,18,144,404,1617,436,61,18,441,79,789,121,103,981,270,311,1899,24,20,79,91,152,534,29,637,20,1853,884,1226,306,189,68,957,1377,102,155,44,1511,269,268,49,265,836,322,1453,1598,811,53,277,101,890,1067,801,114,19,943,1427,715,797,1440,21,860,48,70,1396,1461,906,37,689,45,636,724,63,92,467,488,37,612,434,304,175,813,1676,1194,129,1198,76,178,692,87,761,1323,1044,31,29,279,60,231,835,195,1383,397,415,1443,1127,653,62,446,732,747,561,37,929,198,93,1161,67,1677,18,1893,23,409,40,54,326,1084,41,1910,106,730,1182,21,131,246,1930,1109,1910,36,274,973,656,450,2302,64,1908,74,1477,63,81,11,23,1006,1049,468,685,1336,92,914,728,48,1323,850,153,75,152,1215,1650,1085,523,1078,233,20,1198,960,595,1171,1338,135,1495,13,9,59,1040,45,357,44,103,265,749,28,612,634,928,396,2006,102,65,913,244,928,79,221,103,1125,564,91,41,1288,1443,29,24,265,102,1497,217,1474,46,368,1730,191,114,2119,1334,297,107,28,603,989,1572,66,93,137,844,325,61,163,1478,63,711,1234,74,22,18,763,75,948,156,13,1761,460,17,1853,615,396,42,61,56,729,35,38,310,587,1152,990,1168,972,2153,311,371,39,18,122,296,1135,1187,38,52,497,59,43,122,1104,2013,467,237,1152,1464,1091,793,1021,86,21,172,726,2086,1034,1947,84,103,283,44,43,17,1020,218,1616,358,1092,15,331,25,988,860,577,95,86,57,135,41,660,670,94,2008,73,1635,1029,1778,764,14,122,1244,1028,80,282,767,76,1711,422,704,24,90,563,158,1001,655,635,341,115,546,70,11,401,459,139,183,63,507,497,28,1062,1507,1026,530,506,859,1048,41,1651,630,133,1453,65,966,443,35,1870,369,77,134,29,180,443,992,1390,1064,438,405,1173,976,1381,108,128,971,1179,1621,324,227,81,317,404,545,129,1623,96,1363,54,65,24,22,546,557,326,1033,1213,945,820,70,1365,1149,442,1115,1156,895,162,57,21,96,31,44,32,795,823,1241,1680,278,13,1334,573,22,859,28,1808,1143,1103,257,27,20,1644,795,1588,81,654,2087,87,530,13,521,57,41,365,1263,610,49,55,78,1042,62,79,1576,64,1706,45,1631,1345,685,1423,66,89,71,393,1902,235,1501,1574,1097,271,55,42,30,88,173,51,1617,429,490,40,1804,1822,1338,106,1130,46,2440,747,1862,893,34,33,42,467,775,67,1220,28,393,16,1685,275,2231,45,5,460,54,6,84,133,78,1958,361,1816,2257,46,789,22,1211,1479,46,2486,266,576,879,906,44,1581,160,362,95,312,137,41,236,263,882,1253,461,100,1282,70,43,1779,38,23,292,2126,733,367,1544,395,159,1021,758,318,943,1738,144,236,86,1695,1047,165,27,730,1185,1782,1415,976,48,2092,269,736,894,28,1175,428,77,1232,486,820,22,1382,1633,134,2074,46,274,140,219,30,60,106,2525,11,2349,320,46,69,1307,235,30,1034,380,832,1528,1540,58,1319,116,502,23,1138,29,174,622,519,769,1064,691,1615,1065,1004,473,1734,1833,50,1217,39,46,937,54,119,1797,1507,602,73,900,732,606,1250,279,1121,242,83,264,69,507,46,1754,22,65,27,570,401,343,377,721,802,1650,455,1095,132,36,49,805,71,960,300,614,410,22,46,745,1485,347,16,868,1079,170,1655,1150,1482,1958,1395,968,22,270,1512,19,1919,20,215,47,594,211,1065,24,892,26,174,65,521,839,1260,1076,263,46,40,61,32,41,68,47,285,1497,96,1449,139,1815,97,946,916,1536,37,1424,450,15,120,843,76,1665,60,1968,1240,121,1001,449,272,16,1410,809,38,225,1230,75,938,49,2524,1575,708,123,411,293,1196,1169,1580,777,1156,1019,1435,13,985,30,1149,62,2283,60,1627,310,1052,37,209,1918,259,393,316,74,2217,1141,195,244,727,1678,1080,932,177,1853,187,1789,1282,561,116,21,339,587,52,330,266,67,16,758,1148,1730,727,542,805,925,1315,999,222,63,84,882,1190,50,59,1331,632,147,33,62,973,38,1313,18,861,55]};
+
+/* ---------- vote ---------- */
+(function(){const lc=(n,k)=>lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1);const binTail=(n,p,need)=>{let s=0;for(let j=Math.max(0,need);j<=n;j++)s+=Math.exp(lc(n,j)+j*Math.log(p)+(n-j)*Math.log(1-p));return Math.min(1,s)};
+const u=()=>{const M=+$('vM').value,p=+$('vP').value;$('vK').max=M;let k=Math.min(+$('vK').value,M);$('vMv').textContent=M;$('vPv').textContent=f2(p);$('vKv').textContent=k;
+const need=Math.floor(M/2)+1,o=M-k;let P;if(k<=1)P=binTail(M,p,need);else P=p*binTail(o,p,need-k)+(1-p)*binTail(o,p,need);
+$('vOne').textContent=f3(p);$('vAll').textContent=f3(P);$('vAll').style.color=P>p+0.001?C.ok:P<p-0.001?C.bad:C.ink;
+$('vMsg').textContent=p<0.5?'Modele mai slabe decât o monedă: votul amplifică greșelile. Cu cât sunt mai multe, cu atât e mai rău.':k>=need?'Copiile formează singure majoritatea, deci ansamblul e la fel de bun ca un singur model. Fără diversitate nu câștigi nimic.':P>p?'Modelele sunt diferite și mai bune decât întâmplarea: votul are dreptate mai des decât fiecare.':'Un singur model: nimic de câștigat.'};
+['vM','vP','vK'].forEach(i=>$(i).oninput=u);u();})();
+
+/* ---------- bootstrap ---------- */
+(function(){let rnd=seeded(7);const N=20;const show=()=>{const cnt=Array(N).fill(0);for(let i=0;i<N;i++)cnt[Math.floor(rnd()*N)]++;const oob=cnt.filter(c=>c===0).length;
+$('bChips').innerHTML=cnt.map((c,i)=>'<div class="chip'+(c===0?' x':c>1?' m':'')+'">C'+(i+1)+(c>1?' ×'+c:'')+'</div>').join('');
+$('bMsg').innerHTML='Din 20 de clienți, <b>'+oob+'</b> n-au fost trași ('+Math.round(oob/N*100)+'%). Ei sunt out-of-bag: arborele ăsta nu i-a văzut, deci poate fi verificat pe ei.'};
+$('bOne').onclick=show;$('bMany').onclick=()=>{let tot=0;for(let r=0;r<1000;r++){const s=new Set();for(let i=0;i<N;i++)s.add(Math.floor(rnd()*N));tot+=N-s.size}$('bMsg').innerHTML='După 1000 de eșantioane, în medie <b>'+f2(tot/1000/N*100)+'%</b> dintre clienți rămân out-of-bag. Teoria spune ~36,8% (adică 1/e).'};show();})();
+
+/* ---------- RF curve ---------- */
+(function(){const c=D.rf_curve;mk('cRf',{type:'line',data:{labels:c.map(r=>r[0]),datasets:[{data:c.map(r=>r[1]),borderColor:C.acc,borderWidth:2,pointRadius:3}]},options:{scales:{x:ax('câți arbori'),y:ax('PR-AUC',{min:0.2,max:0.7})}}});
+$('rfMsg').innerHTML='Un singur arbore: <b>'+f3(c[0][1])+'</b>. Cu '+c[c.length-1][0]+' de arbori: <b>'+f3(c[c.length-1][1])+'</b>. Scorul crește repede la început, apoi se stabilizează. Mai mulți arbori nu strică, doar costă timp.';})();
+
+/* ---------- GB eta ---------- */
+(function(){let e='0.1';const ch=mk('cGb',{type:'line',data:{labels:[],datasets:[{data:[],borderColor:C.acc,borderWidth:2,pointRadius:0},{type:'scatter',data:[],pointRadius:7,backgroundColor:C.org}]},options:{scales:{x:ax('numărul de arbori',{type:'linear',min:0,max:600}),y:ax('log-loss pe validare (mic = bine)')}}});
+const u=()=>{const g=D.gb[e];const xs=g.loss.map((_,i)=>1+i*5);if(ch){ch.data.datasets[0].data=g.loss.map((v,i)=>({x:xs[i],y:v}));const bi=Math.min(g.loss.length-1,Math.round((g.best-1)/5));ch.data.datasets[1].data=[{x:g.best,y:g.loss[bi]}];ch.update()}
+document.querySelectorAll('.eta').forEach(b=>b.classList.toggle('on',b.dataset.e===e));$('gbMsg').innerHTML='Cu η = '+e.replace('.',',')+', minimul vine la <b>'+g.best+'</b> de arbori (η × arbori ≈ '+f2(+e*g.best)+'). După minim, pierderea crește: modelul începe să tocească.'};
+document.querySelectorAll('.eta').forEach(b=>b.onclick=()=>{e=b.dataset.e;u()});u();})();
+
+/* ---------- voting ---------- */
+(function(){const V=D.vote_rows;const u=()=>{const on=[...document.querySelectorAll('.vm')].map(c=>c.checked);const n=on.filter(Boolean).length;
+let h='<tr><th>Client</th><th>Logistică</th><th>SVM</th><th>HistGB</th><th>Media (vot)</th><th>A acceptat?</th></tr>';
+V.forEach((r,i)=>{const avg=n?r.slice(0,3).reduce((s,x,j)=>s+(on[j]?x:0),0)/n:NaN;h+='<tr><td>#'+(i+1)+'</td>'+[0,1,2].map(j=>'<td style="opacity:'+(on[j]?1:.35)+'">'+f2(r[j])+'</td>').join('')+'<td><b>'+(n?f2(avg):'—')+'</b></td><td>'+(r[3]?'<span class="pill ok">da</span>':'<span class="pill acc">nu</span>')+'</td></tr>'});$('vT').innerHTML=h};
+document.querySelectorAll('.vm').forEach(c=>c.onchange=u);u();})();
+
+/* ---------- log target ---------- */
+(function(){const Y=D.mnt;let lg=false;const ch=mk('cLg',{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:C.acc,borderRadius:3}]},options:{scales:{x:ax(''),y:ax('câți clienți')}}});
+const skew=a=>{const m=a.reduce((s,x)=>s+x,0)/a.length,sd=Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/a.length);return a.reduce((s,x)=>s+((x-m)/sd)**3,0)/a.length};
+const u=()=>{const a=lg?Y.map(v=>Math.log1p(v)):Y;const mn=Math.min(...a),mx=Math.max(...a),B=20,w=(mx-mn)/B;const h=Array(B).fill(0);a.forEach(v=>h[Math.min(B-1,Math.floor((v-mn)/w))]++);
+if(ch){ch.data.labels=h.map((_,i)=>lg?f2(mn+i*w):n0(mn+i*w));ch.data.datasets[0].data=h;ch.options.scales.x.title.text=lg?'log(1 + MntTotal)':'MntTotal (bani)';ch.update()}
+$('lgMsg').innerHTML='Skew: <b>'+f2(skew(a))+'</b>. '+(lg?'Pe scara log, coada din dreapta dispare, dar pe stânga apare alta. Modelul ar optimiza eroarea relativă, nu banii.':'Asimetrie moderată: mulți cheltuie puțin, câțiva mult.');$('lgO').classList.toggle('on',!lg);$('lgL').classList.toggle('on',lg)};
+$('lgO').onclick=()=>{lg=false;u()};$('lgL').onclick=()=>{lg=true;u()};u();})();
+
+/* ---------- grid vs random ---------- */
+(function(){const cv=$('cvRand'),ctx=cv.getContext('2d');let rnd=seeded(3);const W=cv.width,H=cv.height,pad=40;const good=x=>Math.exp(-((x-0.78)**2)/0.004);
+const X=x=>pad+x*(W-2*pad),Y=y=>H-pad-y*(H-2*pad);
+const draw=()=>{ctx.fillStyle=C.card;ctx.fillRect(0,0,W,H);ctx.fillStyle=C.ok+'33';ctx.fillRect(X(0.7),pad,X(0.86)-X(0.7),H-2*pad);
+ctx.fillStyle=C.mute;ctx.font='12px system-ui';ctx.fillText('parametrul important (ex. min_samples_leaf) →',pad,H-12);ctx.save();ctx.translate(14,H-pad);ctx.rotate(-Math.PI/2);ctx.fillText('parametrul neimportant →',0,0);ctx.restore();
+const g=[1/6,1/2,5/6];let gb=0;g.forEach(a=>g.forEach(b=>{ctx.fillStyle=C.org;ctx.fillRect(X(a)-5,Y(b)-5,10,10);gb=Math.max(gb,good(a))}));
+let rb=0;const xs=new Set();for(let i=0;i<9;i++){const a=rnd(),b=rnd();xs.add(a.toFixed(2));rb=Math.max(rb,good(a));ctx.beginPath();ctx.arc(X(a),Y(b),6,0,7);ctx.fillStyle=C.acc;ctx.fill()}
+$('rMsg').innerHTML='Grid: doar <b>3</b> valori diferite pentru parametrul important, cel mai bun scor găsit '+f2(gb)+'. Aleator: <b>9</b> valori diferite, cel mai bun scor '+f2(rb)+'. Când doar unul dintre parametri contează, căutarea aleatoare îl explorează mai bine.'};
+$('rNew').onclick=draw;draw();})();
+
+/* ---------- bootstrap CI ---------- */
+(function(){const T=D.test;const ap=AP(T);$('ciAP').textContent=f3(ap);const ch=mk('cCi',{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3}]},options:{scales:{x:ax('PR-AUC pe un eșantion bootstrap'),y:ax('de câte ori')}}});
+$('ciRun').onclick=()=>{const rnd=seeded(11),n=T.length,vals=[];for(let b=0;b<2000;b++){const s=[];for(let i=0;i<n;i++)s.push(T[Math.floor(rnd()*n)]);vals.push(AP(s))}vals.sort((a,b)=>a-b);const lo=vals[Math.floor(0.025*2000)],hi=vals[Math.floor(0.975*2000)];
+const B=24,mn=vals[0],mx=vals[vals.length-1],w=(mx-mn)/B,h=Array(B).fill(0);vals.forEach(v=>h[Math.min(B-1,Math.floor((v-mn)/w))]++);
+if(ch){ch.data.labels=h.map((_,i)=>f2(mn+(i+0.5)*w));ch.data.datasets[0].data=h;ch.data.datasets[0].backgroundColor=h.map((_,i)=>{const c=mn+(i+0.5)*w;return c>=lo&&c<=hi?C.acc:C.gray});ch.update()}
+$('ciLo').textContent=f3(lo);$('ciHi').textContent=f3(hi);$('ciMsg').innerHTML='În 95% din reeșantionări, PR-AUC a ieșit între <b>'+f3(lo)+'</b> și <b>'+f3(hi)+'</b>. Intervalul e larg pentru că testul are doar 63 de clienți care acceptă.'};})();
+
+/* ---------- lift ---------- */
+(function(){const T=[...D.test].sort((a,b)=>b[0]-a[0]),P=T.filter(r=>r[1]).length,n=T.length;const curve=[{x:0,y:0}];let tp=0;T.forEach((r,i)=>{tp+=r[1];curve.push({x:(i+1)/n*100,y:tp/P*100})});
+const ch=mk('cLift',{type:'scatter',data:{datasets:[{type:'line',data:curve,borderColor:C.acc,borderWidth:2,pointRadius:0},{type:'line',data:[{x:0,y:0},{x:100,y:100}],borderColor:C.gray,borderDash:[4,4],borderWidth:1,pointRadius:0},{data:[],pointRadius:8,backgroundColor:C.org}]},options:{scales:{x:ax('% clienți contactați',{type:'linear',min:0,max:100}),y:ax('% din cei care acceptă găsiți',{min:0,max:100})}}});
+const u=()=>{const pc=+$('lf').value;$('lfV').textContent=pc+'%';const k=Math.round(n*pc/100);const f=T.slice(0,k).filter(r=>r[1]).length/P*100;$('lfF').textContent=Math.round(f)+'%';$('lfL').textContent=f2(f/pc);if(ch){ch.data.datasets[2].data=[{x:pc,y:f}];ch.update()}};$('lf').oninput=u;u();})();
+
+/* ---------- importance ---------- */
+(function(){let m='c';const ch=mk('cImp',{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:C.acc,borderRadius:4,barThickness:18}]},options:{indexAxis:'y',scales:{x:ax(''),y:{grid:{display:false}}}}});
+const u=()=>{const I=m==='c'?D.imp_c:D.imp_r;if(ch){ch.data.labels=I.map(r=>r[0]);ch.data.datasets[0].data=I.map(r=>r[1]);ch.options.scales.x.title.text=m==='c'?'cât scade PR-AUC când amesteci coloana':'cu cât crește MAE când amesteci coloana';ch.update()}
+$('iMsg').innerHTML=m==='c'?'Contează cel mai mult: <b>'+I[0][0]+'</b>, <b>'+I[1][0]+'</b>, <b>'+I[2][0]+'</b>. Clienții recenți, care au mai acceptat oferte și cumpără carne, răspund mai des.':'<b>Income</b> domină: fără el, MAE crește cu <b>'+n0(I[0][1])+'</b>. Apoi vechimea și copiii.';$('iC').classList.toggle('on',m==='c');$('iR').classList.toggle('on',m==='r')};
+$('iC').onclick=()=>{m='c';u()};$('iR').onclick=()=>{m='r';u()};u();})();
+
+/* ---------- profit ---------- */
+(function(){const pr=(S,t)=>{let tp=0,c=0;S.forEach(([p,y])=>{if(p>=t){c++;tp+=y}});return{v:(11*tp-3*c)/S.length,c}};const ts=[];for(let t=0;t<=0.95;t+=0.01)ts.push(+t.toFixed(2));
+const ch=mk('cPf',{type:'line',data:{labels:ts,datasets:[{data:ts.map(t=>pr(D.oof,t).v),borderColor:C.acc,borderWidth:2,pointRadius:0},{data:ts.map(t=>pr(D.test,t).v),borderColor:C.org,borderWidth:2,pointRadius:0,borderDash:[6,4]},{type:'scatter',data:[],pointRadius:7,backgroundColor:C.ink}]},options:{scales:{x:ax('prag',{ticks:{maxTicksLimit:10}}),y:ax('profit pe client')}}});
+const u=()=>{const t=+$('pf').value;$('pfV').textContent=f2(t);const a=pr(D.oof,t),b=pr(D.test,t);$('pfT').textContent=(a.v<0?'−':'+')+f2(Math.abs(a.v));$('pfE').textContent=(b.v<0?'−':'+')+f2(Math.abs(b.v));$('pfN').textContent=b.c+' / 412';
+if(ch){ch.data.datasets[2].data=[{x:t.toFixed(2),y:a.v}];ch.update()}$('pfMsg').textContent=t<0.05?'Prag 0: îi suni pe toți și pierzi, pentru că doar 15% acceptă, iar 0,15 × 11 < 3.':t>0.85?'Prag foarte mare: suni puțini, deci câștigi puțin.':'Pe curba albastră (train) cauți vârful. Curba portocalie (test) doar confirmă.'};$('pf').oninput=u;u();})();
+</script>
+</body>
+</html>

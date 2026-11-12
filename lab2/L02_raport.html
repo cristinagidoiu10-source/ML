@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raport L02</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<style>
+:root { --bg:#fafaf8; --fg:#1f2328; --muted:#59636e; --border:#d8dee4; --code-bg:#f3f4f6; --accent:#0b6bcb; }
+body { background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; margin:0; }
+main { max-width:960px; margin:0 auto; padding:24px 16px 80px; }
+h1 { font-size:1.8rem; border-bottom:2px solid var(--border); padding-bottom:.3em; }
+h2 { margin-top:2.2em; border-bottom:1px solid var(--border); padding-bottom:.2em; }
+h3 { margin-top:1.4em; color:#24292f; }
+code { background:var(--code-bg); padding:.1em .35em; border-radius:4px; font-size:.9em; }
+pre { position:relative; background:#f6f8fa; border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto; }
+pre code { background:none; padding:0; font-size:.85em; line-height:1.45; }
+pre .copy { position:absolute; top:8px; right:8px; font:12px system-ui; padding:4px 10px; border:1px solid var(--border);
+            border-radius:6px; background:#fff; cursor:pointer; }
+pre .copy:hover { border-color:var(--accent); color:var(--accent); }
+table { border-collapse:collapse; margin:1em 0; display:block; overflow-x:auto; }
+th, td { border:1px solid var(--border); padding:6px 10px; text-align:left; }
+th { background:#eef1f4; }
+blockquote { margin:1em 0; padding:.5em 1em; border-left:4px solid var(--accent); background:#eef5fc; color:#24292f; }
+hr { border:none; border-top:1px solid var(--border); margin:2em 0; }
+</style></head>
+<body><main>
+<h1>Raport L02 — Explorarea, curățarea și primele modele (T8 Customer Personality Analysis)</h1>
+<p>Analiză pe fiecare TODO din <code>L02_Explorare_Modele (1).ipynb</code>. Pentru fiecare: <strong>verdict</strong>, <strong>ce e greșit și de ce</strong>, <strong>codul de înlocuit</strong> (din notebook-ul tău) și <strong>codul corect</strong> (copiezi toată celula).</p>
+<p>Legendă: ✅ corect · ⚠️ merge, dar are probleme de logică / curățenie · ❌ greșit sau necompletat</p>
+<blockquote>
+<p>Cifrele din acest raport le-am obținut rulând codul corectat pe <code>lab2/data/raw.csv</code> (scikit-learn 1.9). Pe Colab pot ieși mici diferențe la a treia zecimală. Dacă aplici curățarea corectată (TODO 5), <strong>toate scorurile se schimbă puțin</strong>, pentru că setul are acum 2058 de rânduri, nu 2054. Rulează din nou notebook-ul de sus până jos și copiază în observații cifrele care îți ies ție.</p>
+</blockquote>
+<h2>Rezumat</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>TODO</th>
+<th>Verdict</th>
+<th>Problema principală</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Setul de date și problema</td>
+<td>❌</td>
+<td><code>TARGET_R = ""</code>, spațiu la finalul <code>MY_NAME</code>, lipsește celula de text cu povestea</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Încărcarea datelor</td>
+<td>⚠️</td>
+<td>nu salvează <code>raw.csv</code> în <code>MY_DIR</code>, variabila se numește <code>customer</code>, nu <code>df</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Structura tabelului</td>
+<td>⚠️</td>
+<td><code>df.sample</code> nu se afișează, <code>if 'df' not in locals()</code> e fragil</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Observații structură</td>
+<td>❌</td>
+<td><code>Year_Birth</code> nu e cod ascuns; ai ratat <code>666666</code>, <code>Absurd</code>/<code>YOLO</code>, duplicatele ascunse de <code>ID</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Celula AI</td>
+<td>❌</td>
+<td>e copiată de la alt set de date (Obesity, UCI 544)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Întrebarea Penguins</td>
+<td>❌</td>
+<td>necompletată</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Statistici descriptive</td>
+<td>⚠️</td>
+<td><strong>modifică <code>df</code> brut</strong> (adaugă <code>MntTotal</code>)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Observații statistici</td>
+<td>❌</td>
+<td>răspunsuri incomplete sau greșite (24 de lipsuri, nu una)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Grafice</td>
+<td>✅ / ⚠️</td>
+<td>corecte; doar modifică <code>df</code> și au comentarii lăsate de AI</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Lista de decizii</td>
+<td>❌</td>
+<td>necompletată</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Curățarea</td>
+<td>⚠️</td>
+<td><code>666666</code> ar trebui să devină <code>NaN</code>, <code>2n Cycle</code> = Master, dată de referință fixă</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Întrebări Penguins (arbore, MAE)</td>
+<td>❌</td>
+<td>necompletate</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Primele modele</td>
+<td>⚠️</td>
+<td>bloc duplicat, tabelele nu se afișează, nume de variabile luate din exemplu, <em>leakage</em> la regresie</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Observații modele</td>
+<td>❌</td>
+<td>necompletate</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Final</td>
+<td>❌</td>
+<td>lipsește <code>raw.csv</code> din <code>MY_DIR</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TODO 0 — Setul de date și problema (celula 5) ❌</h2>
+<h3>Ce e greșit</h3>
+<ol>
+<li><strong><code>TARGET_R = ""</code></strong>: ținta de regresie nu e completată, deși o folosești mai jos (<code>MntTotal</code>). Mai târziu o redefinești ca <code>target_r</code> / <code>TARGET_R</code>. Constanta trebuie definită <strong>o singură dată</strong>, sus, și apoi folosită peste tot.</li>
+<li><strong><code>MY_NAME = "Customer Personality Analysis "</code></strong>: are un <strong>spațiu la final</strong>. Numele intră în căi de fișiere: în output se vede <code>L02_Customer Personality Analysis _first_models.csv</code>. În L03 ai scris numele fără spațiu, deci cele două laboratoare caută în <strong>foldere diferite</strong>. Laboratorul cere explicit ca <code>MY_NAME</code> să fie identic.</li>
+<li>Lipsește celula de text cerută: detaliile setului, o linie <code>---</code> și propoziția <em>„Prezic X pentru Y, ca să Z”</em>.</li>
+</ol>
+<h3>Cod de înlocuit</h3>
+<pre><code class="language-python">MY_PROJECT_NUMBER = &quot;8&quot;
+MY_NAME = &quot;Customer Personality Analysis &quot;            # ex. &quot;online_shoppers&quot;
+TARGET_C = &quot;Response&quot;             # daca clientul a acceptat oferta din ultima campanie
+TASK_C = &quot;classification&quot;               # &quot;classification&quot;
+
+TARGET_R = &quot;&quot;
+TASK_R = &quot;regression&quot;               # &quot;regression&quot;
+</code></pre>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># TODO:
+MY_PROJECT_NUMBER = &quot;8&quot;
+MY_NAME = &quot;Customer Personality Analysis&quot;   # fara spatiu la final: numele apare in caile fisierelor
+TARGET_C = &quot;Response&quot;                       # 1 = clientul a acceptat oferta din ultima campanie, 0 = nu
+TASK_C = &quot;classification&quot;
+
+TARGET_R = &quot;MntTotal&quot;                       # suma cheltuita in 2 ani pe toate produsele (o construim la curatare)
+TASK_R = &quot;regression&quot;
+MNT_COLS = [&quot;MntWines&quot;, &quot;MntFruits&quot;, &quot;MntMeatProducts&quot;, &quot;MntFishProducts&quot;, &quot;MntSweetProducts&quot;, &quot;MntGoldProds&quot;]
+
+MY_DIR = f&quot;{DATA_DIR}/{MY_NAME}&quot;
+os.makedirs(MY_DIR, exist_ok=True)
+print(MY_PROJECT_NUMBER, MY_NAME, TARGET_C, TARGET_R, MY_DIR)
+</code></pre>
+<p><code>MNT_COLS</code> stă aici pentru că lista apare de 5 ori în notebook. Definită o singură dată, nu riști să o scrii diferit într-un loc.</p>
+<h3>Celula de text (o creezi sub celula de cod)</h3>
+<pre><code class="language-markdown">**Proiect 8 — Customer Personality Analysis**
+Set de date: [Kaggle — imakash3011/customer-personality-analysis](https://www.kaggle.com/datasets/imakash3011/customer-personality-analysis), fișierul `marketing_campaign.csv` (2240 clienți × 29 coloane, separator TAB).
+Povestea: un lanț de magazine pregătește o nouă campanie de oferte și vrea să știe ce clienți să contacteze și cât valorează fiecare client.
+
+---
+- **Clasificare:** prezic dacă un client acceptă oferta campaniei (`Response`) pentru fiecare client din baza de date, ca să trimitem oferta doar celor care au șanse reale să o accepte.
+- **Regresie:** prezic suma cheltuită de un client în ultimii 2 ani (`MntTotal` = suma coloanelor `Mnt*`), ca să știm cât valorează fiecare client.
+</code></pre>
+<hr />
+<h2>TODO 1 — Încărcarea datelor (celula 9) ⚠️</h2>
+<h3>Ce e greșit</h3>
+<ol>
+<li>TODO-ul cere <code>f"{MY_DIR}/raw.csv"</code>. Tu salvezi în <code>f"{DATA_DIR}/customer/customer.csv"</code>. Celula de verificare de la final o confirmă: în <code>MY_DIR</code> există doar <code>clean.csv</code>, <strong>nu și <code>raw.csv</code></strong>.</li>
+<li>TODO-ul cere un DataFrame numit <strong><code>df</code></strong>. Tu îl numești <code>customer</code>, iar în celula următoare ai nevoie de <code>if 'df' not in locals(): df = customer.copy()</code>, un ocoliș care ascunde problema.</li>
+<li>A rămas comentariul <code># EXAMPLE (Penguins)</code>, care e înșelător într-o celulă TODO.</li>
+<li>Nu afișezi coloana țintă (pasul 4 din TODO).</li>
+</ol>
+<h3>Cod de înlocuit</h3>
+<pre><code class="language-python"># EXAMPLE (Penguins)
+
+import kagglehub
+
+CUSTOMER_CSV = f&quot;{DATA_DIR}/customer/customer.csv&quot;
+
+if os.path.exists(CUSTOMER_CSV):
+    customer = pd.read_csv(CUSTOMER_CSV)
+    ...
+print(customer.shape)
+customer.head(3)
+</code></pre>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># TODO: incarcarea setului de date
+import kagglehub
+
+RAW_CSV = f&quot;{MY_DIR}/raw.csv&quot;
+if os.path.exists(RAW_CSV):                                    # exista deja in Drive -&gt; il citim de acolo
+    df = pd.read_csv(RAW_CSV)
+    print(&quot;Loaded from Drive&quot;)
+else:                                                          # nu exista -&gt; il descarcam o singura data si il salvam
+    path = kagglehub.dataset_download(&quot;imakash3011/customer-personality-analysis&quot;)   # intoarce un FOLDER
+    df = pd.read_csv(f&quot;{path}/marketing_campaign.csv&quot;, sep=&quot;\t&quot;)                     # fisierul original e separat prin TAB
+    df.to_csv(RAW_CSV, index=False)                                                  # copia din Drive e separata prin virgula
+    print(&quot;Downloaded and saved to Drive&quot;)
+
+print(df.shape)
+print(f&quot;target {TARGET_C}:&quot;, sorted(df[TARGET_C].unique()))
+df.head(3)
+</code></pre>
+<p><strong>De ce <code>sep="\t"</code> doar la descărcare:</strong> fișierul de pe Kaggle e separat prin TAB, dar <code>to_csv</code> scrie cu virgulă. La a doua rulare citești copia ta, deci nu mai e nevoie de <code>sep</code>.</p>
+<hr />
+<h2>TODO 2 — Structura tabelului (celula 16) ⚠️</h2>
+<h3>Ce e greșit</h3>
+<ol>
+<li><code>if 'df' not in locals() and 'customer' in locals(): df = customer.copy()</code> este un ocoliș pentru problema de la TODO 1. Dacă <code>df</code> există deja dintr-o rulare anterioară (de exemplu cu <code>MntTotal</code> adăugat), <strong>nu se mai reîncarcă</strong>. Exact asta s-a întâmplat la tine: lista <code>numeric</code> din output conține <code>MntTotal</code>, o coloană care <strong>nu există</strong> în setul original.</li>
+<li><code>df.sample(5, random_state=SEED)</code> nu e ultima linie din celulă, deci <strong>nu se afișează</strong>. Ultima linie este <code>print(df["Dt_Customer"].dtype)</code>. Pentru tabele la mijlocul celulei folosește <code>display(...)</code>.</li>
+<li>Bucla <code>for c in cat_cols</code> afișează și cele 663 de date distincte din <code>Dt_Customer</code>, adică zgomot. Afișează valorile unice doar pentru coloanele cu puține categorii.</li>
+<li>Lipsește verificarea care contează cel mai mult la setul tău: <strong>duplicatele fără <code>ID</code></strong>. Cu <code>ID</code> inclus, fiecare rând e unic (0 duplicate). Fără <code>ID</code> apar 182 de rânduri identice. <code>ID</code> ascunde duplicatele.</li>
+</ol>
+<h3>Cod de înlocuit</h3>
+<p>Toată celula, de la <code>if 'df' not in locals() ...</code> până la <code>print(df["Dt_Customer"].dtype)</code>.</p>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># TODO: Analiza structurii setului de date
+print(&quot;shape:&quot;, df.shape)
+df.info()
+
+# Separarea coloanelor
+num_cols = df.select_dtypes(include=&quot;number&quot;).columns.tolist()
+cat_cols = df.select_dtypes(exclude=&quot;number&quot;).columns.tolist()
+print(&quot;\nnumeric:&quot;, num_cols)
+print(&quot;text / categorical:&quot;, cat_cols)
+
+# Cardinalitate, duplicate si coloane speciale
+print(&quot;\ndistinct values per column:\n&quot;, df.nunique())
+print(&quot;\nduplicated rows:&quot;, df.duplicated().sum())
+print(&quot;duplicated rows without ID:&quot;, df.drop(columns=[&quot;ID&quot;]).duplicated().sum())   # ID face fiecare rand unic si ascunde duplicatele
+print(&quot;constant columns:&quot;, [c for c in df.columns if df[c].nunique(dropna=False) == 1])
+print(&quot;ID-like columns:&quot;, [c for c in df.columns if df[c].nunique() == len(df)])
+
+for c in cat_cols:
+    if df[c].nunique() &lt;= 20:                                  # Dt_Customer are 663 de valori: nu le afisam pe toate
+        print(f&quot;\n{c}:&quot;, df[c].value_counts().to_dict())
+
+# valori imposibile / coduri ascunse in coloanele numerice
+print(&quot;\nsmallest Year_Birth:&quot;, df[&quot;Year_Birth&quot;].nsmallest(4).tolist())
+print(&quot;largest Income:&quot;, df[&quot;Income&quot;].nlargest(3).tolist())
+print(&quot;Dt_Customer dtype:&quot;, df[&quot;Dt_Customer&quot;].dtype)
+
+display(df.sample(5, random_state=SEED))
+</code></pre>
+<p>Am folosit <code>value_counts()</code> în loc de <code>unique()</code> pentru că arată și <strong>câte</strong> rânduri are fiecare categorie. Așa vezi imediat că <code>Absurd</code>, <code>YOLO</code> și <code>Alone</code> au câte 2–3 rânduri.</p>
+<hr />
+<h2>TODO 2 — Observații structură (celula 17) ❌</h2>
+<h3>Ce e greșit în răspunsul tău</h3>
+<ul>
+<li><em>„Year_Birth este un cod ascuns”</em>: <strong>nu</strong>. Un cod ascuns este o valoare care <strong>înseamnă „lipsă”</strong>, scrisă ca valoare normală („?”, -1, 0, 999). 1893, 1899 și 1900 sunt <strong>valori imposibile</strong> (erori de introducere). Le tratăm la fel (devin <code>NaN</code>), dar nu e același concept.</li>
+<li>Ai ratat <strong>codul ascuns real</strong>: <code>Income = 666666</code>. E o valoare de umplere tipică („6666…”), nu un venit real. Următorul venit ca mărime este 162397.</li>
+<li>Ai ratat categoriile fără sens din <code>Marital_Status</code>: <code>Absurd</code>, <code>YOLO</code> (nu sunt stări civile) și <code>Alone</code> (= <code>Single</code>).</li>
+<li>La coloane de eliminat lipsește <strong><code>ID</code></strong> (identificator).</li>
+<li>Lipsesc duplicatele: 182 de rânduri identice după ce scoți <code>ID</code>.</li>
+</ul>
+<h3>Răspuns corect (înlocuiește tot textul din celulă)</h3>
+<pre><code class="language-markdown">**Observații:**
+- **Coloane de eliminat:** `ID` (identificator: o valoare diferită pe fiecare rând, nu descrie clientul); `Z_CostContact` și `Z_Revenue` (constante: aceeași valoare, 3 și 11, pe toate rândurile, deci nu aduc informație).
+- **Tip greșit:** `Dt_Customer` (data înscrierii clientului) este citită ca text (`object`). O transformăm în dată, apoi într-un număr: vechimea clientului în zile.
+- **Coduri ascunse și valori imposibile:**
+  - `Income = 666666`: cod de umplere, nu un venit real (următorul venit ca mărime este 162397) → `NaN`;
+  - `Year_Birth` = 1893, 1899, 1900: imposibil (clienți de peste 110 ani în 2014) → `NaN`;
+  - `Marital_Status`: `Absurd` și `YOLO` nu sunt stări civile, iar `Alone` înseamnă `Single`.
+- **Duplicate:** 0 cu `ID`, dar **182 fără `ID`**: același client înregistrat de două ori, cu ID-uri diferite.
+- **Categorii de verificat:** `Education = &quot;2n Cycle&quot;` înseamnă ciclul 2 Bologna, adică **master**, deci nu e un nivel între `Basic` și `Graduation`.
+</code></pre>
+<hr />
+<h2>TODO 2 — Celula AI (celula 19) ❌</h2>
+<p>Celula este <strong>copiată de la alt set de date</strong>: <em>„setul UCI 544 Obesity Levels… 2.111 instanțe și 17 coloane… 24 de rânduri duplicate”</em>. Nimic din ea nu e adevărat pentru setul tău (2240 × 29, 0 duplicate cu <code>ID</code>). Un profesor vede asta imediat și pune la îndoială tot laboratorul.</p>
+<p>Ori o ștergi (dacă nu ai folosit AI la acest pas), ori o completezi cinstit, de exemplu:</p>
+<pre><code class="language-markdown">**Dacă ați folosit un tool AI, completați această celulă**:
+- **Promptul folosit:** „Am un DataFrame pandas `df` cu setul Customer Personality Analysis (2240 × 29; coloane numerice + `Education`, `Marital_Status`, `Dt_Customer` ca text). Vreau să găsesc coloanele constante, coloanele de tip identificator, rândurile duplicate și valorile imposibile. Doar pandas; nu modifica datele, doar afișează. Explică fiecare linie.”
+- **Codul primit:** `select_dtypes`, `nunique`, `duplicated`, `value_counts` și sugestia de a verifica duplicatele fără `ID`.
+- **Rezultat:** `ID` identificator; `Z_CostContact`, `Z_Revenue` constante; 182 de duplicate fără `ID`; `Income = 666666` și `Year_Birth &lt; 1901` imposibile; `Dt_Customer` e text.
+- **Cum am verificat:** am rulat celula și am comparat `df.shape` cu pagina Kaggle (2240 de rânduri); am verificat manual cu `df[&quot;Income&quot;].nlargest(3)`.
+</code></pre>
+<hr />
+<h2>TODO 3 — Întrebarea Penguins (celula 26) ❌</h2>
+<p>Celula a rămas „Răspundeți în această căsuță”. Răspuns:</p>
+<pre><code class="language-markdown">- **Atributul care separă cel mai bine speciile:** `flipper_length_mm` separă Gentoo (media 217 mm) de celelalte (190 și 196 mm); `bill_length_mm` separă Adelie (38,8 mm) de Chinstrap și Gentoo (aprox. 48 mm); `bill_depth_mm` separă din nou Gentoo (15 mm față de 18,3 mm). Niciun atribut nu separă singur toate cele trei specii, dar două luate împreună (lungimea și adâncimea ciocului) o fac aproape perfect (vezi scatter-ul).
+- **Clasele sunt echilibrate?** Moderat: 44% Adelie, 36% Gentoo, 20% Chinstrap; raportul de dezechilibru este 2,24.
+- **Cea mai corelată pereche:** `flipper_length_mm` – `body_mass_g` (Pearson 0,87): pinguinii cu aripi mai lungi sunt mai grei. Cele două coloane aduc în mare parte aceeași informație (redundanță).
+</code></pre>
+<hr />
+<h2>TODO 3 — Statistici descriptive (celula 27) ⚠️</h2>
+<h3>Ce e greșit</h3>
+<ol>
+<li><strong>Modifici <code>df</code>-ul brut:</strong> <code>df["MntTotal"] = df[mnt_cols].sum(axis=1)</code>. De aici vine <code>MntTotal</code> în outputul de la TODO 2 (rulat a doua oară) și <code>BEFORE: (2240, 30)</code> în loc de 29 la curățare. Regula din laborator: explorarea <strong>nu modifică datele</strong>. Toate transformările se fac la curățare, pe o copie.</li>
+<li>Redefinești ținta ca <code>target_c = "Response"</code> / <code>target_r = "MntTotal"</code>, deși <code>TARGET_C</code> există deja. Două nume pentru același lucru înseamnă că le poți schimba pe una și o uiți pe cealaltă.</li>
+<li><code>ID</code> și coloanele constante intră în <code>describe()</code> și <code>numeric_summary</code>. Statisticile pentru <code>ID</code> (media unui identificator) nu au sens. Le scoți o singură dată, la început.</li>
+<li>Lipsește o verificare utilă pentru TODO-ul următor: <strong>diferă rata de răspuns între clienții cu și fără <code>Income</code>?</strong> (Da: 4% față de 15%, vezi mai jos.)</li>
+</ol>
+<p>Restul (funcția <code>numeric_summary</code>, excluderea coloanelor binare de la skew, excluderea <code>Mnt*</code> din corelația cu <code>MntTotal</code>) e <strong>corect și bine gândit</strong>.</p>
+<h3>Cod de înlocuit</h3>
+<p>Toată celula. Liniile problematice sunt:</p>
+<pre><code class="language-python">target_c = &quot;Response&quot;
+...
+mnt_cols = [&quot;MntWines&quot;, ...]
+if &quot;MntTotal&quot; not in df.columns:
+    df[&quot;MntTotal&quot;] = df[mnt_cols].sum(axis=1)
+target_r = &quot;MntTotal&quot;
+</code></pre>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># TODO: Statistici descriptive
+pd.set_option(&quot;display.max_columns&quot;, None)                 # afisam toate coloanele tabelelor (fara &quot;...&quot;)
+
+# lucram pe o copie: fara ID / coloane constante (statisticile lor nu au sens), plus tinta de regresie
+# df ramane neschimbat - transformarile reale se fac la capitolul 5 (curatare)
+df_stats = df.drop(columns=[&quot;ID&quot;, &quot;Z_CostContact&quot;, &quot;Z_Revenue&quot;]).assign(**{TARGET_R: df[MNT_COLS].sum(axis=1)})
+
+# Statistici descriptive generale
+display(df_stats.describe(percentiles=[0.05, 0.25, 0.5, 0.75, 0.95]).round(2))
+display(df_stats.describe(exclude=&quot;number&quot;))
+
+# Tabel cu metrici per coloana
+def numeric_summary(data):
+    rows = {}
+    for c in data.select_dtypes(include=&quot;number&quot;).columns:
+        s = data[c]
+        q1, q3 = s.quantile([0.25, 0.75])
+        iqr = q3 - q1
+        outside = ((s &lt; q1 - 1.5 * iqr) | (s &gt; q3 + 1.5 * iqr)).sum()     # candidati la outlier (IQR)
+        rows[c] = {&quot;missing %&quot;: 100 * s.isna().mean(), &quot;mean&quot;: s.mean(), &quot;median&quot;: s.median(),
+                   &quot;std&quot;: s.std(), &quot;CV&quot;: s.std() / s.mean() if s.mean() != 0 else np.nan,
+                   &quot;min&quot;: s.min(), &quot;max&quot;: s.max(), &quot;IQR&quot;: iqr, &quot;IQR outliers&quot;: outside,
+                   &quot;skew&quot;: s.skew(), &quot;kurtosis&quot;: s.kurt()}
+    return pd.DataFrame(rows).T.round(2)
+
+summary = numeric_summary(df_stats)
+display(summary)
+
+# asimetria, fara coloanele binare 0/1 (acolo skew masoara doar cat de rara e valoarea 1)
+binary = [c for c in summary.index if set(df_stats[c].dropna().unique()) &lt;= {0, 1}]
+skew = summary.drop(index=binary)[&quot;skew&quot;]
+print(&quot;strongly skewed (|skew| &gt; 1):\n&quot;, skew[skew.abs() &gt; 1].sort_values(ascending=False))
+print(&quot;\nmoderately skewed (0.5 - 1):\n&quot;, skew[skew.abs().between(0.5, 1)].sort_values(ascending=False))
+
+# Valori lipsa
+missing = 100 * df_stats.isna().mean()
+print(&quot;\nmissing values (%):\n&quot;, missing[missing &gt; 0].round(2))
+print(&quot;missing Income (rows):&quot;, df_stats[&quot;Income&quot;].isna().sum())
+
+# Lipsa venitului spune ceva despre tinta? (decide daca merita add_indicator in L03)
+no_income = df_stats[&quot;Income&quot;].isna()
+print(f&quot;response rate: without Income = {df_stats.loc[no_income, TARGET_C].mean():.3f} &quot;
+      f&quot;| with Income = {df_stats.loc[~no_income, TARGET_C].mean():.3f}&quot;)
+
+# Distributia tintei de clasificare
+counts = df_stats[TARGET_C].value_counts()
+print(&quot;\ntarget distribution:\n&quot;, df_stats[TARGET_C].value_counts(normalize=True).round(3))
+print(&quot;imbalance ratio (largest / smallest class):&quot;, round(counts.max() / counts.min(), 2))
+
+# Media si mediana fiecarei coloane numerice, pe clase
+num_feats = [c for c in df_stats.select_dtypes(include=&quot;number&quot;).columns if c != TARGET_C]
+print(&quot;\nmean / median of each numeric column per class:&quot;)
+display(df_stats.groupby(TARGET_C)[num_feats].agg([&quot;mean&quot;, &quot;median&quot;]).round(1).T)   # .T: un rand pe atribut, mai usor de citit
+
+# Tabele de contingenta: rata de raspuns pe categorii
+for c in [&quot;Education&quot;, &quot;Marital_Status&quot;]:
+    print(f&quot;{c} x {TARGET_C} (share of responders):&quot;)
+    display(pd.crosstab(df_stats[c], df_stats[TARGET_C], normalize=&quot;index&quot;).round(3))
+
+# Corelatiile Pearson si Spearman
+corr_cols = df_stats.select_dtypes(include=&quot;number&quot;).columns
+pearson = df_stats[corr_cols].corr(method=&quot;pearson&quot;)
+spearman = df_stats[corr_cols].corr(method=&quot;spearman&quot;)
+display(pearson.round(2))
+
+pairs = pearson.where(np.triu(np.ones(pearson.shape, dtype=bool), k=1)).stack()     # fiecare pereche o singura data
+print(&quot;strongest pairs (Pearson):\n&quot;, pairs.abs().sort_values(ascending=False).head(5).round(2))
+
+# corelatia cu tinta de clasificare
+print(f&quot;\ncorrelation with {TARGET_C} (Spearman):\n&quot;,
+      spearman[TARGET_C].drop(TARGET_C).sort_values(key=abs, ascending=False).head(10).round(2))
+
+# corelatia cu tinta de regresie, fara componentele Mnt* (MntTotal e chiar suma lor -&gt; corelatie trivial mare)
+print(f&quot;\ncorrelation with {TARGET_R} (Spearman):\n&quot;,
+      spearman[TARGET_R].drop([TARGET_R] + MNT_COLS).sort_values(key=abs, ascending=False).round(2))
+</code></pre>
+<p><strong>Ce am schimbat și de ce:</strong>
+- <code>df_stats = df.drop(...).assign(...)</code> creează o <strong>copie</strong>; <code>df</code> rămâne exact cum l-ai încărcat. <code>assign(**{TARGET_R: ...})</code> adaugă coloana cu numele din constantă, fără să scrii <code>"MntTotal"</code> de mână.
+- <code>.T</code> la tabelul pe clase: cu 26 de atribute × 2 statistici, tabelul lat nu se poate citi. Transpus, ai un rând pe atribut și două coloane pe clasă.
+- Crosstab-urile cu <code>normalize="index"</code> dau <strong>rata de răspuns</strong> pe categorie (de ex. PhD 20,8% față de Basic 3,7%). Numerele absolute, ca în exemplu, nu se pot compara între categorii de mărimi foarte diferite.
+- Am adăugat corelația cu <code>Response</code>, pentru că întrebarea „ce atribute par legate de țintă?” se referă în primul rând la ținta de clasificare.</p>
+<hr />
+<h2>TODO 3 — Observații statistici (celula 28) ❌</h2>
+<h3>Ce e greșit în răspunsul tău</h3>
+<ul>
+<li><em>„Ce coloane sunt asimetrice? — coloana skew”</em>: nu ai răspuns la întrebare, ai indicat doar unde e răspunsul.</li>
+<li><em>„O valoare este lipsă la Income”</em>: <strong>greșit</strong>. Lipsesc <strong>24 de valori</strong> (1,07% din 2240). 1,07% este procentul, nu o singură valoare.</li>
+<li><em>„Income… deoarece este pozitiv”</em>: semnul nu arată cât de puternică e legătura. Contează <strong>mărimea</strong> corelației, iar semnul arată doar direcția. Mai mult, <code>Income</code> (0,85) nu este nici cea mai mare: <code>NumCatalogPurchases</code> are 0,89.</li>
+<li>Nu ai răspuns la <em>„Ținta este echilibrată?”</em> și <em>„leakage?”</em>.</li>
+</ul>
+<h3>Răspuns corect</h3>
+<pre><code class="language-markdown">**Observații:**
+- **Coloane asimetrice:** puternic asimetrice spre dreapta (skew &gt; 1): `Income` (6,76, din cauza valorii 666666), `NumDealsPurchases` (2,42), toate coloanele `Mnt*` (1,2–2,1), `NumCatalogPurchases` (1,88), `NumWebPurchases` (1,38). Moderat: `MntTotal` (0,86), `NumStorePurchases` (0,70). La toate media este mult peste mediană (de ex. `MntWines`: media 304, mediana 174), deci pentru completarea lipsurilor folosim **mediana**.
+- **Valori lipsă:** doar `Income`: 24 de valori (1,07%). Sunt puține, deci completăm cu mediana, după împărțirea train/test. Rata de răspuns la clienții fără venit este 4% față de 15% la ceilalți, dar e calculată pe doar 24 de rânduri (1 singur client care a răspuns), deci nu e o dovadă solidă. O testăm cu `add_indicator` în L03.
+- **Ținta este echilibrată?** **Nu**: 85,1% nu au răspuns (0), 14,9% au răspuns (1); raportul de dezechilibru este 5,71. Un model care spune mereu „0” are acuratețe 0,85, deci folosim acuratețea echilibrată, F1 și ROC AUC.
+- **Atribute legate de țintă (`Response`):** clienții care au răspuns au `Recency` mai mic (au cumpărat recent: mediana 30 față de 52 de zile), cheltuie mai mult (`MntWines`: 448 față de 152, `MntMeatProducts`: 174 față de 56), au venit mai mare (64k față de 50k), au acceptat mai des campaniile anterioare (`AcceptedCmp*`) și au mai puțini copii (`Kidhome`, `Teenhome`). Rata de răspuns crește cu educația (Basic 3,7% → PhD 20,8%) și e mai mare la Single/Divorced/Widow decât la Married/Together.
+- **Atribute legate de `MntTotal`:** `NumCatalogPurchases` (0,89), `Income` (0,85), `NumStorePurchases` (0,80), `NumWebPurchases` (0,73) pozitiv; `Kidhome` (−0,62) și `NumWebVisitsMonth` (−0,48) negativ.
+- **Leakage:** la regresie, coloanele `Mnt*` **sunt** ținta (`MntTotal` e suma lor) → le scoatem din X. `Num*Purchases` sunt numărate în aceeași perioadă de 2 ani ca `Mnt*`: le știm doar după ce clientul a cheltuit deja. Le discutăm la TODO 6. La clasificare nu am găsit o coloană suspectă: nicio corelație cu `Response` nu e apropiată de ±1 (cea mai mare este `AcceptedCmp5`, ≈ 0,33).
+</code></pre>
+<hr />
+<h2>TODO 3 — Celula AI (celula 30) ⚠️</h2>
+<p>E incompletă („Codul primit” și „Cum am verificat” sunt goale). Completează-o cinstit sau șterge-o. De exemplu: <em>„Cum am verificat: am comparat skew-ul cu poziția mediei față de mediană din <code>describe()</code>: unde media ≫ mediana, skew &gt; 1.”</em></p>
+<hr />
+<h2>TODO 4 — Grafice (celula 35) ✅ / ⚠️</h2>
+<p>Graficele sunt <strong>bune</strong>: fiecare răspunde la o întrebare, au etichete, au distribuția țintei (cu procente) și o caracteristică față de țintă, iar figura se salvează înainte de <code>show</code>. Excluderea <code>Income ≥ 200000</code> doar pentru afișare e o decizie bună.</p>
+<h3>Ce e de corectat</h3>
+<ol>
+<li>Același <code>df["MntTotal"] = ...</code>, care <strong>modifică <code>df</code></strong>. Folosește <code>df_stats</code> din TODO 3.</li>
+<li><code>target_c = "Response"</code> duplică <code>TARGET_C</code>.</li>
+<li>Comentariile de la final (<em>„Dacă primești eroare tick_labels… înlocuiește atunci cu labels=”</em>, <em>„Variabile necesare: FIGURES_DIR…”</em>) sunt <strong>notițe primite de la AI, adresate ție</strong>, nu comentarii de cod. Șterge-le. Dacă vrei să păstrezi explicațiile, mută-le într-o celulă de text.</li>
+</ol>
+<h3>Cod de înlocuit</h3>
+<pre><code class="language-python">target_c = &quot;Response&quot;                                # tinta de clasificare
+classes = sorted(df[target_c].unique())              # [0, 1]
+
+# ne asiguram ca tinta de regresie exista
+mnt_cols = [...]
+if &quot;MntTotal&quot; not in df.columns:
+    df[&quot;MntTotal&quot;] = df[mnt_cols].sum(axis=1)
+</code></pre>
+<p>plus toate aparițiile <code>df[...]</code> → <code>df_stats[...]</code>, <code>target_c</code> → <code>TARGET_C</code>, <code>"MntTotal"</code> → <code>TARGET_R</code>, și cele 4 comentarii de la final.</p>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># TODO: minim 4 plot-uri, fiecare raspunde la o intrebare (titlul)
+fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+classes = sorted(df_stats[TARGET_C].unique())                # [0, 1]
+labels = [&quot;No (0)&quot;, &quot;Yes (1)&quot;]
+colors = [&quot;indianred&quot;, &quot;seagreen&quot;]                           # aceeasi culoare pentru aceeasi clasa in toate graficele
+no_outlier = df_stats[df_stats[&quot;Income&quot;] &lt; 200_000]          # fara 666666, DOAR pentru afisare
+
+# 1) Cum este distribuit venitul clientilor?
+axes[0, 0].hist(no_outlier[&quot;Income&quot;], bins=40, color=&quot;steelblue&quot;)
+axes[0, 0].set(title=&quot;How is customer income distributed?&quot;, xlabel=&quot;Income (per year)&quot;, ylabel=&quot;customers&quot;)
+
+# 2) Cheltuie mai mult clientii care au raspuns la campanie?
+groups = [df_stats.loc[df_stats[TARGET_C] == k, TARGET_R] for k in classes]
+axes[0, 1].boxplot(groups, tick_labels=labels)
+axes[0, 1].set(title=&quot;Do responders spend more in total?&quot;, xlabel=TARGET_C, ylabel=f&quot;{TARGET_R} (2 years)&quot;)
+
+# 3) Este tinta echilibrata?
+vc = df_stats[TARGET_C].value_counts().sort_index()
+axes[0, 2].bar(labels, vc.values, color=colors)
+for i, v in enumerate(vc.values):
+    axes[0, 2].text(i, v, f&quot;{100 * v / vc.sum():.1f}%&quot;, ha=&quot;center&quot;, va=&quot;bottom&quot;)
+axes[0, 2].set(title=f&quot;Is the target ({TARGET_C}) balanced?&quot;, ylabel=&quot;customers&quot;)
+
+# 4) Explica venitul cat cheltuie un client? (si unde sunt cei care au raspuns)
+for k, color, label in zip(classes, colors, labels):
+    part = no_outlier[no_outlier[TARGET_C] == k]
+    axes[1, 0].scatter(part[&quot;Income&quot;], part[TARGET_R], s=10, alpha=0.5, color=color, label=label)
+axes[1, 0].set(title=&quot;Does income drive total spending?&quot;, xlabel=&quot;Income (per year)&quot;, ylabel=f&quot;{TARGET_R} (2 years)&quot;)
+axes[1, 0].legend(title=TARGET_C)
+
+# 5) Ce caracteristici sunt corelate? (doar 12 coloane, ca valorile din celule sa se poata citi)
+heat_cols = [&quot;Income&quot;, &quot;Year_Birth&quot;, &quot;Kidhome&quot;, &quot;Teenhome&quot;, &quot;Recency&quot;, &quot;NumDealsPurchases&quot;, &quot;NumWebPurchases&quot;,
+             &quot;NumCatalogPurchases&quot;, &quot;NumStorePurchases&quot;, &quot;NumWebVisitsMonth&quot;, TARGET_R, TARGET_C]
+corr = df_stats[heat_cols].corr()
+im = axes[1, 1].imshow(corr, cmap=&quot;coolwarm&quot;, vmin=-1, vmax=1)
+axes[1, 1].set_xticks(range(len(heat_cols)), heat_cols, rotation=45, ha=&quot;right&quot;, fontsize=8)
+axes[1, 1].set_yticks(range(len(heat_cols)), heat_cols, fontsize=8)
+for i in range(len(heat_cols)):
+    for j in range(len(heat_cols)):
+        axes[1, 1].text(j, i, f&quot;{corr.iloc[i, j]:.2f}&quot;, ha=&quot;center&quot;, va=&quot;center&quot;, fontsize=6)
+axes[1, 1].set_title(&quot;Which features are correlated? (Pearson)&quot;)
+fig.colorbar(im, ax=axes[1, 1], shrink=0.8)
+
+# 6) Difera rata de raspuns in functie de educatie? (proportii: grupurile au marimi foarte diferite)
+pd.crosstab(df_stats[&quot;Education&quot;], df_stats[TARGET_C], normalize=&quot;index&quot;).plot(
+    kind=&quot;bar&quot;, stacked=True, ax=axes[1, 2], rot=0, color=colors)
+axes[1, 2].set(title=&quot;Does response rate differ by education?&quot;, ylabel=&quot;share of customers&quot;)
+axes[1, 2].legend(labels, title=TARGET_C)
+
+plt.tight_layout()
+plt.savefig(f&quot;{FIGURES_DIR}/L02_{MY_NAME}_explore.png&quot;, dpi=150, bbox_inches=&quot;tight&quot;)   # salvam INAINTE de show
+plt.show()
+</code></pre>
+<hr />
+<h2>TODO 5 — Lista de decizii (celula 43) ❌</h2>
+<p>Celula e necompletată. TODO-ul cere deciziile <strong>înainte</strong> de cod:</p>
+<pre><code class="language-markdown">**Lista de decizii:**
+1. Elimin `ID`: identificator, nu descrie clientul.
+2. Elimin `Z_CostContact` și `Z_Revenue`: constante (3 și 11 pe toate rândurile).
+3. Elimin duplicatele **după** ce scot `ID`: 182 de rânduri identice = același client înregistrat de două ori. Dacă le păstrez, același client poate ajunge și în train, și în test, iar scorul iese prea optimist.
+4. `Income = 666666` → `NaN`: cod de umplere, nu un venit real. Păstrez rândul (are țintă validă) și completez venitul mai târziu, din train.
+5. `Year_Birth &lt; 1920` (1893, 1899, 1900) → `NaN`: valori imposibile; păstrez rândurile din același motiv.
+6. `Marital_Status`: `Alone` → `Single` (același înțeles); `Absurd`, `YOLO` → `Other` (răspunsuri fără sens, 4 rânduri).
+7. `Education`: `2n Cycle` → `Master`: „2n Cycle” este ciclul 2 Bologna, adică master. Altfel aș avea două categorii pentru același nivel, iar ordinea (L03) ar ieși greșită.
+8. `Dt_Customer`: text → dată → `Customer_Days` = câte zile au trecut de la înscriere până la 31.12.2014 (o dată fixă, după ultima înscriere din set: 29.06.2014).
+9. Construiesc ținta de regresie `MntTotal` = suma celor 6 coloane `Mnt*`.
+10. **Nu** completez lipsurile din `Income` / `Year_Birth` acum: completarea învață o mediană, deci se face doar pe train (în pipeline).
+</code></pre>
+<hr />
+<h2>TODO 5 — Curățarea (celula 44) ⚠️</h2>
+<h3>Ce e greșit</h3>
+<ol>
+<li><strong>Ștergi rândurile cu <code>Income &gt; 600_000</code> și <code>Year_Birth &lt; 1920</code>.</strong> Laboratorul spune: <em>„valori lipsă codificate (…, 0 imposibil) → le transformăm în <code>NaN</code>”</em>. <code>666666</code> este exact un cod pentru „lipsă”. Ștergând rândul, pierzi și <code>Response</code> și celelalte 25 de coloane, care sunt valide. Corect: <code>NaN</code> și completare din train.</li>
+<li><strong><code>dt.max()</code> ca dată de referință</strong> depinde de date. Pe un client nou (de exemplu înscris în 2015), <code>dt.max()</code> se schimbă, deci și semnificația coloanei <code>Customer_Days</code>. O dată fixă (<code>2014-12-31</code>) dă aceeași valoare indiferent ce rânduri ai.</li>
+<li><strong><code>pd.to_datetime(..., dayfirst=True)</code></strong> ghicește formatul. <code>format="%d-%m-%Y"</code> e explicit și dă eroare dacă apare o dată cu alt format, în loc să o interpreteze greșit fără să te anunțe.</li>
+<li><strong><code>2n Cycle</code></strong> a rămas ca o categorie separată (vezi decizia 7).</li>
+<li><code>print("BEFORE:", df.shape)</code> afișa <code>(2240, 30)</code>, pentru că <code>df</code> fusese deja modificat (<code>MntTotal</code>). După corecturile de mai sus va afișa <code>(2240, 29)</code>.</li>
+<li>Comentariile de la final (<em>„Dacă în notebook ai luat alte decizii la pasul anterior…”</em>) sunt din nou notițe de la AI → le ștergi.</li>
+</ol>
+<h3>Cod de înlocuit</h3>
+<pre><code class="language-python"># 3) Valori imposibile: an nasterii &lt; 1920 (clienti de peste 90 de ani in 2014) si venitul extrem 666666
+impossible = (df_clean[&quot;Year_Birth&quot;] &lt; 1920) | (df_clean[&quot;Income&quot;] &gt; 600_000)
+print(&quot;rows with impossible values:&quot;, impossible.sum())
+df_clean = df_clean[~impossible]
+...
+dt = pd.to_datetime(df_clean[&quot;Dt_Customer&quot;], dayfirst=True)
+df_clean[&quot;Customer_Days&quot;] = (dt.max() - dt).dt.days
+</code></pre>
+<p>plus comentariile de la final.</p>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># TODO: aplicam deciziile pe o copie a df
+print(&quot;BEFORE:&quot;, df.shape)
+display(df.head(3))
+
+df_clean = df.copy()
+
+# 1-2) identificatorul si coloanele constante nu aduc informatie
+df_clean = df_clean.drop(columns=[&quot;ID&quot;, &quot;Z_CostContact&quot;, &quot;Z_Revenue&quot;])
+
+# 3) duplicate: fara ID apar clienti inregistrati de doua ori -&gt; pastram o singura copie
+print(&quot;duplicated rows (without ID):&quot;, df_clean.duplicated().sum())
+df_clean = df_clean.drop_duplicates()
+
+# 4-5) cod ascuns si valori imposibile -&gt; NaN (randurile raman: tinta si restul coloanelor sunt valide)
+df_clean.loc[df_clean[&quot;Income&quot;] == 666666, &quot;Income&quot;] = np.nan
+df_clean.loc[df_clean[&quot;Year_Birth&quot;] &lt; 1920, &quot;Year_Birth&quot;] = np.nan
+
+# 6-7) categorii cu acelasi inteles / fara sens
+df_clean[&quot;Marital_Status&quot;] = df_clean[&quot;Marital_Status&quot;].replace({&quot;Alone&quot;: &quot;Single&quot;, &quot;Absurd&quot;: &quot;Other&quot;, &quot;YOLO&quot;: &quot;Other&quot;})
+df_clean[&quot;Education&quot;] = df_clean[&quot;Education&quot;].replace({&quot;2n Cycle&quot;: &quot;Master&quot;})       # ciclul 2 Bologna = master
+print(&quot;Marital_Status:&quot;, df_clean[&quot;Marital_Status&quot;].value_counts().to_dict())
+print(&quot;Education:&quot;, df_clean[&quot;Education&quot;].value_counts().to_dict())
+
+# 8) data inscrierii -&gt; vechimea clientului in zile, fata de o data FIXA (ultima inscriere din set: 2014-06-29)
+REFERENCE_DATE = pd.Timestamp(&quot;2014-12-31&quot;)
+signup = pd.to_datetime(df_clean[&quot;Dt_Customer&quot;], format=&quot;%d-%m-%Y&quot;)
+df_clean[&quot;Customer_Days&quot;] = (REFERENCE_DATE - signup).dt.days
+df_clean = df_clean.drop(columns=[&quot;Dt_Customer&quot;])
+
+# 9) tinta de regresie: suma cheltuita pe toate categoriile de produse
+df_clean[TARGET_R] = df_clean[MNT_COLS].sum(axis=1)
+
+# lipsurile raman NaN: le completam mai tarziu, invatand DOAR din setul de antrenament
+print(&quot;\nmissing after cleaning:\n&quot;, df_clean.isna().sum()[df_clean.isna().sum() &gt; 0])
+
+df_clean.to_csv(f&quot;{MY_DIR}/clean.csv&quot;, index=False)
+print(&quot;\nAFTER:&quot;, df_clean.shape)
+display(df_clean.head(3))
+</code></pre>
+<p><strong>Rezultat așteptat:</strong> <code>BEFORE: (2240, 29)</code> → <code>AFTER: (2058, 27)</code>; lipsuri: <code>Income</code> 25 (24 + valoarea 666666), <code>Year_Birth</code> 3.</p>
+<p><strong>De ce am numerotat comentariile 1–9:</strong> corespund punctelor din lista de decizii. Cine citește codul găsește imediat motivul fiecărei linii.</p>
+<hr />
+<h2>TODO 6 — Întrebările Penguins (celulele 53 și 56) ❌</h2>
+<p>Ambele au rămas necompletate.</p>
+<p><strong>Celula 53</strong> (verifică pe desenul arborelui din notebook-ul tău primele două niveluri):</p>
+<pre><code class="language-markdown">- **Matricele de confuzie:** regresia logistică nu confundă nicio specie (69/69 corecte). Arborele confundă **un singur Chinstrap cu Adelie** (recall Chinstrap 0,93 = 13/14); Gentoo nu este confundat de niciun model.
+- **Drumul unui pinguin prin arbore:** prima întrebare este despre lungimea aripii (`flipper_length_mm`): aripile lungi duc aproape numai la Gentoo. Pe ramura cu aripi scurte, a doua întrebare este despre lungimea ciocului (`bill_length_mm`): cioc scurt → Adelie, cioc lung → Chinstrap. Pragurile sunt pe valori scalate (de ex. `num__flipper_length_mm &lt;= 0,4`).
+- **Atributele din primele niveluri** sunt exact cele cu cele mai mari diferențe între mediile pe clase din capitolul 3.
+</code></pre>
+<p><strong>Celula 56:</strong></p>
+<pre><code class="language-markdown">MAE scade de la 693,2 g (baseline) la 232,2 g (regresia liniară), adică cu **461 g** (−67%). R² crește de la −0,01 la 0,876: modelul elimină 87,6% din eroarea pătratică a baseline-ului.
+</code></pre>
+<hr />
+<h2>TODO 6 — Primele modele (celula 57) ⚠️</h2>
+<h3>Ce e greșit</h3>
+<ol>
+<li><strong>Blocul „Regresia logistică în detaliu” apare de două ori</strong>, identic: antrenezi același model de două ori și afișezi de două ori același raport.</li>
+<li><strong><code>results</code> și <code>results_r</code> nu se afișează</strong>: nu sunt ultima linie din celulă. Tabelul principal, cerut explicit, lipsește din output. Se văd doar diferențele față de baseline.</li>
+<li><strong>Suprascrii variabilele exemplului</strong> (<code>X_tr</code>, <code>X_te</code>, <code>preprocess</code>, <code>models</code>, <code>dt</code>, <code>logistic</code>). Exemplul spune clar: <em>„tr-train, te-test - scris ca să nu interfereze cu codul vostru”</em>. Folosește <code>X_train</code>, <code>X_test</code>, ca în L03. Bonus: <code>dt</code> era deja numele datelor calendaristice din curățare.</li>
+<li><strong><code>MntTotal</code> rămâne printre atributele de clasificare.</strong> Nu e leakage pentru <code>Response</code>, dar este <strong>suma exactă</strong> a celor 6 coloane <code>Mnt*</code>, care sunt deja în X. O coloană care e combinație liniară a altora nu aduce informație nouă, iar la regresia logistică ponderile se împart arbitrar între ele. Am scos-o.</li>
+<li><strong>Leakage la regresie (logică, nu cod):</strong> <code>NumWebPurchases</code>, <code>NumCatalogPurchases</code>, <code>NumStorePurchases</code>, <code>NumDealsPurchases</code> sunt numărate <strong>în aceeași perioadă de 2 ani</strong> în care se adună <code>MntTotal</code>. Le știi doar <strong>după</strong> ce clientul a cheltuit. Dacă povestea este „cât va cheltui un client” (ca să decidem cui facem oferte), aceste coloane nu sunt disponibile la momentul predicției. Laboratorul definește leakage-ul exact așa: <em>„o coloană cunoscută abia după momentul predicției”</em>. Cu ele: R² ≈ 0,85; fără ele: R² ≈ 0,76. Diferența arată cât din scor venea din aceste coloane. Mai jos am pus o variabilă <code>LEAKY_R</code>: dacă profesorul consideră că povestea permite să le folosești, o lași goală.</li>
+<li>Ai doar 2 modele + baseline la clasificare, iar exemplul din enunț cere „cel puțin două”, deci e ok. Am adăugat kNN ca să fie aceleași modele ca la regresie.</li>
+<li>Comentariile de la final (<em>„probabil în jur de 0,85–0,90…”</em>) sunt <strong>predicții ale AI-ului</strong>, nu rezultatele tale → le ștergi. Observațiile reale merg în celula de text.</li>
+</ol>
+<h3>Cod de înlocuit</h3>
+<p>Toată celula 57. O împart în <strong>3 celule</strong>, ca să le poți rula separat și ca outputul să nu fie un singur bloc lung.</p>
+<h3>Cod corect — celula 6a: comparația modelelor de clasificare</h3>
+<pre><code class="language-python"># TODO: primele modele - clasificare (Response)
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.dummy import DummyClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import (accuracy_score, balanced_accuracy_score, precision_score, recall_score,
+                             f1_score, roc_auc_score, classification_report, ConfusionMatrixDisplay)
+
+df_clean = pd.read_csv(f&quot;{MY_DIR}/clean.csv&quot;)                  # pornim de la tabelul CURATAT
+
+# 1. X = atributele, y = tinta; MntTotal iese: e suma exacta a coloanelor Mnt*, deja prezente in X
+X = df_clean.drop(columns=[TARGET_C, TARGET_R])
+y = df_clean[TARGET_C]
+num_feats = X.select_dtypes(include=&quot;number&quot;).columns.tolist()  # include coloanele 0/1 (AcceptedCmp*, Complain)
+cat_feats = X.select_dtypes(exclude=&quot;number&quot;).columns.tolist()  # Education, Marital_Status
+
+# 2. I - Isolate: 20% test, stratificat (clasa 1 are doar ~15%)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=SEED)
+
+# 3. C - Construct: preprocesarea, invatata DOAR din train
+def make_preprocess(num, cat):
+    return ColumnTransformer([
+        # mediana: Income e foarte asimetric (skew 6,8)
+        (&quot;num&quot;, Pipeline([(&quot;impute&quot;, SimpleImputer(strategy=&quot;median&quot;)), (&quot;scale&quot;, StandardScaler())]), num),
+        (&quot;cat&quot;, Pipeline([(&quot;impute&quot;, SimpleImputer(strategy=&quot;most_frequent&quot;)),
+                          (&quot;onehot&quot;, OneHotEncoder(handle_unknown=&quot;ignore&quot;))]), cat),
+    ])
+preprocess_c = make_preprocess(num_feats, cat_feats)
+
+# 4. baseline + modele, fiecare intr-un Pipeline
+models_c = {
+    &quot;baseline&quot;: DummyClassifier(strategy=&quot;most_frequent&quot;),
+    &quot;logistic regression&quot;: LogisticRegression(max_iter=1000),
+    &quot;kNN (k=5)&quot;: KNeighborsClassifier(n_neighbors=5),
+    &quot;decision tree&quot;: DecisionTreeClassifier(max_depth=3, random_state=SEED),
+}
+
+# 5. T - Test: 2 clase -&gt; precision / recall / F1 pentru clasa 1, ROC AUC din probabilitatea clasei 1
+rows = []
+for name, model in models_c.items():
+    pipe = Pipeline([(&quot;prep&quot;, preprocess_c), (&quot;model&quot;, model)]).fit(X_train, y_train)
+    pred = pipe.predict(X_test)
+    proba = pipe.predict_proba(X_test)[:, 1]
+    rows.append({&quot;model&quot;: name, &quot;accuracy&quot;: accuracy_score(y_test, pred),
+                 &quot;balanced accuracy&quot;: balanced_accuracy_score(y_test, pred),
+                 &quot;precision&quot;: precision_score(y_test, pred, zero_division=0),   # baseline nu prezice niciun 1
+                 &quot;recall&quot;: recall_score(y_test, pred),
+                 &quot;F1&quot;: f1_score(y_test, pred),
+                 &quot;ROC AUC&quot;: roc_auc_score(y_test, proba)})
+results_c = pd.DataFrame(rows).set_index(&quot;model&quot;).round(3)
+results_c.to_csv(f&quot;{RESULTS_DIR}/L02_{MY_NAME}_first_models.csv&quot;)
+display(results_c)
+print(&quot;difference vs baseline:&quot;)
+display((results_c - results_c.loc[&quot;baseline&quot;]).drop(index=&quot;baseline&quot;).round(3))
+</code></pre>
+<h3>Cod corect — celula 6b: regresia logistică și arborele în detaliu</h3>
+<pre><code class="language-python"># 6. Regresia logistica si arborele in detaliu: raport pe clase, ROC AUC, matricea de confuzie
+from sklearn import tree
+
+def show_details(model, title):
+    pipe = Pipeline([(&quot;prep&quot;, preprocess_c), (&quot;model&quot;, model)]).fit(X_train, y_train)
+    pred = pipe.predict(X_test)
+    proba = pipe.predict_proba(X_test)[:, 1]                    # coloana 1 = probabilitatea clasei pipe.classes_[1] = 1
+    print(f&quot;=== {title} ===&quot;)
+    print(classification_report(y_test, pred, digits=3))
+    print(&quot;ROC AUC:&quot;, round(roc_auc_score(y_test, proba), 3))
+    ConfusionMatrixDisplay.from_predictions(y_test, pred, cmap=&quot;Blues&quot;)
+    plt.title(f&quot;{title} - confusion matrix&quot;)
+    plt.show()
+    return pipe
+
+logistic_c = show_details(LogisticRegression(max_iter=1000), &quot;Logistic regression&quot;)
+tree_c = show_details(DecisionTreeClassifier(max_depth=3, random_state=SEED), &quot;Decision tree (max_depth=3)&quot;)
+
+# arborele desenat; pragurile numerice sunt pe valori SCALATE
+plt.figure(figsize=(20, 8))
+tree.plot_tree(tree_c.named_steps[&quot;model&quot;],
+               feature_names=list(tree_c.named_steps[&quot;prep&quot;].get_feature_names_out()),
+               class_names=[str(k) for k in tree_c.classes_],
+               filled=True, rounded=True, proportion=True, fontsize=9)
+plt.title(&quot;Decision tree (max_depth=3)&quot;)
+plt.show()
+</code></pre>
+<p><strong>De ce o funcție:</strong> codul pentru regresia logistică și cel pentru arbore era identic, doar modelul diferea. Așa ai fost tentat să-l copiezi (și a ieșit de două ori). Cu <code>show_details</code> scrii logica o singură dată, iar un model nou e o singură linie.</p>
+<h3>Cod corect — celula 6c: regresie (<code>MntTotal</code>)</h3>
+<pre><code class="language-python"># Regresie: cat cheltuie in total un client in 2 ani? (MntTotal)
+from sklearn.dummy import DummyRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+# leakage: Mnt* SUNT tinta (MntTotal = suma lor); Num*Purchases sunt numarate in aceeasi perioada de 2 ani,
+# deci le stim abia DUPA ce clientul a cheltuit -&gt; le scoatem (LEAKY_R = [] daca povestea permite sa le folosim)
+LEAKY_R = [&quot;NumWebPurchases&quot;, &quot;NumCatalogPurchases&quot;, &quot;NumStorePurchases&quot;, &quot;NumDealsPurchases&quot;]
+Xr = df_clean.drop(columns=[TARGET_R] + MNT_COLS + LEAKY_R)
+yr = df_clean[TARGET_R]
+Xr_train, Xr_test, yr_train, yr_test = train_test_split(Xr, yr, test_size=0.2, random_state=SEED)   # fara stratify: tinta e numerica
+preprocess_r = make_preprocess(Xr.select_dtypes(include=&quot;number&quot;).columns.tolist(),
+                               Xr.select_dtypes(exclude=&quot;number&quot;).columns.tolist())
+
+models_r = {
+    &quot;baseline&quot;: DummyRegressor(strategy=&quot;mean&quot;),
+    &quot;linear regression&quot;: LinearRegression(),
+    &quot;kNN (k=5)&quot;: KNeighborsRegressor(n_neighbors=5),
+    &quot;decision tree&quot;: DecisionTreeRegressor(max_depth=5, random_state=SEED),
+}
+rows = []
+for name, model in models_r.items():
+    pred = Pipeline([(&quot;prep&quot;, preprocess_r), (&quot;model&quot;, model)]).fit(Xr_train, yr_train).predict(Xr_test)
+    rows.append({&quot;model&quot;: name, &quot;MAE&quot;: mean_absolute_error(yr_test, pred),
+                 &quot;RMSE&quot;: np.sqrt(mean_squared_error(yr_test, pred)), &quot;R2&quot;: r2_score(yr_test, pred)})
+results_r = pd.DataFrame(rows).set_index(&quot;model&quot;).round(3)
+results_r.to_csv(f&quot;{RESULTS_DIR}/L02_{MY_NAME}_first_models_regression.csv&quot;)
+display(results_r)
+</code></pre>
+<p><strong>De ce <code>make_preprocess(num, cat)</code>:</strong> la clasificare și la regresie preprocesarea e aceeași, doar listele de coloane diferă. Înainte o scriai de două ori.</p>
+<hr />
+<h2>TODO 6 — Observații modele (celula 58) ❌</h2>
+<p>Răspuns, cu cifrele obținute de mine după curățarea corectată (înlocuiește-le cu ale tale dacă diferă):</p>
+<pre><code class="language-markdown">**Observații:**
+- **Cel mai bun model (clasificare): regresia logistică**: acuratețe echilibrată 0,753, F1 0,647, ROC AUC 0,912. kNN (0,646 / 0,435 / 0,798) și arborele cu `max_depth=3` (0,621 / 0,386 / 0,769) sunt clar mai slabi.
+- **Cât depășește baseline-ul:** baseline-ul are acuratețe 0,847 (prezice mereu „0”), dar acuratețe echilibrată 0,5, F1 0 și ROC AUC 0,5. Regresia logistică câștigă doar +0,066 la acuratețe, dar +0,253 la acuratețea echilibrată, +0,647 la F1 și +0,412 la ROC AUC. Acuratețea ascunde aproape tot câștigul, din cauza dezechilibrului.
+- **Problema rămasă:** recall-ul pe clasa 1 este doar 0,52: modelul ratează aproape jumătate dintre clienții care ar accepta oferta, pentru că pragul 0,5 favorizează clasa majoritară.
+- **Regresie (`MntTotal`, fără `Mnt*` și `Num*Purchases`):** regresia liniară are R² ≈ 0,76 și MAE ≈ 210, față de baseline (MAE ≈ 477, R² ≈ 0). Cu `Num*Purchases` incluse, R² urca la 0,85, dar acele coloane se cunosc abia după ce clientul a cheltuit (leakage).
+- **Ce ar putea îmbunătăți:** (1) `class_weight=&quot;balanced&quot;` sau SMOTE pentru clasa rară; (2) alegerea pragului de decizie; (3) hiperparametri aleși prin validare încrucișată, nu pe test; (4) atribute noi: vârsta (`2014 − Year_Birth`), numărul total de copii (`Kidhome + Teenhome`), numărul de campanii acceptate anterior (suma `AcceptedCmp*`); (5) la regresie, logaritmul țintei (`MntTotal` e asimetrică).
+</code></pre>
+<hr />
+<h2>Celulele AI (celulele 11, 37, 46, 60) ⚠️</h2>
+<ul>
+<li><strong>Celula 11</strong>: ok.</li>
+<li><strong>Celulele 37, 46, 60</strong>: „Rezultat: mai sus / mai sus / gol” și „Cum am verificat: am analizat codul”. Profesorul cere <strong>ce ai verificat concret</strong>. De exemplu: <em>„am verificat că <code>MntTotal</code> din primul rând = 635 + 88 + 546 + 172 + 88 + 88 = 1617”</em>, <em>„am verificat că suma procentelor de pe bare este 100%”</em>.</li>
+<li>Cinstit vorbind: o parte mare din cod are comentarii scrise în stilul unui asistent AI (<em>„Dacă primești eroare…”</em>, <em>„probabil în jur de 0,85–0,90”</em>). Dacă ai folosit AI pentru aceste celule, declară-l în celula AI corespunzătoare; laboratorul permite asta, dar cere transparență.</li>
+</ul>
+<hr />
+<h2>TODO 7 — Final (celula 62) ❌</h2>
+<p>Outputul arată că în <code>MY_DIR</code> există doar <code>clean.csv</code>. <strong><code>raw.csv</code> lipsește</strong>, pentru că TODO 1 salva în altă parte. După corecturile de mai sus și o rulare completă trebuie să vezi:</p>
+<pre><code>.../data/Customer Personality Analysis -&gt; ['clean.csv', 'raw.csv']
+.../figures -&gt; ['L02_Customer Personality Analysis_explore.png']
+.../results -&gt; ['L02_Customer Personality Analysis_first_models.csv', 'L02_Customer Personality Analysis_first_models_regression.csv']
+</code></pre>
+<p>(fără spațiu înainte de <code>_explore</code> / <code>_first_models</code>). Fișierele vechi, cu spațiu în nume, le poți șterge din Drive.</p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+document.querySelectorAll("pre code").forEach(function (block) {
+  if (window.hljs) hljs.highlightElement(block);
+  var btn = document.createElement("button");
+  btn.className = "copy"; btn.textContent = "Copiază";
+  btn.onclick = function () {
+    navigator.clipboard.writeText(block.innerText).then(function () {
+      btn.textContent = "Copiat ✓"; setTimeout(function () { btn.textContent = "Copiază"; }, 1500);
+    });
+  };
+  block.parentNode.appendChild(btn);
+});
+</script>
+</body></html>

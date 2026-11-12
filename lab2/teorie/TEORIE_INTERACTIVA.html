@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teorie ML interactivă</title>
+<style>
+:root{--bg:#fbfaf7;--card:#ffffff;--ink:#1d1d1b;--ink2:#55544f;--mute:#8a8983;--line:#e4e2da;--acc:#2a78d6;--acc-bg:#e6f1fb;--org:#eb6834;--org-bg:#fdeee6;--ok:#1a8a55;--ok-bg:#e3f4ea;--bad:#c63b3b;--bad-bg:#fbe9e9;--warn-bg:#fdf3dc;--warn:#8a5a00;--grid:#e9e7e0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171716;--card:#201f1e;--ink:#f0efec;--ink2:#c3c2b7;--mute:#8f8e88;--line:#363532;--acc:#4b93e8;--acc-bg:#16304d;--org:#e8743f;--org-bg:#43230f;--ok:#4cc184;--ok-bg:#143322;--bad:#ec6a6a;--bad-bg:#421818;--warn-bg:#3a2c08;--warn:#f0c15a;--grid:#2c2c2a}}
+:root[data-theme="dark"]{--bg:#171716;--card:#201f1e;--ink:#f0efec;--ink2:#c3c2b7;--mute:#8f8e88;--line:#363532;--acc:#4b93e8;--acc-bg:#16304d;--org:#e8743f;--org-bg:#43230f;--ok:#4cc184;--ok-bg:#143322;--bad:#ec6a6a;--bad-bg:#421818;--warn-bg:#3a2c08;--warn:#f0c15a;--grid:#2c2c2a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px 80px}
+header h1{font-size:30px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+header p{color:var(--ink2);margin:0}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin:20px -16px 0;padding:8px 16px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+nav a{flex:none;font-size:13px;color:var(--ink2);text-decoration:none;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+nav a:hover{color:var(--ink);border-color:var(--mute)}
+section{margin-top:40px}
+h2{font-size:23px;font-weight:600;margin:0 0 6px;scroll-margin-top:60px}
+h3{font-size:17px;font-weight:600;margin:22px 0 6px}
+p{margin:8px 0}
+.lead{color:var(--ink2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.demo{border-left:0;position:relative}
+.demo .tag{display:inline-block;font-size:12px;font-weight:600;color:var(--acc);background:var(--acc-bg);border-radius:6px;padding:2px 8px;margin-bottom:8px}
+.say{background:var(--warn-bg);color:var(--ink);border-radius:10px;padding:12px 14px;margin:14px 0}
+.say b{color:var(--warn)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:8px 0}
+.row label{font-size:14px;color:var(--ink2)}
+input[type=range]{flex:1;min-width:160px;accent-color:var(--acc)}
+button,select{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--mute)}
+button.on{background:var(--acc-bg);border-color:var(--acc);color:var(--acc)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:10px 0}
+.st{background:var(--bg);border-radius:10px;padding:10px 12px}
+.st small{display:block;font-size:12px;color:var(--mute)}
+.st b{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.chart{position:relative;height:280px;margin:8px 0}
+.chart.sm{height:220px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{color:var(--ink2);font-weight:600}
+.tw{overflow-x:auto}
+.cm{display:grid;grid-template-columns:110px 1fr 1fr;gap:6px;font-size:14px;max-width:520px}
+.cm div{padding:10px;border-radius:8px;text-align:center}
+.cm .h{color:var(--ink2);font-weight:600;background:none}
+.tp{background:var(--ok-bg)}.tn{background:var(--ok-bg)}.fp{background:var(--warn-bg)}.fn{background:var(--bad-bg)}
+.cm b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
+.lg{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--ink2);margin:4px 0}
+.lg span{display:inline-flex;align-items:center;gap:6px}
+.sq{width:11px;height:11px;border-radius:3px;display:inline-block}
+.folds{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:6px 0}
+.folds div{padding:8px 0;text-align:center;border-radius:6px;font-size:13px;background:var(--acc-bg);color:var(--acc)}
+.folds div.v{background:var(--org);color:#fff;font-weight:600}
+.bulbs{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.bulb{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;text-align:center;min-width:86px}
+.bulb b{display:block;font-size:20px}
+.bulb.lit{background:var(--warn-bg);border-color:var(--warn)}
+.pill{display:inline-block;font-size:12px;border-radius:999px;padding:1px 9px;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.acc{background:var(--acc-bg);color:var(--acc)}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--card)}
+summary{cursor:pointer;font-weight:600}
+details p{color:var(--ink2)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.9em;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:0 4px}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;font-size:13px;line-height:1.5}
+.out{font-size:15px;margin-top:6px}
+.mono{font-variant-numeric:tabular-nums}
+.note{font-size:13px;color:var(--mute)}
+.final{border:2px solid var(--acc)}
+.theme{position:absolute;right:16px;top:24px}
+header{position:relative}
+@media (max-width:600px){header h1{font-size:25px}.theme{position:static;margin-top:10px}.cm{grid-template-columns:80px 1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;font-size:13px"><a href="TEORIE_INTERACTIVA.html" style="color:var(--acc);background:var(--acc-bg);border:1px solid var(--acc);border-radius:6px;padding:3px 10px;text-decoration:none">Teorie generală</a><a href="LAB4_INTERACTIV.html" style="color:var(--ink2);border:1px solid var(--line);border-radius:6px;padding:3px 10px;text-decoration:none">Lab 4</a><a href="LAB5_INTERACTIV.html" style="color:var(--ink2);border:1px solid var(--line);border-radius:6px;padding:3px 10px;text-decoration:none">Lab 5</a><a href="LAB6_INTERACTIV.html" style="color:var(--ink2);border:1px solid var(--line);border-radius:6px;padding:3px 10px;text-decoration:none">Lab 6</a></div>
+<h1>Teorie ML, pe setul Customer Personality</h1>
+<p>Tot ce ai la laboratoarele 2–6, explicat simplu, cu exemple pe care le poți mișca. Cifrele vin din datele tale.</p>
+<button class="theme" id="themeBtn" type="button">Temă: auto</button>
+</header>
+
+<nav>
+<a href="#date">Setul de date</a><a href="#stat">Statistici</a><a href="#leak">Leakage</a><a href="#split">Train / test / CV</a><a href="#prep">Pipeline</a><a href="#modele">Modele</a><a href="#svm">SVM</a><a href="#boost">Boosting</a><a href="#over">Overfitting</a><a href="#hp">Hiperparametri</a><a href="#metr">Metrici clasificare</a><a href="#cal">Calibrare</a><a href="#reg">Metrici regresie</a><a href="#final">Ce am ales</a><a href="#q">Întrebări</a>
+</nav>
+
+<!-- ================= DATE ================= -->
+<section id="date">
+<h2>1. Setul de date și cele două întrebări</h2>
+<p class="lead">2240 de clienți ai unui lanț de magazine × 29 de coloane. După curățare: <b>2058 de clienți</b> (am scos 182 de duplicate).</p>
+<div class="tw"><table>
+<tr><th></th><th>Clasificare</th><th>Regresie</th></tr>
+<tr><td>Întrebarea</td><td>Ce clienți vor <b>accepta</b> oferta?</td><td><b>Cât</b> cheltuie un client în 2 ani?</td></tr>
+<tr><td>Ținta</td><td><code>Response</code> (0 / 1)</td><td><code>MntTotal</code> = suma celor 6 coloane <code>Mnt*</code></td></tr>
+<tr><td>Răspunsul</td><td>o categorie: da / nu</td><td>un număr: 50, 396, 1617…</td></tr>
+<tr><td>Cifre</td><td>313 din 2058 acceptă (15,2%)</td><td>media 606, mediana 396</td></tr>
+<tr><td>Model final</td><td><span class="pill acc">regresie logistică</span></td><td><span class="pill acc">HistGradientBoosting</span></td></tr>
+</table></div>
+<p><b>Povestea de business:</b> un contact costă <b>3</b> (<code>Z_CostContact</code>), un client care acceptă aduce <b>11</b> (<code>Z_Revenue</code>). Dacă îi suni pe toți, pierzi 1,33 pe client. Modelul alege <b>pe cine</b> suni.</p>
+</section>
+
+<!-- ================= STATISTICI ================= -->
+<section id="stat">
+<h2>2. Medie, mediană, împrăștiere</h2>
+<p><b>Media</b> = aduni tot și împarți. <b>Mediana</b> = clientul din mijloc, când îi pui în rând. Un singur client foarte bogat mută media, dar aproape nu mișcă mediana.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<p>10 clienți cu cheltuieli obișnuite. Mută sliderul ca să adaugi un al 11-lea client, care cheltuie mult.</p>
+<div class="row"><label for="rich">Clientul nr. 11 cheltuie</label><input type="range" id="rich" min="0" max="20000" step="100" value="0"><b id="richV" class="mono">—</b></div>
+<div class="stats"><div class="st"><small>Media</small><b id="sMean"></b></div><div class="st"><small>Mediana</small><b id="sMed"></b></div><div class="st"><small>Deviația standard</small><b id="sStd"></b></div><div class="st"><small>IQR (Q3 − Q1)</small><b id="sIqr"></b></div></div>
+<p class="out" id="sMsg"></p>
+</div>
+<h3>Împrăștierea, pe datele tale</h3>
+<div class="tw"><table>
+<tr><th>Coloana</th><th>Medie</th><th>Mediană</th><th>Std</th><th>Jumătatea din mijloc (Q1–Q3)</th><th>CV = std / medie</th></tr>
+<tr><td><code>Income</code></td><td>51 970</td><td>51 373</td><td>21 526</td><td>35 284 – 68 487</td><td>0,41 (omogen)</td></tr>
+<tr><td><code>MntTotal</code></td><td>606</td><td>396</td><td>602</td><td>69 – 1046</td><td>0,99 (foarte împrăștiat)</td></tr>
+<tr><td><code>MntFruits</code></td><td>26</td><td>8</td><td>40</td><td>1 – 33</td><td>1,51 (extrem)</td></tr>
+</table></div>
+<p><b>Skew (asimetrie) spre dreapta:</b> mulți clienți cheltuie puțin, câțiva foarte mult. Din cauza lor, media (606) e mai mare decât mediana (396). De aceea completăm golurile cu <b>mediana</b>, nu cu media.</p>
+<div class="say"><b>Spui:</b> „Cheltuielile sunt asimetrice spre dreapta: media 606, mediana 396. Deviația standard e aproape cât media, deci clienții cheltuie foarte diferit. Venitul e mult mai omogen.”</div>
+</section>
+
+<!-- ================= LEAKAGE ================= -->
+<section id="leak">
+<h2>3. Leakage = trișat fără să vrei</h2>
+<p>Leakage înseamnă că modelul vede, în timpul antrenării, o informație pe care <b>n-ar avea-o în realitate</b> când face predicția. Scorul iese prea frumos.</p>
+<h3>a) Leakage prin coloane (regresie)</h3>
+<div class="card">
+<p>Clientul 5524: vin <b>635</b> + fructe <b>88</b> + carne <b>546</b> + pește <b>172</b> + dulciuri <b>88</b> + aur <b>88</b> = <code>MntTotal</code> <b>1617</b>.</p>
+<p>Dacă lași coloanele <code>Mnt*</code> în X, modelul doar <b>adună bonul</b>. Le-am scos. Am scos și <code>Num*Purchases</code> (numărate în aceiași 2 ani, corelație 0,91) și <code>Response</code>. Fără ele, R² scade de la ~0,85 la ~0,76: diferența era trișat.</p>
+<p><b>La clasificare nu e leakage:</b> campaniile vechi (<code>AcceptedCmp1–5</code>) și cheltuielile s-au întâmplat <b>înainte</b> de oferta nouă. Corelația maximă e 0,33, departe de 1.</p>
+</div>
+<h3>b) Leakage prin preprocesare</h3>
+<div class="card demo"><span class="tag">Încearcă</span>
+<p>6 clienți. Lui D îi lipsește venitul. E și F sunt în <b>test</b> („clienții de mâine”).</p>
+<div class="row"><button id="lkOk" class="on" type="button">Mediana doar din train</button><button id="lkBad" type="button">Mediana din toți</button></div>
+<div class="tw"><table id="lkT"></table></div>
+<p class="out" id="lkMsg"></p>
+</div>
+<div class="say"><b>Regula:</b> întâi împarți train / test, abia apoi calculezi ceva din date (mediană, medie, std, categorii) și doar din train. Pipeline-ul face asta automat, inclusiv în fiecare fold al CV.</div>
+</section>
+
+<!-- ================= SPLIT / CV ================= -->
+<section id="split">
+<h2>4. Train, test și validarea încrucișată (CV)</h2>
+<div class="tw"><table>
+<tr><th></th><th>Train (80%)</th><th>Test (20%)</th></tr>
+<tr><td>Clienți</td><td>1646, din care 250 acceptă</td><td>412, din care 63 acceptă</td></tr>
+<tr><td>La școală</td><td>culegerea</td><td>examenul final</td></tr>
+<tr><td>Ce faci</td><td>tot: preprocesare, CV, GridSearch, prag</td><td>o singură verificare, la final</td></tr>
+</table></div>
+<p><code>stratify=y</code> păstrează 15% acceptări și în train, și în test.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<p><b>CV cu 5 fold-uri:</b> tai train-ul în 5 bucăți. Pe rând, o bucată verifică, iar celelalte 4 învață. Apasă pe runde.</p>
+<div class="row" id="cvBtns"></div>
+<div class="folds" id="cvF"></div>
+<p class="out" id="cvMsg"></p>
+<p class="note">Notele pe runde sunt ilustrative. Media reală la regresia logistică: 0,808 ± 0,033 (acuratețe echilibrată), PR-AUC 0,601.</p>
+</div>
+<div class="say"><b>Spui:</b> „Am folosit StratifiedKFold cu 5 fold-uri și aceleași fold-uri pentru toate modelele. Nota e media celor 5, deci nu depinde de norocul unei singure împărțiri. Testul l-am folosit o singură dată.”</div>
+</section>
+
+<!-- ================= PIPELINE ================= -->
+<section id="prep">
+<h2>5. Pipeline: completare, scalare, codificare</h2>
+<pre>Pipeline
+ ├─ ColumnTransformer
+ │   ├─ numerice      → SimpleImputer(median) → StandardScaler / RobustScaler
+ │   ├─ Education     → OrdinalEncoder  (Basic &lt; Graduation &lt; Master &lt; PhD)
+ │   └─ Marital_Status→ OneHotEncoder(min_frequency=10)
+ └─ model             → LogisticRegression(C=1, class_weight="balanced")</pre>
+<p><code>fit</code> pe train = fiecare pas <b>învață</b> (mediana, media, std, categoriile). <code>predict</code> pe test = doar <b>aplică</b> ce a învățat.</p>
+
+<h3>One-hot vs ordinal</h3>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><label for="ms">Starea civilă</label><select id="ms"><option>Married</option><option>Together</option><option>Single</option><option>Divorced</option><option>Widow</option><option>Other</option></select>
+<label for="ed">Educația</label><select id="ed"><option>Basic</option><option selected>Graduation</option><option>Master</option><option>PhD</option></select></div>
+<p><b>One-hot</b> (fără ordine): un bec pentru fiecare categorie, se aprinde unul singur.</p>
+<div class="bulbs" id="bulbs"></div>
+<p><b>Ordinal</b> (cu ordine): <code>Education</code> devine un singur număr: <b id="edV" class="mono"></b></p>
+<p class="note">„Other” (Absurd + YOLO, 4 clienți) are sub 10 clienți, deci <code>min_frequency=10</code> îl pune în coloana „rare”.</p>
+</div>
+
+<h3>Outlieri și scalare</h3>
+<p><b>Outlier</b> = valoare mult peste restul. <code>Income</code>: 7 clienți peste ~118 000 (regula Q3 + 1,5 × IQR). <code>666666</code> nu era outlier, era <b>greșeală</b>, așa că l-am făcut <code>NaN</code>.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<p>Câțiva clienți cu venituri obișnuite + unul foarte bogat. Uite cum se schimbă valoarea scalată a unui client <b>obișnuit, cu 70 000</b>.</p>
+<div class="row"><label for="ol">Venitul clientului bogat</label><input type="range" id="ol" min="80000" max="700000" step="10000" value="160000"><b id="olV" class="mono"></b></div>
+<div class="stats"><div class="st"><small>StandardScaler (medie, std)</small><b id="olS"></b></div><div class="st"><small>RobustScaler (mediană, IQR)</small><b id="olR"></b></div></div>
+<p class="out" id="olMsg"></p>
+</div>
+<p>La tine am pornit cu RobustScaler, dar GridSearch a ales StandardScaler, la o diferență neglijabilă: outlierii sunt puțini și nu foarte extremi. <b>Arborii</b> primesc <code>scaler="passthrough"</code>, pentru că ei compară („Income &gt; 60 000?”), nu înmulțesc.</p>
+<div class="say"><b>666666 → NaN, nu ștergem clientul:</b> restul celor ~25 de coloane ale lui sunt bune. Golul se completează în pipeline cu mediana din train, ca la ceilalți 24 fără venit. Un client nou cu date lipsă nu poate fi „șters”, trebuie să primească o predicție.</div>
+</section>
+
+<!-- ================= MODELE ================= -->
+<section id="modele">
+<h2>6. Modelele: cum fac predicții</h2>
+<p class="lead">Graficele folosesc 1–2 coloane, ca să se vadă. Modelele reale folosesc ~25 de coloane, dar ideea e aceeași.</p>
+
+<h3>Regresia liniară: trage o dreaptă <span class="pill acc">regresie</span></h3>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>clienți reali</span><span><span class="sq" style="background:var(--org)"></span>cheltuială ≈ 22 × venit(mii) − 536</span></div>
+<div class="chart"><canvas id="cLin" role="img" aria-label="Venit vs cheltuială cu dreapta de regresie"></canvas></div>
+<p>Prezice punând valorile în formulă: venit 60 000 → 22 × 60 − 536 = <b>784</b>. Punctele nu stau pe o dreaptă (relația e „strâmbă”), de aceea regresia liniară greșește cu <b>233</b> în medie, iar HistGB cu <b>185</b>.</p>
+
+<h3>Regresia logistică: dreapta îndoită în S <span class="pill acc">clasificare</span></h3>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>procent real care a acceptat</span><span><span class="sq" style="background:var(--org)"></span>curba modelului</span></div>
+<div class="chart sm"><canvas id="cLog" role="img" aria-label="Rata de acceptare după numărul de campanii vechi acceptate"></canvas></div>
+<p>Calculează un scor (ponderi × coloane) și îl îndoaie între 0% și 100%. Rezultatul e o <b>probabilitate</b>. Peste prag (la tine <b>0,53</b>) zice „acceptă”.</p>
+
+<h3>kNN: spune-mi cu cine semeni <span class="pill acc">clasificare</span></h3>
+<div class="card demo"><span class="tag">Încearcă: dă click pe grafic</span>
+<div class="row"><label for="kk">k vecini</label><input type="range" id="kk" min="1" max="15" step="2" value="5"><b id="ko">5</b></div>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>a acceptat</span><span><span class="sq" style="background:#b4b2a9"></span>a refuzat</span><span><span class="sq" style="background:var(--org)"></span>client nou</span><span>contur portocaliu = vecin</span></div>
+<div class="chart"><canvas id="cKnn" role="img" aria-label="kNN interactiv pe venit și recență"></canvas></div>
+<p class="out" id="kOut"></p>
+</div>
+<p>Nu învață nimic, ține minte tot. Prezice prin votul celor k vecini. Pentru că doar 15% acceptă, majoritatea vecinilor refuză, iar kNN (fără <code>class_weight</code>) zice aproape mereu „nu”. De aceea a ieșit slab.</p>
+
+<h3>Arborele de decizie: 20 de întrebări <span class="pill acc">ambele</span></h3>
+<svg viewBox="0 0 680 250" width="100%" role="img" aria-label="Arbore de decizie de adâncime 2 antrenat pe date" style="font-size:13px">
+<g fill="var(--card)" stroke="var(--line)"><rect x="215" y="10" width="250" height="52" rx="8"/><rect x="50" y="100" width="220" height="48" rx="8"/><rect x="410" y="100" width="220" height="48" rx="8"/><rect x="175" y="180" width="130" height="56" rx="8"/></g>
+<rect x="20" y="180" width="130" height="56" rx="8" fill="var(--warn-bg)"/><rect x="375" y="180" width="130" height="56" rx="8" fill="var(--warn-bg)"/><rect x="535" y="180" width="130" height="56" rx="8" fill="var(--acc-bg)"/>
+<g stroke="var(--mute)" fill="none"><path d="M290 62L160 100M390 62L520 100M120 148L85 180M200 148L240 180M480 148L440 180M560 148L600 180"/></g>
+<g fill="var(--ink)" text-anchor="middle" font-weight="600"><text x="340" y="32">A acceptat vreo campanie veche?</text><text x="160" y="121">A cumpărat în ultimele 15 zile?</text><text x="520" y="121">A acceptat 3 sau mai multe?</text><text x="85" y="202">20% acceptă</text><text x="240" y="202">6% acceptă</text><text x="440" y="202">35% acceptă</text><text x="600" y="202">82% acceptă</text></g>
+<g fill="var(--ink2)" text-anchor="middle"><text x="340" y="50">2033 clienți · 15% acceptă</text><text x="160" y="139">1606 clienți</text><text x="520" y="139">427 clienți</text><text x="85" y="222">269 · zice nu</text><text x="240" y="222">1337 · zice nu</text><text x="440" y="222">377 · zice nu</text><text x="600" y="222">50 · zice da</text><text x="205" y="86">nu</text><text x="475" y="86">da</text><text x="93" y="168">da</text><text x="232" y="168">nu</text><text x="448" y="168">nu</text><text x="592" y="168">da</text></g>
+</svg>
+<p>Arborele de mai sus e antrenat pe datele tale. Prima întrebare, aleasă singur, e despre campaniile vechi. Clientul coboară prin întrebări până la o frunză. Fără limită de adâncime, arborele tocește (vezi <a href="#over">overfitting</a>).</p>
+</section>
+
+<!-- ================= SVM ================= -->
+<section id="svm">
+<h2>7. SVM, kernel, gamma și SVR</h2>
+<p><b>SVM</b> caută strada cea mai lată între cei care acceptă și cei care refuză. Strada e ținută de clienții de la margine (<b>vectori suport</b>, 44% la tine). <code>C</code> = amenda pentru casele de pe stradă.</p>
+<p><b>Kernel</b> = cum măsoară asemănarea a doi clienți. <code>linear</code> → graniță dreaptă. <code>rbf</code> → graniță curbă. <code>poly</code> nu l-am folosit (lent).</p>
+<div class="card demo"><span class="tag">Încearcă: gamma = raza lanternei</span>
+<p>RBF: asemănare = e<sup>−γ × distanța²</sup>. Mută gamma și uită-te cât de repede scade asemănarea.</p>
+<div class="row"><label for="gm">γ</label><input type="range" id="gm" min="-4" max="0" step="0.25" value="-3"><b id="gmV" class="mono"></b></div>
+<div class="chart sm"><canvas id="cGam" role="img" aria-label="Asemănarea RBF în funcție de distanță"></canvas></div>
+<p class="out" id="gmMsg"></p>
+</div>
+<p>La tine, clasificare: <b>RBF, C = 100, γ = 0,001</b>, PR-AUC 0,606, practic egal cu kernelul liniar (0,599) și cu regresia logistică (0,601, p = 0,845). Regresie: RBF a ajutat (MAE 199 față de ~230 liniar).</p>
+<div class="card demo"><span class="tag">Încearcă: tubul SVR</span>
+<p>SVR pune un tub de lățime ε în jurul liniei. Punctele din tub nu sunt penalizate. Punctele din afară devin vectori suport.</p>
+<div class="row"><label for="ep">ε</label><input type="range" id="ep" min="0" max="3" step="0.1" value="1"><b id="epV" class="mono"></b></div>
+<div class="chart sm"><canvas id="cSvr" role="img" aria-label="Tubul epsilon al SVR"></canvas></div>
+<p class="out" id="epMsg"></p>
+</div>
+<p class="note">La tine: ε = 0,05 pe ținta scalată (≈ 30 de unități de bani), 81% vectori suport. Fără scalarea țintei, R² ≈ 0,01.</p>
+</section>
+
+<!-- ================= BOOSTING ================= -->
+<section id="boost">
+<h2>8. HistGradientBoosting: arbori care se corectează</h2>
+<p>Fiecare arbore nou învață <b>greșelile rămase</b> de la cei dinainte. „Hist” = valorile sunt grupate în cel mult 255 de intervale, deci e rapid. Nu are <code>C</code>: frânele lui sunt <code>learning_rate</code>, numărul de arbori, oprirea timpurie, <code>l2_regularization</code>.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<p>Ana a cheltuit de fapt <b>1000</b>. Modelul pornește de la medie (606). Fiecare arbore adaugă o parte din corectură.</p>
+<div class="row"><label for="lr">learning_rate</label><input type="range" id="lr" min="0.1" max="1" step="0.1" value="0.3"><b id="lrV" class="mono"></b></div>
+<div class="chart sm"><canvas id="cBoost" role="img" aria-label="Predicția pentru Ana după fiecare arbore"></canvas></div>
+<p class="out" id="lrMsg"></p>
+</div>
+<p>La tine (regresie, <code>MntTotal</code>): HistGB implicit + oprire timpurie → <b>MAE 185,5 în CV, 160 pe test, R² 0,826</b>. Model final.</p>
+</section>
+
+<!-- ================= OVERFITTING ================= -->
+<section id="over">
+<h2>9. Overfitting: modelul care tocește</h2>
+<p>Overfitting = foarte bine pe train, mult mai slab pe date noi. Se vede din <b>distanța</b> dintre cele două linii.</p>
+<div class="card demo"><span class="tag">Încearcă: adâncimea arborelui</span>
+<div class="row"><label for="dp">max_depth</label><input type="range" id="dp" min="0" max="10" step="1" value="3"><b id="dpV" class="mono"></b></div>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>train</span><span><span class="sq" style="background:var(--org)"></span>validare (CV)</span></div>
+<div class="chart sm"><canvas id="cDep" role="img" aria-label="Train vs validare în funcție de adâncimea arborelui"></canvas></div>
+<p class="out" id="dpMsg"></p>
+<p class="note">Recalculat aici pe datele tale (arbore, class_weight="balanced", acuratețe echilibrată, 5 fold-uri).</p>
+</div>
+<div class="tw"><table>
+<tr><th>Model (din rapoarte)</th><th>Train</th><th>Validare</th><th>Verdict</th></tr>
+<tr><td>Arbore fără limită</td><td>0,998</td><td>0,610</td><td><span class="pill bad">tocește</span></td></tr>
+<tr><td>GradientBoosting</td><td>0,998</td><td>0,718</td><td><span class="pill bad">tocește</span></td></tr>
+<tr><td>Random forest implicit</td><td>0,984</td><td>0,741</td><td><span class="pill bad">tocește</span></td></tr>
+<tr><td>Random forest reglat (min_samples_leaf=10)</td><td>0,923</td><td>0,772</td><td><span class="pill ok">mai bine</span></td></tr>
+<tr><td>Regresia logistică</td><td>0,829</td><td>0,802</td><td><span class="pill ok">fără overfitting</span></td></tr>
+</table></div>
+</section>
+
+<!-- ================= HIPERPARAMETRI ================= -->
+<section id="hp">
+<h2>10. Parametri, hiperparametri, GridSearch</h2>
+<div class="tw"><table>
+<tr><th></th><th>Ce e</th><th>Exemplu la tine</th></tr>
+<tr><td>Model</td><td>metoda</td><td>regresie logistică, arbore, HistGB, SVM</td></tr>
+<tr><td>Parametri</td><td>învățați <b>singur</b> din date, la <code>fit</code></td><td>ponderile regresiei logistice, întrebările arborelui</td></tr>
+<tr><td>Hiperparametri</td><td>setați <b>de tine</b>, înainte</td><td><code>C</code>, <code>class_weight</code>, <code>max_depth</code>, <code>gamma</code></td></tr>
+</table></div>
+<div class="card demo"><span class="tag">Încearcă: curba de validare pentru C</span>
+<div class="row"><label for="cS">C</label><input type="range" id="cS" min="0" max="10" step="1" value="6"><b id="cV" class="mono"></b></div>
+<div class="chart sm"><canvas id="cC" role="img" aria-label="Curba de validare pentru C"></canvas></div>
+<p class="out" id="cMsg"></p>
+<p class="note">Recalculat aici (class_weight="balanced"). În raportul L03 curba e fără class_weight la C mic, de aceea acolo C = 0,001 dă 0,665.</p>
+</div>
+<p><b>GridSearch</b> încearcă toate combinațiile: la regresia logistică 5 (C) × 2 (class_weight) × 2 (scaler) × 2 (add_indicator) = <b>40 de combinații × 5 fold-uri = 200 de antrenări</b>. Câștigă C = 1, balanced, StandardScaler: <b>0,808</b>.</p>
+<p><b>Nested CV</b> = 0,798. E puțin sub 0,808, pentru că maximul din 40 de încercări are și noroc.</p>
+</section>
+
+<!-- ================= METRICI ================= -->
+<section id="metr">
+<h2>11. Metrici de clasificare și pragul</h2>
+<p>Toate metricile pornesc de la 4 căsuțe. Mută pragul și uită-te cum se schimbă totul. Datele sunt <b>probabilitățile reale</b> ale regresiei logistice pe cei 412 clienți din test.</p>
+<div class="card demo"><span class="tag">Încearcă: pragul</span>
+<div class="row"><label for="th">Prag</label><input type="range" id="th" min="0.02" max="0.98" step="0.01" value="0.53"><b id="thV" class="mono"></b></div>
+<div class="cm">
+<div class="h"></div><div class="h">A acceptat de fapt</div><div class="h">A refuzat de fapt</div>
+<div class="h">Sunat (zice da)</div><div class="tp">găsit (TP)<b id="mTP"></b></div><div class="fp">degeaba (FP)<b id="mFP"></b></div>
+<div class="h">Nesunat (zice nu)</div><div class="fn">ratat (FN)<b id="mFN"></b></div><div class="tn">bine că nu (TN)<b id="mTN"></b></div>
+</div>
+<div class="stats">
+<div class="st"><small>Recall: din cei buni, câți găsesc</small><b id="mRec"></b></div>
+<div class="st"><small>Precizie: din cei sunați, câți acceptă</small><b id="mPre"></b></div>
+<div class="st"><small>F1</small><b id="mF1"></b></div>
+<div class="st"><small>Acuratețe (te minte)</small><b id="mAcc"></b></div>
+<div class="st"><small>Acuratețe echilibrată</small><b id="mBal"></b></div>
+<div class="st"><small>Profit pe client</small><b id="mPro"></b></div>
+</div>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>curba precizie–recall (aria = PR-AUC)</span><span><span class="sq" style="background:var(--org)"></span>pragul ales</span><span><span class="sq" style="background:#b4b2a9"></span>la întâmplare (0,15)</span></div>
+<div class="chart"><canvas id="cPR" role="img" aria-label="Curba precizie-recall pe test"></canvas></div>
+<p class="out" id="mMsg"></p>
+</div>
+<div class="tw"><table>
+<tr><th>Metrică</th><th>Întrebarea</th><th>Test</th><th>De ce</th></tr>
+<tr><td><b>PR-AUC</b></td><td>sunt cei buni în capul listei?</td><td>0,744 (întâmplare 0,15)</td><td>principală din L04, nu depinde de prag</td></tr>
+<tr><td>Recall</td><td>câți buni găsesc?</td><td>0,857 (54 / 63)</td><td>un client ratat = −11, un telefon = −3</td></tr>
+<tr><td>Precizie</td><td>câți sunați acceptă?</td><td>≈ 0,53</td><td>câte telefoane sunt degeaba</td></tr>
+<tr><td>Acuratețe echilibrată</td><td>bun cu ambele grupuri?</td><td>0,845</td><td>principală în L03</td></tr>
+<tr><td>ROC-AUC</td><td>separă clasele?</td><td>0,917</td><td>arată prea bine (mulți TN)</td></tr>
+<tr><td>Acuratețe</td><td>câte ghicesc în total?</td><td>—</td><td>„mereu nu” = 85%, deci nu o folosim</td></tr>
+</table></div>
+<div class="say"><b>Pragul se alege pe predicții out-of-fold din train</b> (recall ≥ 0,75), nu pe test. Și pragul e o alegere. Dacă l-ai alege pe test, testul ar deveni culegere.</div>
+</section>
+
+<!-- ================= CALIBRARE ================= -->
+<section id="cal">
+<h2>12. Scoruri, probabilități, calibrare</h2>
+<p><b>Scor</b> (<code>decision_function</code>, la SVM) = distanța față de graniță. Ajunge pentru PR-AUC (contează doar ordinea). <b>Probabilitate calibrată</b> = când modelul zice 30%, chiar 30% acceptă.</p>
+<div class="card demo"><span class="tag">Încearcă</span>
+<div class="row"><button id="cb1" class="on" type="button">Regresie logistică cu class_weight="balanced"</button><button id="cb2" type="button">Fără class_weight</button></div>
+<div class="lg"><span><span class="sq" style="background:var(--acc)"></span>proporția reală, pe grupuri</span><span><span class="sq" style="background:#b4b2a9"></span>diagonala = calibrare perfectă</span></div>
+<div class="chart"><canvas id="cCal" role="img" aria-label="Diagrama de fiabilitate"></canvas></div>
+<p class="out" id="calMsg"></p>
+<p class="note">Predicții out-of-fold pe train, recalculate aici.</p>
+</div>
+<p>De aceea pragul diferă: <b>0,53</b> la regresia logistică (probabilități umflate de <code>class_weight</code>) și <b>0,19</b> la SVM-ul calibrat cu <code>CalibratedClassifierCV(method="sigmoid")</code> (Brier 0,088). Un prag are sens doar pe scara modelului lui.</p>
+</section>
+
+<!-- ================= REGRESIE ================= -->
+<section id="reg">
+<h2>13. Metrici de regresie: MAE, RMSE, R²</h2>
+<div class="card demo"><span class="tag">Încearcă: schimbă ghicirea pentru Dan</span>
+<div class="row"><label for="dan">Modelul ghicește pentru Dan (a cheltuit 1500)</label><input type="range" id="dan" min="200" max="2500" step="50" value="1000"><b id="danV" class="mono"></b></div>
+<div class="tw"><table id="rgT"></table></div>
+<div class="stats"><div class="st"><small>MAE (media greșelilor)</small><b id="rMAE"></b></div><div class="st"><small>RMSE (greșelile mari strigă)</small><b id="rRMSE"></b></div><div class="st"><small>R² (cât explică)</small><b id="rR2"></b></div></div>
+<p class="out" id="rMsg"></p>
+</div>
+<p>La tine, MAE e metrica principală: se măsoară în bani și nu e dominată de câțiva clienți uriași. HistGB pe test: <b>MAE 160</b> (media la toți: 527), <b>R² 0,826</b>.</p>
+</section>
+
+<!-- ================= FINAL ================= -->
+<section id="final">
+<h2>14. Ce modele am folosit și ce am ales</h2>
+<div class="card final">
+<h3 style="margin-top:0">Clasificare: <code>Response</code></h3>
+<div class="tw"><table>
+<tr><th>Model</th><th>PR-AUC (CV)</th><th></th></tr>
+<tr><td>baseline</td><td>0,152</td><td>reper</td></tr>
+<tr><td><b>regresie logistică</b> (C = 1, balanced, prag 0,53)</td><td><b>0,601</b></td><td><span class="pill acc">FINAL</span> · test 0,744</td></tr>
+<tr><td>kNN</td><td>slab</td><td>fără class_weight</td></tr>
+<tr><td>arbore</td><td>0,324</td><td>tocește</td></tr>
+<tr><td>random forest / extra-trees</td><td>0,566 / 0,584</td><td></td></tr>
+<tr><td>SVM RBF</td><td>0,606</td><td>egal (p = 0,845)</td></tr>
+<tr><td>GradientBoosting / HistGB</td><td>0,598 / 0,603</td><td></td></tr>
+<tr><td>voting / stacking</td><td>0,630 / 0,625</td><td>sub zgomot, mai complicate</td></tr>
+<tr><td>rețea Keras (L06)</td><td>≈ logistica</td><td>mai lentă</td></tr>
+</table></div>
+</div>
+<div class="card final">
+<h3 style="margin-top:0">Regresie: <code>MntTotal</code></h3>
+<div class="tw"><table>
+<tr><th>Model</th><th>MAE (CV)</th><th></th></tr>
+<tr><td>baseline (media)</td><td>527</td><td>reper</td></tr>
+<tr><td>regresie liniară</td><td>233</td><td>relația nu e dreaptă</td></tr>
+<tr><td>arbore</td><td>233,5</td><td>tocește</td></tr>
+<tr><td>random forest / extra-trees</td><td>192,2 / 187,3</td><td></td></tr>
+<tr><td>SVR RBF</td><td>199,1</td><td></td></tr>
+<tr><td>GradientBoosting</td><td>182,7</td><td></td></tr>
+<tr><td><b>HistGB</b> (implicit + oprire timpurie)</td><td><b>185,5</b></td><td><span class="pill acc">FINAL</span> · test 160, R² 0,826</td></tr>
+<tr><td>voting / stacking</td><td>193,0 / 186,1</td><td>nimic în plus</td></tr>
+</table></div>
+</div>
+<p><b>Regula de alegere:</b> la scor egal (diferență sub o deviație standard sau test t nesemnificativ), alegem modelul <b>mai simplu</b>.</p>
+<p><b>Lift@20% = 3,97:</b> primii 20% clienți după scor conțin 79% dintre cei care acceptă. <b>Profit:</b> de la −1,33 la +0,74 pe client (test).</p>
+</section>
+
+<!-- ================= INTREBARI ================= -->
+<section id="q">
+<h2>15. Întrebări de la profesor</h2>
+<p class="lead">Gândește-te la răspuns, apoi deschide.</p>
+<details><summary>De ce mediana lui Income se învață doar pe train?</summary><p>Testul simulează clienți noi. Dacă mediana se calculează și din test, informația din test intră în antrenare (leakage) și scorul pe test iese prea bun.</p></details>
+<details><summary>De ce Education e ordinal și Marital_Status one-hot?</summary><p>Educația are ordine reală (Basic &lt; Graduation &lt; Master &lt; PhD). Starea civilă nu are. Cu numere 1–5 am inventa o ordine falsă.</p></details>
+<details><summary>Random forest: train 0,984, validare 0,741. Ce înseamnă?</summary><p>Overfitting: a memorat train-ul. Cu min_samples_leaf=10 a ajuns la 0,923 / 0,772: memorează mai puțin și generalizează mai bine.</p></details>
+<details><summary>De ce SMOTE în ImbPipeline și nu înainte de CV?</summary><p>SMOTE fabrică clienți din cei reali. Aplicat înainte, un client fabricat din Ana ajunge în train, iar Ana în validare, deci scorul e umflat. ImbPipeline îl aplică doar la fit, pe fold-urile de antrenare.</p></details>
+<details><summary>best_score_ 0,808 vs nested CV 0,798?</summary><p>best_score_ e maximul din 40 de încercări și are și noroc. Nested CV evaluează procedura de căutare pe date nevăzute, deci e cinstit.</p></details>
+<details><summary>De ce pragul nu se alege pe test?</summary><p>Și pragul e o alegere. Se alege pe predicții out-of-fold din train. Pe test doar se aplică.</p></details>
+<details><summary>De ce arborii au scaler="passthrough"?</summary><p>Arborii compară valori („Income &gt; 60 000?”). Scalarea nu schimbă cine e de o parte sau de alta a pragului.</p></details>
+<details><summary>De ce 666666 → NaN și nu ștergem clientul?</summary><p>E un singur client, cu restul datelor bune. Ștergerea ar pierde informație. Ca NaN, e tratat ca celelalte 24 de lipsuri, completat cu mediana din train. Un client nou cu date lipsă trebuie și el să primească o predicție.</p></details>
+<details><summary>Ai leakage?</summary><p>Ar fi existat la regresie (Mnt*, Num*Purchases, Response), dar le-am scos. La clasificare nu: campaniile vechi și cheltuielile sunt din trecut. Preprocesarea e în pipeline, iar duplicatele au fost scoase înainte de split.</p></details>
+<details><summary>Ce înseamnă 3 și 11?</summary><p>Z_CostContact = 3 (costul unui contact), Z_Revenue = 11 (venitul dintr-o acceptare). Sunt constante, deci nu sunt atribute, dar le-am folosit la profit. Break-even: 3 / 11 ≈ 27% precizie.</p></details>
+<details><summary>De ce PR-AUC și nu acuratețea?</summary><p>Doar 15% acceptă. „Mereu nu” are 85% acuratețe și nu găsește pe nimeni. PR-AUC se uită la cei care acceptă și nu depinde de prag.</p></details>
+<details><summary>De ce MAE și nu RMSE?</summary><p>MAE e în bani și ușor de explicat. RMSE ridică greșelile la pătrat și ar fi dominată de câțiva clienți care cheltuie enorm.</p></details>
+<details><summary>Regresia logistică e regresie?</summary><p>Nu, e clasificare. Dă o probabilitate, iar peste prag decizia e „da”.</p></details>
+<details><summary>Ce face C? De ce C = 1?</summary><p>C = cât de liber e modelul să pună ponderi mari. De la C = 1 în sus scorul nu mai crește, iar la egalitate alegem varianta mai prudentă. GridSearch a confirmat.</p></details>
+</section>
+
+<p class="note" style="margin-top:40px">Exemplele „Încearcă” cu probabilități, curbe și calibrare sunt recalculate pe datele tale (scikit-learn, seed 42) și pot diferi puțin de rapoartele L03–L05. Cifrele din tabele sunt cele din rapoarte.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const DATA={"test": [[0.009, 0], [0.988, 1], [0.96, 1], [0.766, 1], [0.785, 1], [0.381, 0], [0.992, 1], [0.126, 0], [0.045, 0], [0.793, 0], [0.1, 0], [0.708, 0], [0.019, 0], [0.005, 0], [0.01, 0], [0.991, 1], [0.043, 0], [0.088, 0], [0.257, 1], [0.043, 0], [0.573, 0], [0.545, 0], [0.129, 0], [0.951, 1], [0.195, 0], [0.408, 0], [0.983, 1], [0.151, 0], [0.008, 0], [0.636, 1], [0.069, 0], [0.011, 0], [0.003, 0], [0.449, 0], [0.068, 0], [0.54, 1], [0.819, 1], [0.899, 1], [0.133, 0], [0.788, 0], [0.023, 0], [0.356, 0], [0.579, 0], [0.36, 0], [0.025, 0], [0.997, 1], [0.25, 0], [0.983, 1], [0.04, 0], [0.875, 1], [0.826, 0], [0.015, 0], [0.967, 1], [0.013, 0], [0.07, 0], [0.851, 1], [0.068, 1], [0.428, 0], [0.17, 0], [0.103, 0], [0.769, 0], [0.181, 0], [0.269, 0], [0.448, 0], [0.084, 0], [0.397, 0], [0.214, 0], [0.032, 0], [0.189, 0], [0.021, 0], [0.005, 0], [0.19, 0], [0.808, 1], [0.995, 1], [0.13, 0], [0.374, 0], [0.077, 0], [0.502, 0], [0.46, 0], [0.303, 0], [0.255, 0], [0.193, 0], [0.471, 0], [0.006, 0], [0.046, 0], [0.488, 0], [0.038, 0], [0.793, 0], [0.01, 0], [0.428, 0], [0.884, 1], [0.39, 0], [0.138, 0], [0.406, 0], [0.347, 0], [0.321, 0], [0.727, 0], [0.796, 0], [0.348, 0], [0.005, 0], [0.077, 0], [0.048, 0], [0.491, 1], [0.152, 0], [0.229, 0], [0.517, 0], [0.127, 0], [0.062, 0], [0.551, 0], [0.985, 1], [0.637, 1], [0.806, 1], [0.028, 0], [0.645, 0], [0.022, 0], [0.855, 1], [0.023, 0], [0.017, 0], [0.038, 0], [0.093, 0], [0.955, 1], [0.594, 0], [0.086, 0], [0.158, 0], [0.051, 0], [0.161, 0], [0.127, 0], [0.009, 0], [0.167, 0], [0.903, 0], [0.124, 0], [0.231, 0], [0.01, 0], [0.017, 0], [0.687, 1], [0.443, 0], [0.17, 0], [0.09, 0], [0.072, 0], [0.292, 0], [0.507, 0], [0.488, 0], [0.128, 0], [0.283, 0], [0.176, 0], [0.094, 0], [0.012, 0], [0.147, 1], [0.994, 1], [0.053, 0], [0.005, 0], [0.273, 0], [0.83, 0], [0.202, 0], [0.331, 1], [0.008, 0], [0.019, 0], [0.234, 0], [0.047, 0], [0.011, 0], [0.34, 0], [0.998, 1], [1.0, 0], [0.01, 0], [0.151, 0], [0.658, 0], [0.321, 0], [0.023, 0], [0.022, 0], [0.993, 1], [0.182, 0], [0.056, 0], [0.755, 0], [0.971, 1], [0.127, 0], [0.717, 0], [0.674, 0], [0.116, 0], [0.04, 0], [0.08, 0], [0.353, 0], [0.076, 0], [0.188, 0], [0.244, 1], [0.312, 0], [0.118, 0], [0.008, 0], [0.014, 0], [0.059, 0], [0.001, 0], [0.142, 0], [0.853, 0], [0.022, 1], [0.008, 0], [0.055, 0], [0.325, 0], [0.091, 0], [0.994, 1], [0.059, 0], [0.103, 0], [0.251, 0], [0.936, 1], [0.027, 0], [0.983, 1], [0.108, 0], [0.371, 0], [0.068, 0], [0.292, 0], [0.36, 0], [0.259, 0], [0.417, 0], [0.422, 0], [0.014, 0], [0.011, 0], [0.796, 1], [0.125, 0], [0.083, 0], [0.637, 0], [1.0, 1], [0.006, 0], [0.937, 1], [0.335, 0], [0.16, 0], [0.076, 0], [0.474, 0], [0.502, 0], [0.041, 0], [0.004, 0], [0.407, 0], [0.518, 0], [0.163, 0], [0.083, 0], [0.038, 0], [0.887, 0], [0.096, 0], [0.139, 0], [0.993, 1], [0.132, 0], [0.11, 0], [0.242, 0], [0.488, 0], [0.383, 0], [0.722, 1], [0.19, 0], [0.399, 0], [0.79, 0], [0.813, 1], [0.975, 1], [0.0, 0], [0.221, 0], [0.082, 0], [0.818, 1], [0.199, 0], [0.039, 0], [0.362, 0], [0.004, 0], [0.916, 1], [0.053, 0], [0.199, 0], [0.057, 0], [0.682, 0], [0.083, 0], [0.014, 0], [0.056, 0], [0.075, 0], [0.041, 0], [0.503, 0], [0.1, 0], [0.006, 0], [0.229, 1], [0.09, 0], [0.111, 0], [0.493, 0], [0.005, 0], [0.137, 0], [0.224, 0], [0.729, 0], [0.295, 0], [0.009, 0], [0.644, 1], [0.088, 0], [0.058, 0], [0.063, 0], [0.281, 0], [0.679, 0], [0.909, 1], [0.128, 0], [0.206, 0], [0.334, 0], [0.665, 0], [0.025, 0], [0.285, 0], [0.201, 0], [0.034, 0], [0.537, 1], [0.095, 0], [0.003, 0], [0.313, 0], [0.621, 0], [0.94, 1], [0.027, 0], [0.174, 0], [0.001, 0], [0.251, 0], [0.369, 0], [0.517, 0], [0.153, 0], [0.036, 0], [0.167, 0], [0.024, 0], [0.058, 0], [0.255, 0], [0.011, 0], [0.389, 0], [0.764, 0], [0.421, 0], [0.071, 0], [0.708, 0], [0.043, 0], [0.016, 0], [0.177, 0], [0.011, 0], [0.047, 0], [0.818, 0], [0.007, 0], [0.224, 0], [0.026, 0], [0.509, 0], [0.702, 1], [0.028, 0], [0.435, 1], [0.251, 0], [0.365, 0], [0.637, 0], [0.07, 0], [0.184, 0], [0.14, 0], [0.106, 0], [0.057, 0], [0.036, 0], [0.417, 0], [0.048, 0], [0.08, 0], [0.051, 0], [0.077, 0], [0.133, 0], [0.252, 0], [0.049, 0], [0.845, 0], [0.037, 0], [0.35, 0], [0.964, 1], [0.01, 0], [0.294, 0], [0.233, 0], [0.03, 0], [0.89, 0], [0.615, 0], [0.055, 0], [0.009, 0], [0.917, 1], [0.887, 1], [0.004, 0], [0.555, 0], [0.774, 0], [0.531, 0], [0.034, 0], [0.502, 0], [0.967, 1], [0.958, 0], [0.157, 0], [0.156, 0], [0.577, 0], [0.674, 1], [0.729, 0], [0.549, 0], [0.455, 0], [0.06, 0], [0.534, 0], [0.637, 0], [0.13, 0], [0.194, 0], [0.009, 0], [0.84, 0], [0.098, 0], [0.029, 0], [0.356, 0], [0.025, 0], [0.596, 0], [0.296, 0], [0.463, 0], [0.039, 0], [0.143, 0], [0.026, 0], [0.009, 0], [0.543, 0], [0.405, 0], [0.15, 0], [0.883, 1], [0.015, 0], [0.101, 0], [0.199, 0], [0.3, 0], [0.029, 0], [0.049, 0], [0.097, 0], [0.197, 0], [0.02, 0], [0.057, 0], [0.24, 0], [0.066, 0], [0.627, 1]], "cal_bal": [[0.041, 0.009, 567], [0.147, 0.042, 236], [0.243, 0.071, 156], [0.351, 0.06, 117], [0.445, 0.15, 113], [0.545, 0.268, 97], [0.647, 0.329, 70], [0.747, 0.351, 74], [0.847, 0.352, 71], [0.957, 0.69, 145]], "cal_none": [[0.031, 0.029, 1040], [0.144, 0.188, 240], [0.246, 0.308, 91], [0.345, 0.317, 63], [0.446, 0.429, 49], [0.557, 0.5, 40], [0.649, 0.606, 33], [0.746, 0.607, 28], [0.852, 0.778, 27], [0.954, 0.8, 35]], "depth": [[1, 0.617, 0.592], [2, 0.699, 0.674], [3, 0.75, 0.684], [4, 0.784, 0.702], [5, 0.827, 0.68], [6, 0.861, 0.676], [8, 0.914, 0.657], [10, 0.952, 0.634], [12, 0.98, 0.632], [15, 0.994, 0.622], ["f\u0103r\u0103", 0.998, 0.618]], "C": [[0.001, 0.755, 0.741], [0.003, 0.784, 0.764], [0.01, 0.806, 0.784], [0.03, 0.817, 0.788], [0.1, 0.826, 0.802], [0.3, 0.829, 0.806], [1, 0.829, 0.808], [3, 0.83, 0.806], [10, 0.83, 0.806], [30, 0.83, 0.806], [100, 0.83, 0.806]]};
+const $=id=>document.getElementById(id);
+const f2=v=>v.toFixed(2).replace('.',','), f3=v=>v.toFixed(3).replace('.',','), n0=v=>Math.round(v).toLocaleString('ro-RO');
+/* theme */
+(function(){const b=$('themeBtn');const modes=['auto','light','dark'];let i=0;try{i=Math.max(0,modes.indexOf(localStorage.getItem('th')||'auto'))}catch(e){}
+const ap=()=>{const m=modes[i];if(m==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',m);b.textContent='Temă: '+({auto:'auto',light:'luminoasă',dark:'întunecată'})[m];try{localStorage.setItem('th',m)}catch(e){}};
+b.onclick=()=>{i=(i+1)%3;ap();location.reload()};ap();})();
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const C={acc:css('--acc'),org:css('--org'),mute:css('--mute'),grid:css('--grid'),ink:css('--ink'),gray:'#b4b2a9'};
+let charts=false;
+function chartsOk(){return typeof Chart!=='undefined'}
+if(chartsOk()){Chart.defaults.color=C.mute;Chart.defaults.font.size=12;Chart.defaults.plugins.legend.display=false;Chart.defaults.maintainAspectRatio=false;Chart.defaults.animation.duration=250}
+const ax=(t,o={})=>Object.assign({title:{display:!!t,text:t},grid:{color:C.grid}},o);
+function mk(id,cfg){if(!chartsOk()){const c=$(id);c.parentNode.innerHTML='<p class="note">Graficul are nevoie de internet (Chart.js).</p>';return null}return new Chart($(id),cfg)}
+
+/* ---------- statistici ---------- */
+(function(){const base=[20,35,50,69,120,250,396,600,900,1046];
+const q=(a,p)=>{const s=[...a].sort((x,y)=>x-y),i=(s.length-1)*p,l=Math.floor(i);return s[l]+(s[Math.min(l+1,s.length-1)]-s[l])*(i-l)};
+const u=()=>{const r=+$('rich').value;const a=r>0?[...base,r]:base;const m=a.reduce((s,x)=>s+x,0)/a.length;const sd=Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1));
+$('richV').textContent=r>0?n0(r):'nu există';$('sMean').textContent=n0(m);$('sMed').textContent=n0(q(a,.5));$('sStd').textContent=n0(sd);$('sIqr').textContent=n0(q(a,.75)-q(a,.25));
+$('sMsg').textContent=r>0?'Un singur client a urcat media la '+n0(m)+', dar mediana a rămas '+n0(q(a,.5))+'. Mediana nu se sperie de extreme.':'Fără clientul bogat, media ('+n0(m)+') și mediana ('+n0(q(a,.5))+') sunt deja diferite, din cauza asimetriei.'};
+$('rich').oninput=u;u();})();
+
+/* ---------- leakage ---------- */
+(function(){const rows=[['A',30000,'train'],['B',40000,'train'],['C',50000,'train'],['D',null,'train'],['E',150000,'test'],['F',200000,'test']];let bad=false;
+const med=a=>{const s=[...a].sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2};
+const u=()=>{const src=rows.filter(r=>r[1]!==null&&(bad||r[2]==='train')).map(r=>r[1]);const m=med(src);
+$('lkT').innerHTML='<tr><th>Client</th><th>Venit</th><th>Unde</th><th>Intră în calculul medianei?</th></tr>'+rows.map(r=>{const used=r[1]!==null&&(bad||r[2]==='train');return '<tr><td>'+r[0]+'</td><td>'+(r[1]===null?'<b>'+n0(m)+'</b> (completat)':n0(r[1]))+'</td><td>'+r[2]+'</td><td>'+(r[1]===null?'—':used?(r[2]==='test'?'<span class="pill bad">da, dar nu are voie</span>':'<span class="pill ok">da</span>'):'<span class="pill acc">nu</span>')+'</td></tr>'}).join('');
+$('lkMsg').innerHTML=bad?'Mediana = <b>'+n0(m)+'</b>. Clienții E și F din test au schimbat valoarea pusă la D. Informația din viitor a intrat în antrenare: <b>leakage</b>.':'Mediana = <b>'+n0(m)+'</b>, calculată doar din A, B, C. Testul nu a influențat nimic. <b>Corect.</b>';
+$('lkOk').classList.toggle('on',!bad);$('lkBad').classList.toggle('on',bad)};
+$('lkOk').onclick=()=>{bad=false;u()};$('lkBad').onclick=()=>{bad=true;u()};u();})();
+
+/* ---------- CV ---------- */
+(function(){const sc=[0.78,0.83,0.80,0.76,0.82];let r=0;const bt=$('cvBtns');
+for(let i=0;i<5;i++){const b=document.createElement('button');b.type='button';b.textContent='Runda '+(i+1);b.onclick=()=>{r=i;u()};bt.appendChild(b)}
+const u=()=>{[...bt.children].forEach((b,i)=>b.classList.toggle('on',i===r));$('cvF').innerHTML=[0,1,2,3,4].map(i=>'<div class="'+(i===r?'v':'')+'">'+(i===r?'verifică':'învață')+'</div>').join('');
+const done=sc.slice(0,r+1);$('cvMsg').innerHTML='Runda '+(r+1)+': învață pe '+(4*329)+' clienți, verifică pe ~329 → nota <b>'+f2(sc[r])+'</b>. Media până acum: <b>'+f2(done.reduce((a,b)=>a+b,0)/done.length)+'</b>'+(r===4?' ← nota finală CV.':'.')};u();})();
+
+/* ---------- one-hot ---------- */
+(function(){const cats=['Married','Together','Single','Divorced','Widow'];const edu=['Basic','Graduation','Master','PhD'];
+const u=()=>{const v=$('ms').value;const list=[...cats,'rare'];const lit=cats.includes(v)?v:'rare';
+$('bulbs').innerHTML=list.map(c=>'<div class="bulb'+(c===lit?' lit':'')+'">'+c+'<b>'+(c===lit?1:0)+'</b></div>').join('');$('edV').textContent=$('ed').value+' → '+edu.indexOf($('ed').value)};
+$('ms').onchange=u;$('ed').onchange=u;u();})();
+
+/* ---------- outlier ---------- */
+(function(){const base=[30000,35000,42000,48000,51000,55000,60000,66000,70000];
+const q=(a,p)=>{const s=[...a].sort((x,y)=>x-y),i=(s.length-1)*p,l=Math.floor(i);return s[l]+(s[Math.min(l+1,s.length-1)]-s[l])*(i-l)};
+const u=()=>{const o=+$('ol').value,a=[...base,o];const m=a.reduce((s,x)=>s+x,0)/a.length,sd=Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/a.length);const md=q(a,.5),iqr=q(a,.75)-q(a,.25);
+const zs=(70000-m)/sd,zr=(70000-md)/iqr;$('olV').textContent=n0(o);$('olS').textContent=f2(zs);$('olR').textContent=f2(zr);
+$('olMsg').textContent='Cu cât crește clientul bogat, cu atât StandardScaler îl „strivește” pe clientul de 70 000 spre 0 (media și std se mută după bogat). RobustScaler rămâne aproape la fel, pentru că mediana și IQR nu se uită la extreme.'};
+$('ol').oninput=u;u();})();
+
+/* ---------- liniară ---------- */
+const P=[[66.7,612],[61.3,632],[43.8,492],[51.3,182],[62.8,819],[79.1,1693],[52.2,939],[44.7,34],[43.2,637],[59.2,574],[75.9,1242],[61.8,1319],[60.2,1071],[69,1533],[82.7,1167],[81.1,1501],[11.4,14],[83.2,2346],[72.3,939],[53.7,694],[82.7,2283],[34.5,162],[45.1,20],[31.8,98],[31.8,60],[24.3,263],[33,78],[17.1,128],[77.6,1680],[28.8,12],[42,25],[25.8,28],[19,37],[38.2,153],[34.9,34],[51.4,18],[13.7,25],[83.7,1173],[35.9,129],[40.5,49],[36.1,74],[48.2,265],[59.7,1027],[47.4,225],[16.2,106],[32.4,52],[46.1,362],[49.2,236],[32.2,22],[48,41],[66.7,438],[113.7,277],[75.3,563],[50.9,46],[48.8,54],[32.6,80],[46.8,23],[62.5,973],[62.8,1178],[14.8,65],[19.7,84],[79.8,868],[31.9,70],[17.5,18],[30.6,70],[42.1,382],[75.3,1040],[30.8,81],[37.1,401],[52.5,794],[31.9,72],[24.9,80],[38.2,40],[27.9,37],[22.3,18],[51.8,63],[73,497],[50.7,561],[44,662],[60.5,289],[22.4,58],[7.5,100],[59.9,766],[71.2,917],[62.2,634],[79.6,1113],[66.5,401],[51.1,315],[56.2,156],[36.8,16],[86.6,1603],[50.5,135],[80.7,1004],[7.5,15],[28.6,78],[51.4,353],[81.3,928],[65.8,747],[46.9,263],[21,73],[23.7,23],[58,468],[44.3,42],[58,470],[40.1,414],[43.3,441],[62.9,1307],[42.3,270],[65.2,1531],[57.3,608],[35.6,178],[64.9,1540],[47.5,75],[15.9,36],[14.9,66],[37,94],[65.8,1146],[18.2,21],[22,22],[80.4,1380],[62.7,749],[75.7,1921],[31,167],[66.8,1033],[75.3,841],[38.2,17],[61.6,530],[62.6,953],[81.4,778],[26.2,25],[30.4,46],[42.4,100],[35.8,72],[81.7,1104],[85.5,1383],[31.6,38],[33.2,120],[92.5,1131],[24,68],[45.9,199],[35.9,49],[56.3,597],[73,1958],[63,463],[75,1869],[89.6,2059],[14.8,51],[55.5,633],[83,1674],[79.5,1348],[42.2,100],[77.5,1157],[59.6,499],[85.7,1313],[51.3,270],[31.5,155],[64,882],[39.1,165],[37.4,30]];
+mk('cLin',{type:'scatter',data:{datasets:[{data:P.map(p=>({x:p[0],y:p[1]})),backgroundColor:C.acc+'99',pointRadius:3.5},{type:'line',data:[{x:25,y:22*25-536},{x:115,y:22*115-536}],borderColor:C.org,borderWidth:2,pointRadius:0}]},options:{scales:{x:ax('venit (mii)',{min:0,max:120}),y:ax('MntTotal',{min:0,max:2500})}}});
+
+/* ---------- logistică ---------- */
+(function(){const S=[];for(let a=0;a<=40;a++)S.push({x:a/10,y:1/(1+Math.exp(-(1.284*a/10-2.31)))});
+mk('cLog',{type:'scatter',data:{datasets:[{type:'bar',data:[{x:0,y:.086},{x:1,y:.311},{x:2,y:.52},{x:3,y:.8},{x:4,y:.9}],backgroundColor:C.acc,barThickness:26,borderRadius:4},{type:'line',data:S,borderColor:C.org,borderWidth:2,pointRadius:0,borderDash:[6,4]}]},options:{scales:{x:ax('câte campanii vechi a acceptat (1606 · 302 · 75 · 40 · 10 clienți)',{type:'linear',min:-0.5,max:4.5,ticks:{stepSize:1}}),y:ax('șansa de a accepta',{min:0,max:1,ticks:{callback:v=>Math.round(v*100)+'%'}})}}});})();
+
+/* ---------- kNN ---------- */
+(function(){const K=[[54.8,87,0],[55.7,27,0],[55.8,97,0],[30.5,16,0],[33.6,33,0],[42.4,42,0],[82,76,1],[71.6,94,0],[56.7,64,0],[72.3,52,0],[54.9,57,0],[74.6,73,0],[66.5,1,0],[57.1,82,1],[66.5,71,0],[39.1,28,0],[22.8,75,0],[35.9,80,0],[23.5,51,0],[86,95,1],[27.8,40,0],[45.9,42,0],[62.6,27,0],[39,92,0],[48.7,50,0],[37,50,0],[70.9,42,0],[74.7,92,0],[42.4,69,0],[32.7,38,0],[48.5,32,0],[70.6,65,0],[27.2,50,0],[22.5,36,1],[27.6,45,0],[46.3,28,0],[102.7,5,1],[26.6,26,0],[75,74,0],[44.6,25,0],[79.6,70,0],[72.6,60,1],[70.5,73,0],[82.2,83,0],[34.9,26,0],[68.3,31,1],[72,59,0],[24.2,94,0],[57.3,55,1],[78.1,89,0],[50.4,72,0],[19.5,63,0],[16.9,50,0],[60.7,56,1],[64.1,8,1],[68.8,73,0],[60.9,41,0],[22.4,49,0],[68.1,51,0],[75.5,56,0],[76.7,91,0],[65.5,22,0],[38.1,69,0],[30.1,30,0],[72,27,0],[38.7,71,0],[78.7,42,0],[61.2,46,0],[68.1,86,0],[77.9,93,1]];
+let nc={x:65,y:20},k=5;
+const ch=mk('cKnn',{type:'scatter',data:{datasets:[{data:K.map(p=>({x:p[0],y:p[1]})),pointRadius:5,pointBackgroundColor:K.map(p=>p[2]?C.acc:C.gray),pointBorderColor:[],pointBorderWidth:[]},{data:[nc],pointRadius:9,pointStyle:'rectRot',backgroundColor:C.org}]},options:{animation:false,plugins:{tooltip:{enabled:false}},scales:{x:ax('venit (mii)',{min:10,max:110}),y:ax('Recency (zile)',{min:0,max:100})},onClick:(e,_,c)=>{const p=Chart.helpers.getRelativePosition(e,c);nc={x:c.scales.x.getValueForPixel(p.x),y:c.scales.y.getValueForPixel(p.y)};u()}}});
+const u=()=>{const ds=K.map((p,i)=>({i,d:Math.hypot(p[0]-nc.x,p[1]-nc.y)})).sort((a,b)=>a.d-b.d).slice(0,k);const s=new Set(ds.map(o=>o.i));const yes=ds.filter(o=>K[o.i][2]).length;
+if(ch){const d0=ch.data.datasets[0];d0.pointBorderColor=K.map((_,i)=>s.has(i)?C.org:'rgba(0,0,0,0)');d0.pointBorderWidth=K.map((_,i)=>s.has(i)?3:0);ch.data.datasets[1].data=[nc];ch.update()}
+$('kOut').innerHTML='Client nou: venit '+Math.round(nc.x)+' mii, ultima cumpărătură acum '+Math.round(nc.y)+' zile. Din '+k+' vecini, '+yes+' au acceptat ('+Math.round(yes/k*100)+'%) → kNN zice: <b>'+(yes/k>0.5?'acceptă':'refuză')+'</b>.'};
+$('kk').oninput=()=>{k=+$('kk').value;$('ko').textContent=k;u()};u();})();
+
+/* ---------- gamma ---------- */
+(function(){const xs=[];for(let d=0;d<=12;d+=0.2)xs.push(+d.toFixed(1));
+const ch=mk('cGam',{type:'line',data:{labels:xs,datasets:[{data:[],borderColor:C.acc,borderWidth:2,pointRadius:0,fill:true,backgroundColor:C.acc+'1a'}]},options:{scales:{x:ax('distanța dintre doi clienți (date scalate)',{ticks:{maxTicksLimit:7}}),y:ax('asemănare',{min:0,max:1})}}});
+const u=()=>{const g=Math.pow(10,+$('gm').value);$('gmV').textContent=g<0.01?g.toFixed(4).replace('.',','):g.toFixed(3).replace('.',',');if(ch){ch.data.datasets[0].data=xs.map(d=>Math.exp(-g*d*d));ch.update()}
+const typ=Math.exp(-g*50);$('gmMsg').innerHTML='Doi clienți obișnuiți (distanța² ≈ 50, adică distanța ≈ 7): asemănare <b>'+f2(typ)+'</b>. '+(typ>0.8?'Lanternă largă: toți seamănă cu toți, granița e aproape dreaptă. Așa e γ = 0,001 la tine.':typ>0.1?'Rază medie: graniță curbă, dar netedă.':'Lanternă îngustă: fiecare client e o insulă, deci overfitting.')};
+$('gm').oninput=u;u();})();
+
+/* ---------- SVR ---------- */
+(function(){const pts=[[0.5,1.6],[1,0.4],[1.5,2.9],[2,1.5],[2.5,3.4],[3,2.0],[3.5,4.6],[4,2.6],[4.5,4.4],[5,5.9],[5.5,3.9],[6,5.6],[6.5,6.9],[7,5.1],[7.5,7.6],[8,6.0],[8.5,8.9],[9,7.4],[9.5,8.0],[10,9.6]];const line=x=>0.85*x+0.4;
+const ch=mk('cSvr',{type:'scatter',data:{datasets:[{data:pts.map(p=>({x:p[0],y:p[1]})),pointRadius:5,pointBackgroundColor:[]},{type:'line',data:[{x:0,y:line(0)},{x:10.5,y:line(10.5)}],borderColor:C.org,borderWidth:2,pointRadius:0},{type:'line',data:[],borderColor:C.org,borderWidth:1,borderDash:[4,4],pointRadius:0,fill:'+1',backgroundColor:C.org+'22'},{type:'line',data:[],borderColor:C.org,borderWidth:1,borderDash:[4,4],pointRadius:0}]},options:{scales:{x:ax('venit',{min:0,max:10.5}),y:ax('cheltuială',{min:-1,max:12})}}});
+const u=()=>{const e=+$('ep').value;$('epV').textContent=f2(e);const out=pts.map(p=>Math.abs(p[1]-line(p[0]))>e);
+if(ch){ch.data.datasets[0].pointBackgroundColor=out.map(o=>o?C.acc:C.gray);ch.data.datasets[2].data=[{x:0,y:line(0)+e},{x:10.5,y:line(10.5)+e}];ch.data.datasets[3].data=[{x:0,y:line(0)-e},{x:10.5,y:line(10.5)-e}];ch.update()}
+const n=out.filter(Boolean).length;$('epMsg').innerHTML='<b>'+n+' din '+pts.length+'</b> puncte sunt în afara tubului (albastre) = vectori suport. Tub lat → puțini vectori suport, model „leneș”. Tub îngust → aproape toți contează.'};
+$('ep').oninput=u;u();})();
+
+/* ---------- boosting ---------- */
+(function(){const ch=mk('cBoost',{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:C.acc,borderRadius:4,barThickness:22},{type:'line',data:[],borderColor:C.org,borderDash:[5,4],borderWidth:2,pointRadius:0}]},options:{scales:{x:ax('după câți arbori'),y:ax('predicția pentru Ana',{min:0,max:1100})}}});
+const u=()=>{const lr=+$('lr').value;$('lrV').textContent=lr.toFixed(1).replace('.',',');let p=606;const v=[p];for(let t=1;t<=10;t++){p+=lr*0.85*(1000-p);v.push(p)}
+if(ch){ch.data.labels=v.map((_,i)=>i===0?'start':i);ch.data.datasets[0].data=v;ch.data.datasets[1].data=v.map(()=>1000);ch.update()}
+$('lrMsg').innerHTML='După 10 arbori: <b>'+n0(v[10])+'</b> (adevărat: 1000). Rată mică = pași mici, trebuie mai mulți arbori, dar generalizează mai bine. La tine, cu 0,1 au ajuns ~42 de arbori, cu 0,03 au trebuit 408.'};
+$('lr').oninput=u;u();})();
+
+/* ---------- adâncime ---------- */
+(function(){const D=DATA.depth;const lab=D.map(d=>String(d[0]));
+const ch=mk('cDep',{type:'line',data:{labels:lab,datasets:[{data:D.map(d=>d[1]),borderColor:C.acc,borderWidth:2,pointRadius:3},{data:D.map(d=>d[2]),borderColor:C.org,borderWidth:2,pointRadius:3,borderDash:[6,4]},{type:'scatter',data:[],pointRadius:9,pointStyle:'line',borderColor:C.ink,borderWidth:2}]},options:{scales:{x:ax('max_depth'),y:ax('acuratețe echilibrată',{min:0.5,max:1})}}});
+const u=()=>{const i=+$('dp').value,d=D[i];$('dpV').textContent=d[0];const gap=d[1]-d[2];if(ch){ch.data.datasets[2].data=[{x:lab[i],y:d[1]},{x:lab[i],y:d[2]}];ch.update()}
+$('dpMsg').innerHTML='Train <b>'+f3(d[1])+'</b>, validare <b>'+f3(d[2])+'</b>, diferență <b>'+f3(gap)+'</b>. '+(gap<0.06?'Liniile sunt apropiate: generalizează.':gap<0.15?'Începe să tocească.':'Tocește: aproape perfect pe train, slab pe date noi.')};
+$('dp').oninput=u;u();})();
+
+/* ---------- C ---------- */
+(function(){const D=DATA.C;const lab=D.map(d=>String(d[0]).replace('.',','));
+const ch=mk('cC',{type:'line',data:{labels:lab,datasets:[{data:D.map(d=>d[1]),borderColor:C.acc,borderWidth:2,pointRadius:3},{data:D.map(d=>d[2]),borderColor:C.org,borderWidth:2,pointRadius:3,borderDash:[6,4]}]},options:{scales:{x:ax('C (scară logaritmică)'),y:ax('acuratețe echilibrată',{min:0.7,max:0.86})}}});
+const u=()=>{const i=+$('cS').value,d=D[i];$('cV').textContent=lab[i];if(ch){ch.data.datasets[1].pointRadius=D.map((_,j)=>j===i?7:3);ch.update()}
+$('cMsg').innerHTML='C = '+lab[i]+': train <b>'+f3(d[1])+'</b>, validare <b>'+f3(d[2])+'</b>. '+(d[0]<0.1?'Prea strict: nu învață tot ce poate.':d[0]===1?'Aici ajunge la maxim. De aici în sus curba e plată, deci alegem C = 1.':d[0]>1?'Nu mai crește nimic, doar riști să tocești.':'Aproape de maxim.')};
+$('cS').oninput=u;u();})();
+
+/* ---------- metrici / prag ---------- */
+(function(){const T=DATA.test,N=T.length,Pn=T.filter(t=>t[1]).length;const s=[...T].sort((a,b)=>b[0]-a[0]);
+const pr=[];let tp=0;s.forEach((t,i)=>{if(t[1])tp++;pr.push({x:tp/Pn,y:tp/(i+1)})});
+let ap=0,ptp=0;s.forEach((t,i)=>{if(t[1]){ptp++;ap+=ptp/(i+1)}});ap/=Pn;
+const ch=mk('cPR',{type:'scatter',data:{datasets:[{type:'line',data:pr,borderColor:C.acc,borderWidth:2,pointRadius:0,fill:true,backgroundColor:C.acc+'1a'},{type:'line',data:[{x:0,y:Pn/N},{x:1,y:Pn/N}],borderColor:C.gray,borderDash:[4,4],borderWidth:1,pointRadius:0},{data:[],pointRadius:8,backgroundColor:C.org}]},options:{scales:{x:ax('recall',{type:'linear',min:0,max:1}),y:ax('precizie',{min:0,max:1.02})}}});
+const u=()=>{const th=+$('th').value;let TP=0,FP=0,FN=0,TN=0;T.forEach(([p,y])=>{if(p>=th){y?TP++:FP++}else{y?FN++:TN++}});
+const rec=TP/Pn,pre=TP+FP?TP/(TP+FP):0,f1=pre+rec?2*pre*rec/(pre+rec):0,acc=(TP+TN)/N,spec=TN/(TN+FP),bal=(rec+spec)/2,prof=(11*TP-3*(TP+FP))/N;
+$('thV').textContent=f2(th);$('mTP').textContent=TP;$('mFP').textContent=FP;$('mFN').textContent=FN;$('mTN').textContent=TN;
+$('mRec').textContent=f3(rec);$('mPre').textContent=f3(pre);$('mF1').textContent=f3(f1);$('mAcc').textContent=f3(acc);$('mBal').textContent=f3(bal);$('mPro').textContent=(prof<0?'−':'+')+f2(Math.abs(prof));
+if(ch){ch.data.datasets[2].data=[{x:rec,y:pre}];ch.update()}
+$('mMsg').innerHTML='Suni <b>'+(TP+FP)+'</b> din 412 clienți și găsești <b>'+TP+' din '+Pn+'</b> buni. PR-AUC (aria albastră) = <b>'+f3(ap)+'</b> și nu depinde de prag. '+(rec<0.75?'Recall sub 0,75: ratezi prea mulți clienți buni.':th<0.3?'Suni aproape pe toată lumea: recall mare, dar multe telefoane degeaba.':'Prag rezonabil.')};
+$('th').oninput=u;u();})();
+
+/* ---------- calibrare ---------- */
+(function(){let k='bal';const ch=mk('cCal',{type:'scatter',data:{datasets:[{type:'line',data:[{x:0,y:0},{x:1,y:1}],borderColor:C.gray,borderDash:[4,4],borderWidth:1,pointRadius:0},{type:'line',data:[],borderColor:C.acc,borderWidth:2,pointRadius:5,backgroundColor:C.acc}]},options:{scales:{x:ax('probabilitatea prezisă',{type:'linear',min:0,max:1}),y:ax('câți au acceptat de fapt',{min:0,max:1})}}});
+const u=()=>{const D=DATA['cal_'+k];if(ch){ch.data.datasets[1].data=D.map(d=>({x:d[0],y:d[1]}));ch.update()}$('cb1').classList.toggle('on',k==='bal');$('cb2').classList.toggle('on',k==='none');
+const mid=D.find(d=>d[0]>0.5&&d[0]<0.6)||D[5];
+$('calMsg').innerHTML=k==='bal'?'Cu class_weight, punctele sunt <b>sub diagonală</b>: când modelul zice ~'+Math.round(mid[0]*100)+'%, acceptă de fapt doar ~'+Math.round(mid[1]*100)+'%. Probabilitățile sunt umflate, dar ordinea e bună. De aceea pragul e 0,53, nu ~0,2.':'Fără class_weight, punctele sunt <b>aproape de diagonală</b>: probabilitățile sunt cinstite (calibrate). Dar modelul zice rar „da”, deci recall-ul la pragul 0,5 e mic.'};
+$('cb1').onclick=()=>{k='bal';u()};$('cb2').onclick=()=>{k='none';u()};u();})();
+
+/* ---------- regresie ---------- */
+(function(){const R=[['Ana',500,400],['Ion',200,250],['Maria',1000,900],['Dan',1500,null]];
+const u=()=>{const dg=+$('dan').value;$('danV').textContent=n0(dg);const rows=R.map(r=>[r[0],r[1],r[2]===null?dg:r[2]]);const e=rows.map(r=>Math.abs(r[1]-r[2]));
+const mae=e.reduce((a,b)=>a+b,0)/4,rmse=Math.sqrt(e.reduce((a,b)=>a+b*b,0)/4),ym=rows.reduce((a,r)=>a+r[1],0)/4,r2=1-rows.reduce((a,r)=>a+(r[1]-r[2])**2,0)/rows.reduce((a,r)=>a+(r[1]-ym)**2,0);
+$('rgT').innerHTML='<tr><th>Client</th><th>A cheltuit</th><th>Modelul ghicește</th><th>Greșeala</th></tr>'+rows.map((r,i)=>'<tr><td>'+r[0]+'</td><td>'+n0(r[1])+'</td><td>'+n0(r[2])+'</td><td>'+n0(e[i])+'</td></tr>').join('');
+$('rMAE').textContent=n0(mae);$('rRMSE').textContent=n0(rmse);$('rR2').textContent=f2(r2);
+$('rMsg').textContent=rmse>1.4*mae?'RMSE e mult peste MAE: o singură greșeală mare (Dan) domină totul.':'MAE și RMSE sunt apropiate: greșelile sunt cam de aceeași mărime.'};
+$('dan').oninput=u;u();})();
+</script>
+</body>
+</html>

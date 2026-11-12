@@ -1,0 +1,11 @@
+numpy
+pandas==3.0.6
+scipy
+scikit-learn==1.9.1
+imbalanced-learn==0.14.2
+matplotlib==3.11.2
+tensorflow
+keras==3.15.1
+kagglehub
+jupyter
+nbconvert

@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raport L06 (bonus)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<style>
+:root { --bg:#fafaf8; --fg:#1f2328; --muted:#59636e; --border:#d8dee4; --code-bg:#f3f4f6; --accent:#0b6bcb; }
+body { background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; margin:0; }
+main { max-width:960px; margin:0 auto; padding:24px 16px 80px; }
+h1 { font-size:1.8rem; border-bottom:2px solid var(--border); padding-bottom:.3em; }
+h2 { margin-top:2.2em; border-bottom:1px solid var(--border); padding-bottom:.2em; }
+h3 { margin-top:1.4em; color:#24292f; }
+code { background:var(--code-bg); padding:.1em .35em; border-radius:4px; font-size:.9em; }
+pre { position:relative; background:#f6f8fa; border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto; }
+pre code { background:none; padding:0; font-size:.85em; line-height:1.45; }
+pre .copy { position:absolute; top:8px; right:8px; font:12px system-ui; padding:4px 10px; border:1px solid var(--border);
+            border-radius:6px; background:#fff; cursor:pointer; }
+pre .copy:hover { border-color:var(--accent); color:var(--accent); }
+table { border-collapse:collapse; margin:1em 0; display:block; overflow-x:auto; }
+th, td { border:1px solid var(--border); padding:6px 10px; text-align:left; }
+th { background:#eef1f4; }
+blockquote { margin:1em 0; padding:.5em 1em; border-left:4px solid var(--accent); background:#eef5fc; color:#24292f; }
+hr { border:none; border-top:1px solid var(--border); margin:2em 0; }
+</style></head>
+<body><main>
+<h1>Raport L06 (bonus) — Keras vs. scikit-learn (T8 Customer Personality Analysis)</h1>
+<p>Notebook-ul <code>L06_Bonus_Keras_v2.ipynb</code> are <strong>toate sarcinile necompletate</strong> (celula de configurare are încă <code>"..."</code>, deci <code>clean.csv exists: False</code>). Nu am greșeli de semnalat în cod. Mai jos e soluția completă, pe sarcini.</p>
+<p>Legendă: ❌ necompletat (toate)</p>
+<blockquote>
+<p><strong>Ce am verificat și ce nu:</strong> pe calculatorul tău nu am putut instala Keras (pachetele TensorFlow / JAX / PyTorch au căi de fișiere prea lungi pentru Windows fără „long paths”, iar asta e o setare de sistem pe care nu o schimb). Codul scikit-learn de aici e același ca în L04/L05, verificat acolo. <strong>Codul Keras nu l-am rulat</strong>: l-am scris după API-ul Keras 3 (cel din Colab, <code>Keras 3.13</code>), dar rulează-l celulă cu celulă și spune-mi dacă apare vreo eroare. Observațiile au locuri marcate cu <strong>[…]</strong> pentru cifrele care îți ies ție; textul din jur spune ce să cauți și cum să interpretezi.</p>
+</blockquote>
+<p><strong>Nume:</strong> exemplele (Penguins) folosesc <code>num_c</code>, <code>cat_c</code>, <code>prep_c</code>, <code>A_c_fit</code>, <code>build_model</code>, <code>keras_cv</code>. În codul tău folosesc alte nume, ca să nu strici celulele de exemplu care rulează după.</p>
+<hr />
+<h2>Sarcina 0 — Setul de date (celula 6) ❌</h2>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># TODO: aceleasi valori ca in laboratoarele 2-5
+MY_NAME = &quot;Customer Personality Analysis&quot;   # IDENTIC cu L02-L05
+TARGET_CLF = &quot;Response&quot;
+POS_CLASS = 1
+TARGET_REG = &quot;MntTotal&quot;
+
+MY_DIR = f&quot;{DATA_DIR}/{MY_NAME}&quot;
+print(MY_NAME, &quot;|&quot;, TARGET_CLF, &quot;|&quot;, TARGET_REG, &quot;| clean.csv exists:&quot;, os.path.exists(f&quot;{MY_DIR}/clean.csv&quot;))
+</code></pre>
+<hr />
+<h2>Sarcina 1 — Cele două probleme (celula 9) ❌</h2>
+<p>Identic cu TODO 1 din L05 (același split, aceleași fold-uri, ca să putem pune rețeaua în tabelul din L05).</p>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># SARCINA: aceleasi doua probleme si aceleasi split-uri ca in laboratoarele 4-5
+from sklearn.model_selection import train_test_split, StratifiedKFold, KFold
+
+CLEAN_CSV = f&quot;{MY_DIR}/clean.csv&quot;
+assert os.path.exists(CLEAN_CSV), f&quot;Nu exista {CLEAN_CSV}: rulati intai capitolul 5 din laboratorul 2&quot;
+df = pd.read_csv(CLEAN_CSV)
+
+MNT_COLS = [&quot;MntWines&quot;, &quot;MntFruits&quot;, &quot;MntMeatProducts&quot;, &quot;MntFishProducts&quot;, &quot;MntSweetProducts&quot;, &quot;MntGoldProds&quot;]
+LEAKY_R = [&quot;NumWebPurchases&quot;, &quot;NumCatalogPurchases&quot;, &quot;NumStorePurchases&quot;, &quot;NumDealsPurchases&quot;]
+
+Xc = df.drop(columns=[TARGET_CLF, TARGET_REG])
+yc = (df[TARGET_CLF] == POS_CLASS).astype(int)
+Xr = df.drop(columns=[TARGET_REG, TARGET_CLF] + MNT_COLS + LEAKY_R)
+yr = df[TARGET_REG]
+
+Xc_train, Xc_test, yc_train, yc_test = train_test_split(Xc, yc, test_size=0.2, stratify=yc, random_state=SEED)
+Xr_train, Xr_test, yr_train, yr_test = train_test_split(Xr, yr, test_size=0.2, random_state=SEED)
+
+num_cols_c = Xc_train.select_dtypes(include=&quot;number&quot;).columns.tolist()
+cat_cols_c = Xc_train.select_dtypes(exclude=&quot;number&quot;).columns.tolist()
+num_cols_r = Xr_train.select_dtypes(include=&quot;number&quot;).columns.tolist()
+cat_cols_r = Xr_train.select_dtypes(exclude=&quot;number&quot;).columns.tolist()
+
+cv_c = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
+cv_r = KFold(n_splits=5, shuffle=True, random_state=SEED)
+print(&quot;classification:&quot;, Xc_train.shape, &quot;| regression:&quot;, Xr_train.shape)
+</code></pre>
+<pre><code class="language-markdown">**Justificare:** aceleași decizii ca în L04–L05: la clasificare scot ținta și `MntTotal`; la regresie scot ținta, `Mnt*` (ținta e suma lor), `Num*Purchases` (aceeași perioadă de 2 ani, leakage) și `Response`. Split 80/20 stratificat la clasificare, aleator la regresie; 5 fold-uri amestecate. Datele nu sunt o serie în timp.
+</code></pre>
+<hr />
+<h2>Sarcina 2 — Funcția de evaluare (celula 12) ❌</h2>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># SARCINA: functia de evaluare din L04 (pentru modelele scikit-learn de comparatie)
+from sklearn.model_selection import cross_validate
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder
+
+METRICS = {
+    &quot;classification&quot;: {&quot;PR_AUC&quot;: &quot;average_precision&quot;, &quot;F1&quot;: &quot;f1&quot;, &quot;recall&quot;: &quot;recall&quot;},
+    &quot;regression&quot;:     {&quot;MAE&quot;: &quot;neg_mean_absolute_error&quot;, &quot;RMSE&quot;: &quot;neg_root_mean_squared_error&quot;, &quot;R2&quot;: &quot;r2&quot;},
+}
+
+def evaluate(model, X, y, task, cv):
+    &quot;&quot;&quot;CV pe metricile problemei; intoarce (randul de tabel, scorurile pe fold-uri ale metricii principale).&quot;&quot;&quot;
+    scoring = METRICS[task]
+    res = cross_validate(model, X, y, cv=cv, scoring=scoring, return_train_score=True, n_jobs=-1)
+    sign = {name: -1 if scorer.startswith(&quot;neg_&quot;) else 1 for name, scorer in scoring.items()}
+    main = next(iter(scoring))
+    folds = sign[main] * res[f&quot;test_{main}&quot;]
+    row = {main: folds.mean(), f&quot;{main}_std&quot;: folds.std(), f&quot;{main}_train&quot;: sign[main] * res[f&quot;train_{main}&quot;].mean()}
+    row |= {name: sign[name] * res[f&quot;test_{name}&quot;].mean() for name in scoring if name != main}
+    row[&quot;fit_time_s&quot;] = res[&quot;fit_time&quot;].mean()
+    return row, folds
+
+EDU_ORDER = [[&quot;Basic&quot;, &quot;Graduation&quot;, &quot;Master&quot;, &quot;PhD&quot;]]
+
+def make_prep(num_cols):
+    &quot;&quot;&quot;Preprocesarea din L03: matrice DENSA de numere, fara NaN (Keras nu accepta matrici sparse sau text).&quot;&quot;&quot;
+    num_steps = Pipeline([(&quot;impute&quot;, SimpleImputer(strategy=&quot;median&quot;)), (&quot;scale&quot;, StandardScaler())])
+    ord_steps = Pipeline([(&quot;impute&quot;, SimpleImputer(strategy=&quot;most_frequent&quot;)),
+                          (&quot;ordinal&quot;, OrdinalEncoder(categories=EDU_ORDER, handle_unknown=&quot;use_encoded_value&quot;, unknown_value=-1))])
+    nom_steps = Pipeline([(&quot;impute&quot;, SimpleImputer(strategy=&quot;most_frequent&quot;)),
+                          (&quot;onehot&quot;, OneHotEncoder(min_frequency=10, handle_unknown=&quot;infrequent_if_exist&quot;, sparse_output=False))])
+    return ColumnTransformer([(&quot;num&quot;, num_steps, num_cols), (&quot;ord&quot;, ord_steps, [&quot;Education&quot;]),
+                              (&quot;nom&quot;, nom_steps, [&quot;Marital_Status&quot;])])
+
+def make_pipe(model, num_cols):
+    return Pipeline([(&quot;prep&quot;, make_prep(num_cols)), (&quot;model&quot;, model)])
+</code></pre>
+<p><strong>Notă:</strong> <code>Education</code> ordinal (0–3) nu e scalat. La o rețea e acceptabil (valori mici, între 0 și 3), dar dacă vrei să fie pe aceeași scară, adaugă un <code>StandardScaler()</code> după <code>OrdinalEncoder</code>.</p>
+<hr />
+<h2>Sarcina 3 — Datele pentru Keras (celula 15) ❌</h2>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># SARCINA: matrice float32 fara NaN, preprocesarea invatata DOAR pe partea de antrenare, + set de validare din train
+# 20% din TRAIN = set de validare pentru antrenarea retelei (EarlyStopping, alegeri); testul ramane inchis
+Xc_fit, Xc_val, yc_fit, yc_val = train_test_split(Xc_train, yc_train, test_size=0.2, stratify=yc_train, random_state=SEED)
+Xr_fit, Xr_val, yr_fit, yr_val = train_test_split(Xr_train, yr_train, test_size=0.2, random_state=SEED)
+
+# CLASIFICARE: tinta 0/1
+prep_clf = make_prep(num_cols_c).fit(Xc_fit)
+Ac_fit = prep_clf.transform(Xc_fit).astype(&quot;float32&quot;)
+Ac_val = prep_clf.transform(Xc_val).astype(&quot;float32&quot;)
+tc_fit = yc_fit.to_numpy().astype(&quot;float32&quot;)
+tc_val = yc_val.to_numpy().astype(&quot;float32&quot;)
+
+# REGRESIE: X preprocesat + tinta scalata (media 0, abaterea 1), ambele invatate doar pe partea &quot;fit&quot;
+prep_reg = make_prep(num_cols_r).fit(Xr_fit)
+Ar_fit = prep_reg.transform(Xr_fit).astype(&quot;float32&quot;)
+Ar_val = prep_reg.transform(Xr_val).astype(&quot;float32&quot;)
+y_scaler = StandardScaler().fit(yr_fit.to_numpy().reshape(-1, 1))              # StandardScaler vrea o matrice cu o coloana
+tr_fit = y_scaler.transform(yr_fit.to_numpy().reshape(-1, 1)).ravel().astype(&quot;float32&quot;)
+tr_val = y_scaler.transform(yr_val.to_numpy().reshape(-1, 1)).ravel().astype(&quot;float32&quot;)
+
+def to_money(t_scaled):
+    &quot;&quot;&quot;Predictiile retelei (tinta scalata) -&gt; unitati monetare.&quot;&quot;&quot;
+    return y_scaler.inverse_transform(np.asarray(t_scaled).reshape(-1, 1)).ravel()
+
+print(&quot;classification:&quot;, Ac_fit.shape, Ac_val.shape, &quot;| NaN:&quot;, np.isnan(Ac_fit).sum())
+print(&quot;regression:    &quot;, Ar_fit.shape, Ar_val.shape, &quot;| scaled target: mean&quot;, tr_fit.mean().round(2), &quot;std&quot;, tr_fit.std().round(2))
+print(&quot;columns (classification):&quot;, list(prep_clf.get_feature_names_out()))
+</code></pre>
+<h3>Observații</h3>
+<pre><code class="language-markdown">- **Coloane:** clasificarea are **30** de coloane (23 numerice + `Education` ordinal + 6 coloane one-hot pentru `Marital_Status`, inclusiv „infrequent”), regresia **20** (13 numerice + 1 + 6). Verifică cu `Ac_fit.shape[1]` / `Ar_fit.shape[1]`.
+- **De ce doar pe `X_fit` / `y_fit`:** mediana, media și abaterea standard sunt „învățate”. Dacă le calculăm și pe `X_val`, validarea influențează antrenarea (leakage), iar scorul pe validare (după care oprim antrenarea și alegem configurația) iese prea optimist. Ținta scalată (media 0, abaterea 1) ajută optimizatorul: pierderea pornește de la valori în jur de 1, nu de la sute de mii (MSE pe sume de bani), deci learning rate-ul implicit merge.
+</code></pre>
+<hr />
+<h2>Sarcina 4 — Prima rețea (celula 24) ❌</h2>
+<p>Sarcina cere <strong>definiția scrisă de voi</strong>, fără <code>build_model</code>. Arhitectura: 2 straturi ascunse (16 și 8 neuroni, ReLU). E mică, pentru că avem doar ≈ 1300 de rânduri de antrenare.</p>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># SARCINA: definitia retelei pentru fiecare problema, scrisa de mana; curbe de invatare; numarul de parametri
+keras.utils.set_random_seed(SEED)
+
+# CLASIFICARE: iesire sigmoid = P(clasa 1); pierdere binary cross-entropy
+net_clf = keras.Sequential([
+    keras.Input(shape=(Ac_fit.shape[1],)),
+    layers.Dense(16, activation=&quot;relu&quot;),
+    layers.Dense(8, activation=&quot;relu&quot;),
+    layers.Dense(1, activation=&quot;sigmoid&quot;),
+], name=&quot;net_clf&quot;)
+net_clf.compile(optimizer=keras.optimizers.Adam(learning_rate=1e-3), loss=&quot;binary_crossentropy&quot;,
+                metrics=[keras.metrics.AUC(curve=&quot;PR&quot;, name=&quot;pr_auc&quot;)])
+
+# REGRESIE: iesire liniara (orice numar real); pierdere MSE pe tinta scalata
+net_reg = keras.Sequential([
+    keras.Input(shape=(Ar_fit.shape[1],)),
+    layers.Dense(16, activation=&quot;relu&quot;),
+    layers.Dense(8, activation=&quot;relu&quot;),
+    layers.Dense(1),
+], name=&quot;net_reg&quot;)
+net_reg.compile(optimizer=keras.optimizers.Adam(learning_rate=1e-3), loss=&quot;mse&quot;,
+                metrics=[keras.metrics.MeanAbsoluteError(name=&quot;mae&quot;)])
+
+hist_clf = net_clf.fit(Ac_fit, tc_fit, validation_data=(Ac_val, tc_val), epochs=200, batch_size=32, verbose=0)
+hist_reg = net_reg.fit(Ar_fit, tr_fit, validation_data=(Ar_val, tr_val), epochs=200, batch_size=32, verbose=0)
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 7))
+for row, (hist, metric, title) in enumerate([(hist_clf, &quot;pr_auc&quot;, &quot;classification&quot;), (hist_reg, &quot;mae&quot;, &quot;regression&quot;)]):
+    for col, key in enumerate([&quot;loss&quot;, metric]):
+        axes[row, col].plot(hist.history[key], label=&quot;train&quot;)
+        axes[row, col].plot(hist.history[f&quot;val_{key}&quot;], label=&quot;validation&quot;)
+        axes[row, col].set(xlabel=&quot;epoch&quot;, ylabel=key, title=f&quot;{title} - {key}&quot;)
+        axes[row, col].legend()
+plt.tight_layout()
+plt.savefig(f&quot;{FIGURES_DIR}/L06_{MY_NAME}_first_nets.png&quot;, dpi=150, bbox_inches=&quot;tight&quot;)
+plt.show()
+
+for name, hist in [(&quot;classification&quot;, hist_clf), (&quot;regression&quot;, hist_reg)]:
+    val_loss = np.array(hist.history[&quot;val_loss&quot;])
+    print(f&quot;{name}: lowest validation loss {val_loss.min():.4f} at epoch {val_loss.argmin() + 1} (of 200)&quot;)
+
+# numarul de parametri, de mana: fiecare strat Dense are (intrari x neuroni) ponderi + neuroni bias-uri
+def count_params(n_inputs, units):
+    sizes = [n_inputs, *units]
+    return sum(a * b + b for a, b in zip(sizes[:-1], sizes[1:]))
+
+for name, net, A in [(&quot;classification&quot;, net_clf, Ac_fit), (&quot;regression&quot;, net_reg, Ar_fit)]:
+    by_hand = count_params(A.shape[1], [16, 8, 1])
+    print(f&quot;{name}: {by_hand} parameters by hand | Keras: {net.count_params()} | training rows: {len(A)}&quot;)
+net_clf.summary()
+</code></pre>
+<p><strong>Calculul de mână (clasificare, 30 de intrări):</strong> 30·16 + 16 = 496; 16·8 + 8 = 136; 8·1 + 1 = 9; total <strong>641</strong>. Regresie (20 de intrări): 20·16 + 16 = 336; + 136 + 9 = <strong>481</strong>.</p>
+<h3>Observații</h3>
+<pre><code class="language-markdown">- **Curbele:** pierderea pe train scade tot timpul. Pierderea pe validare scade în primele […] epoci (clasificare) / […] epoci (regresie), apoi stagnează și începe să crească: de acolo modelul învață zgomotul din train (overfitting). Curbele se depărtează după minimul pierderii pe validare.
+- **Parametri:** 641 (clasificare) și 481 (regresie), față de 1316 rânduri de antrenare: un raport de ≈ 1 parametru la 2 rânduri, deci rețeaua poate memora destul de ușor un set atât de mic. De aceea e nevoie de oprire timpurie / regularizare (sarcina 5).
+</code></pre>
+<hr />
+<h2>Sarcina 5 — Overfitting provocat și reparat (celula 29) ❌</h2>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># SARCINA: overfitting intentionat (retea mare, fara regularizare), apoi reparat cu EarlyStopping, Dropout, L2
+from keras import regularizers, callbacks
+from sklearn.metrics import average_precision_score, mean_absolute_error
+
+def make_net(n_inputs, task, units=(16, 8), dropout=0.0, l2=0.0, lr=1e-3, loss=None):
+    &quot;&quot;&quot;Aceeasi constructie ca la sarcina 4, cu regularizare optionala.&quot;&quot;&quot;
+    reg = regularizers.l2(l2) if l2 &gt; 0 else None
+    net = keras.Sequential([keras.Input(shape=(n_inputs,))])
+    for u in units:
+        net.add(layers.Dense(u, activation=&quot;relu&quot;, kernel_regularizer=reg))
+        if dropout &gt; 0:
+            net.add(layers.Dropout(dropout))
+    if task == &quot;classification&quot;:
+        net.add(layers.Dense(1, activation=&quot;sigmoid&quot;))
+        net.compile(optimizer=keras.optimizers.Adam(learning_rate=lr), loss=loss or &quot;binary_crossentropy&quot;)
+    else:
+        net.add(layers.Dense(1))
+        net.compile(optimizer=keras.optimizers.Adam(learning_rate=lr), loss=loss or &quot;mse&quot;)
+    return net
+
+def early_stop():
+    return callbacks.EarlyStopping(monitor=&quot;val_loss&quot;, patience=20, restore_best_weights=True)
+
+BIG = (256, 256, 128)
+variants = {
+    &quot;big, no regularization&quot;:    dict(units=BIG, stop=False),
+    &quot;big + EarlyStopping&quot;:       dict(units=BIG, stop=True),
+    &quot;big + Dropout 0.3 + ES&quot;:    dict(units=BIG, dropout=0.3, stop=True),
+    &quot;big + L2 1e-3 + ES&quot;:        dict(units=BIG, l2=1e-3, stop=True),
+}
+data = {&quot;classification&quot;: (Ac_fit, tc_fit, Ac_val, tc_val), &quot;regression&quot;: (Ar_fit, tr_fit, Ar_val, tr_val)}
+rows, histories = [], {}
+for task, (A_f, t_f, A_v, t_v) in data.items():
+    for name, cfg in variants.items():
+        cfg = dict(cfg)
+        stop = cfg.pop(&quot;stop&quot;)
+        keras.utils.set_random_seed(SEED)
+        net = make_net(A_f.shape[1], task, **cfg)
+        h = net.fit(A_f, t_f, validation_data=(A_v, t_v), epochs=300, batch_size=32, verbose=0,
+                    callbacks=[early_stop()] if stop else [])
+        histories[(task, name)] = h
+        p = net.predict(A_v, verbose=0).ravel()
+        score = average_precision_score(t_v, p) if task == &quot;classification&quot; else mean_absolute_error(yr_val, to_money(p))
+        rows.append({&quot;task&quot;: task, &quot;variant&quot;: name, &quot;epochs run&quot;: len(h.history[&quot;loss&quot;]),
+                     &quot;validation PR-AUC / MAE&quot;: score, &quot;params&quot;: net.count_params()})
+display(pd.DataFrame(rows).set_index([&quot;task&quot;, &quot;variant&quot;]).round(3))
+
+fig, axes = plt.subplots(1, 2, figsize=(13, 4))
+for ax, task in zip(axes, data):
+    for name in variants:
+        ax.plot(histories[(task, name)].history[&quot;val_loss&quot;], label=name)
+    ax.set(xlabel=&quot;epoch&quot;, ylabel=&quot;validation loss&quot;, title=f&quot;{task}: validation loss&quot;, yscale=&quot;log&quot;)
+    ax.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig(f&quot;{FIGURES_DIR}/L06_{MY_NAME}_regularization.png&quot;, dpi=150, bbox_inches=&quot;tight&quot;)
+plt.show()
+</code></pre>
+<p><strong>De ce MAE în unități monetare pentru regresie:</strong> pierderea e calculată pe ținta scalată; <code>to_money</code> transformă predicțiile înapoi, ca să compar direct cu MAE-ul din L05 (≈ 185).</p>
+<h3>Observații</h3>
+<pre><code class="language-markdown">- **Rețeaua mare fără regularizare** (≈ 107.000 de parametri la ≈ 1300 de rânduri) rulează toate cele 300 de epoci; pierderea pe validare crește mult după primele epoci: overfitting clar.
+- **Cea mai bună variantă:** clasificare […] (PR-AUC […]); regresie […] (MAE […]). De obicei, la seturi atât de mici, EarlyStopping + Dropout sau EarlyStopping + L2 bat EarlyStopping singur.
+- **Epoci cu EarlyStopping:** […] (clasificare) și […] (regresie); `restore_best_weights=True` revine la epoca cu cea mai mică pierdere pe validare (cu 20 de epoci înainte de oprire).
+- **Comparație cu HistGB (L05):** oprirea timpurie a ales acolo 67 de arbori la clasificare și 104 la regresie. Ideea e aceeași: oprim când pierderea pe date nevăzute nu mai scade; la HistGB „pasul” e un arbore, la rețea o epocă.
+</code></pre>
+<hr />
+<h2>Sarcina 6 — Dezechilibru și pierderea la regresie (celula 35) ❌</h2>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># SARCINA (clasificare): class_weight si efectul asupra recall-ului si preciziei (prag 0.5, pe validare)
+from sklearn.utils.class_weight import compute_class_weight
+from sklearn.metrics import precision_score, recall_score, f1_score
+
+def balanced_weights(y):
+    w = compute_class_weight(&quot;balanced&quot;, classes=np.array([0, 1]), y=np.asarray(y).astype(int))
+    return {0: w[0], 1: w[1]}                                  # Keras vrea un dictionar {clasa: pondere}
+
+rows = []
+for name, cw in [(&quot;no class_weight&quot;, None), (&quot;class_weight balanced&quot;, balanced_weights(tc_fit))]:
+    keras.utils.set_random_seed(SEED)
+    net = make_net(Ac_fit.shape[1], &quot;classification&quot;, units=(32, 16), dropout=0.3)
+    net.fit(Ac_fit, tc_fit, validation_data=(Ac_val, tc_val), epochs=300, batch_size=32, class_weight=cw,
+            callbacks=[early_stop()], verbose=0)
+    p = net.predict(Ac_val, verbose=0).ravel()
+    rows.append({&quot;variant&quot;: name, &quot;PR-AUC&quot;: average_precision_score(tc_val, p), &quot;recall&quot;: recall_score(tc_val, p &gt;= 0.5),
+                 &quot;precision&quot;: precision_score(tc_val, p &gt;= 0.5, zero_division=0), &quot;F1&quot;: f1_score(tc_val, p &gt;= 0.5)})
+display(pd.DataFrame(rows).set_index(&quot;variant&quot;).round(3))
+print(&quot;class weights:&quot;, {k: round(v, 2) for k, v in balanced_weights(tc_fit).items()})
+</code></pre>
+<pre><code class="language-python"># SARCINA (regresie): MSE vs. MAE vs. Huber, pe tinta curata si pe una cu 5% erori simulate (doar in antrenare)
+rng = np.random.default_rng(SEED)
+corrupt = rng.random(len(tr_fit)) &lt; 0.05
+tr_fit_noisy = tr_fit.copy()
+tr_fit_noisy[corrupt] = tr_fit_noisy[corrupt] + rng.normal(5, 1, corrupt.sum())    # +5 abateri standard: erori grosolane
+
+rows = []
+for loss_name, loss in [(&quot;MSE&quot;, &quot;mse&quot;), (&quot;MAE&quot;, &quot;mae&quot;), (&quot;Huber&quot;, keras.losses.Huber(delta=1.0))]:
+    for data_name, target in [(&quot;clean&quot;, tr_fit), (&quot;5% errors&quot;, tr_fit_noisy)]:
+        keras.utils.set_random_seed(SEED)
+        net = make_net(Ar_fit.shape[1], &quot;regression&quot;, units=(32, 16), dropout=0.1, loss=loss)
+        net.fit(Ar_fit, target, validation_data=(Ar_val, tr_val), epochs=300, batch_size=32,
+                callbacks=[early_stop()], verbose=0)
+        pred = to_money(net.predict(Ar_val, verbose=0))
+        rows.append({&quot;loss&quot;: loss_name, &quot;training target&quot;: data_name, &quot;validation MAE&quot;: mean_absolute_error(yr_val, pred)})
+display(pd.DataFrame(rows).pivot(index=&quot;loss&quot;, columns=&quot;training target&quot;, values=&quot;validation MAE&quot;).round(1))
+</code></pre>
+<p>Validarea folosește <strong>ținta curată</strong> (<code>tr_val</code>): vrem să știm cât de bine prezice modelul realitatea, nu erorile.</p>
+<h3>Observații</h3>
+<pre><code class="language-markdown">- **Clasificare:** cu `class_weight` (≈ 0,59 pentru clasa 0 și ≈ 3,3 pentru clasa 1), recall-ul pe validare crește de la […] la […], iar precizia scade de la […] la […]. PR-AUC rămâne aproape același (ponderile schimbă pragul efectiv, nu ordinea clienților). Același efect ca în L03 la regresia logistică (recall 0,43 → 0,79).
+- **Regresie:** pe datele curate cea mai bună pierdere e […]; cu 5% erori, MSE se strică cel mai mult (eroarea la pătrat dă o greutate uriașă celor 5% de valori greșite), iar MAE și Huber rămân aproape la fel. **Aleg MAE (sau Huber):** metrica noastră e MAE, iar ținta are clienți foarte mari (asimetrie 0,87), care la MSE ar trage modelul după ei.
+</code></pre>
+<hr />
+<h2>Sarcina 7 — Raport cu <code>sklearn.metrics</code> și comparație cu <code>MLP</code> (celula 41) ❌</h2>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># SARCINA: raportul pentru retea (clasificare: prag ales pe VALIDARE; regresie: unitati monetare) + MLP din scikit-learn
+from sklearn.metrics import classification_report, r2_score, root_mean_squared_error
+from sklearn.neural_network import MLPClassifier, MLPRegressor
+from sklearn.compose import TransformedTargetRegressor
+
+UNITS = (32, 16)
+
+# CLASIFICARE: reteaua finala a sarcinilor 5-6 (Dropout + class_weight + EarlyStopping)
+keras.utils.set_random_seed(SEED)
+net_c = make_net(Ac_fit.shape[1], &quot;classification&quot;, units=UNITS, dropout=0.3)
+net_c.fit(Ac_fit, tc_fit, validation_data=(Ac_val, tc_val), epochs=300, batch_size=32,
+          class_weight=balanced_weights(tc_fit), callbacks=[early_stop()], verbose=0)
+p_val = net_c.predict(Ac_val, verbose=0).ravel()
+
+# pragul: precizia maxima cu recall &gt;= 0.75 (acelasi criteriu ca in L04-L05)
+thresholds = np.arange(0.05, 0.96, 0.01)
+ok = [t for t in thresholds if recall_score(tc_val, p_val &gt;= t) &gt;= 0.75]
+threshold_net = max(ok, key=lambda t: precision_score(tc_val, p_val &gt;= t))
+print(f&quot;threshold chosen on validation: {threshold_net:.2f}&quot;)
+print(classification_report(tc_val, (p_val &gt;= threshold_net).astype(int), digits=3))
+# atentie: pragul e ales pe aceleasi date pe care il raportam -&gt; raportul e usor optimist (testul ramane pentru final)
+
+# MLPClassifier cu aceeasi arhitectura (fara class_weight: scikit-learn nu il are la MLP)
+mlp_c = make_pipe(MLPClassifier(hidden_layer_sizes=UNITS, activation=&quot;relu&quot;, alpha=1e-3, early_stopping=True,
+                                max_iter=500, random_state=SEED), num_cols_c).fit(Xc_fit, yc_fit)
+print(f&quot;PR-AUC on validation: Keras {average_precision_score(tc_val, p_val):.3f} | &quot;
+      f&quot;MLPClassifier {average_precision_score(yc_val, mlp_c.predict_proba(Xc_val)[:, 1]):.3f}&quot;)
+
+# REGRESIE: reteaua cu pierdere MAE, predictiile in unitati monetare
+keras.utils.set_random_seed(SEED)
+net_r = make_net(Ar_fit.shape[1], &quot;regression&quot;, units=UNITS, dropout=0.1, loss=&quot;mae&quot;)
+net_r.fit(Ar_fit, tr_fit, validation_data=(Ar_val, tr_val), epochs=300, batch_size=32, callbacks=[early_stop()], verbose=0)
+pred_val = to_money(net_r.predict(Ar_val, verbose=0))
+mlp_r = TransformedTargetRegressor(make_pipe(MLPRegressor(hidden_layer_sizes=UNITS, activation=&quot;relu&quot;, alpha=1e-3,
+                                                          early_stopping=True, max_iter=500, random_state=SEED), num_cols_r),
+                                   transformer=StandardScaler()).fit(Xr_fit, yr_fit)
+pred_mlp = mlp_r.predict(Xr_val)
+for name, pred in [(&quot;Keras&quot;, pred_val), (&quot;MLPRegressor&quot;, pred_mlp)]:
+    print(f&quot;{name:12s}: MAE {mean_absolute_error(yr_val, pred):.1f} | RMSE {root_mean_squared_error(yr_val, pred):.1f} | &quot;
+          f&quot;R2 {r2_score(yr_val, pred):.3f}&quot;)
+
+# unde greseste reteaua de regresie? MAE pe sferturi ale tintei
+quart = pd.qcut(yr_val, 4, labels=[&quot;Q1 (low)&quot;, &quot;Q2&quot;, &quot;Q3&quot;, &quot;Q4 (high)&quot;])
+display(pd.DataFrame({&quot;abs error&quot;: np.abs(yr_val - pred_val), &quot;residual&quot;: yr_val - pred_val})
+        .groupby(quart, observed=True).mean().round(1))
+</code></pre>
+<p><strong>Arhitectura „aceeași”:</strong> 2 straturi ascunse (32, 16), ReLU, Adam, regularizare L2 (<code>alpha</code> la MLP), oprire timpurie. Diferențe care rămân: MLP-ul nu are Dropout și nici <code>class_weight</code>, iar oprirea lui timpurie folosește 10% din datele primite.</p>
+<h3>Observații</h3>
+<pre><code class="language-markdown">- **Keras vs. MLP:** PR-AUC Keras […] vs. MLPClassifier […]; MAE Keras […] vs. MLPRegressor […]. Cu aceeași arhitectură, diferențele sunt de obicei mici. Dacă Keras e mai bun la recall, e din cauza `class_weight` (MLPClassifier nu îl are).
+- **Pragul:** […] (precizia maximă cu recall ≥ 0,75): găsim cel puțin 3 din 4 clienți interesați. Pragul e ales pe setul de validare, deci raportul pe validare e ușor optimist.
+- **Unde greșește regresia:** ca la SVR (L04) și HistGB (L05), eroarea crește cu valoarea țintei: MAE mic la clienții mici (Q1), mare la cei mari (Q4), unde modelul **subestimează** (reziduul mediu pozitiv).
+</code></pre>
+<hr />
+<h2>Sarcina 8 — Validarea încrucișată a rețelei + tabelul din L05 (celula 47) ❌</h2>
+<p>Bucla e scrisă de mine (nu <code>keras_cv</code> din exemplu): în fiecare fold, preprocesarea și scalarea țintei se învață doar pe partea de antrenare, rețeaua e nouă, iar 15% din partea de antrenare e folosit pentru <code>EarlyStopping</code>.</p>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># SARCINA: validarea incrucisata a retelei, aceleasi fold-uri ca in L05, + tabel + testul t corectat
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+def net_cv(X, y, task, cv, num_cols, units=UNITS, dropout=0.3, l2=0.0, lr=1e-3, loss=None, epochs=300, seed=SEED):
+    rows = []
+    y = np.asarray(y)
+    for idx_fit, idx_val in cv.split(X, y):
+        X_f, X_v, y_f, y_v = X.iloc[idx_fit], X.iloc[idx_val], y[idx_fit], y[idx_val]
+        X_f, X_es, y_f, y_es = train_test_split(X_f, y_f, test_size=0.15, random_state=seed,
+                                                stratify=y_f if task == &quot;classification&quot; else None)
+        prep = make_prep(num_cols).fit(X_f)                               # doar pe antrenarea fold-ului
+        A_f, A_es, A_v = (prep.transform(d).astype(&quot;float32&quot;) for d in (X_f, X_es, X_v))
+        cw = None
+        if task == &quot;regression&quot;:
+            ys = StandardScaler().fit(y_f.reshape(-1, 1))                 # si tinta, doar pe antrenarea fold-ului
+            t_f, t_es = (ys.transform(d.reshape(-1, 1)).ravel() for d in (y_f, y_es))
+        else:
+            t_f, t_es, cw = y_f, y_es, balanced_weights(y_f)
+        keras.backend.clear_session()                                    # sterge retelele din fold-urile anterioare
+        keras.utils.set_random_seed(seed)
+        net = make_net(A_f.shape[1], task, units=units, dropout=dropout, l2=l2, lr=lr, loss=loss)   # retea NOUA
+        net.fit(A_f, t_f, validation_data=(A_es, t_es), epochs=epochs, batch_size=32, class_weight=cw,
+                callbacks=[early_stop()], verbose=0)
+        p = net.predict(A_v, verbose=0).ravel()
+        if task == &quot;regression&quot;:
+            pred = ys.inverse_transform(p.reshape(-1, 1)).ravel()
+            rows.append({&quot;MAE&quot;: mean_absolute_error(y_v, pred), &quot;RMSE&quot;: root_mean_squared_error(y_v, pred),
+                         &quot;R2&quot;: r2_score(y_v, pred)})
+        else:
+            rows.append({&quot;PR_AUC&quot;: average_precision_score(y_v, p), &quot;F1&quot;: f1_score(y_v, p &gt;= 0.5),
+                         &quot;recall&quot;: recall_score(y_v, p &gt;= 0.5)})
+    folds = pd.DataFrame(rows)
+    main = folds.columns[0]
+    return {main: folds[main].mean(), f&quot;{main}_std&quot;: folds[main].std(ddof=0), **folds.iloc[:, 1:].mean()}, folds[main].to_numpy()
+
+t0 = time.time()
+row_nc, folds_nc = net_cv(Xc_train, yc_train, &quot;classification&quot;, cv_c, num_cols_c, dropout=0.3)
+time_net_c = time.time() - t0
+t0 = time.time()
+row_nr, folds_nr = net_cv(Xr_train, yr_train, &quot;regression&quot;, cv_r, num_cols_r, dropout=0.1, loss=&quot;mae&quot;)
+time_net_r = time.time() - t0
+
+# modelele finale din L05, pe ACELEASI fold-uri, cu aceeasi functie de evaluare
+best_c = make_pipe(LogisticRegression(max_iter=1000, class_weight=&quot;balanced&quot;), num_cols_c)
+best_r = make_pipe(HistGradientBoostingRegressor(learning_rate=0.05, max_iter=1000, early_stopping=True,
+                                                 loss=&quot;absolute_error&quot;, random_state=SEED), num_cols_r)
+row_bc, folds_bc = evaluate(best_c, Xc_train, yc_train, &quot;classification&quot;, cv_c)
+row_br, folds_br = evaluate(best_r, Xr_train, yr_train, &quot;regression&quot;, cv_r)
+
+table_net = pd.DataFrame([{&quot;task&quot;: &quot;classification&quot;, &quot;model&quot;: &quot;Keras network&quot;, **row_nc, &quot;cv time (s)&quot;: time_net_c},
+                          {&quot;task&quot;: &quot;classification&quot;, &quot;model&quot;: &quot;logistic regression (L05 final)&quot;, **row_bc},
+                          {&quot;task&quot;: &quot;regression&quot;, &quot;model&quot;: &quot;Keras network&quot;, **row_nr, &quot;cv time (s)&quot;: time_net_r},
+                          {&quot;task&quot;: &quot;regression&quot;, &quot;model&quot;: &quot;HistGB (L05 final)&quot;, **row_br}]).set_index([&quot;task&quot;, &quot;model&quot;])
+display(table_net.round(3))
+
+# testul t corectat: reteaua vs. cel mai bun model din L05
+for task, f_net, f_best, n in [(&quot;classification&quot;, folds_nc, folds_bc, len(Xc_train)), (&quot;regression&quot;, folds_nr, folds_br, len(Xr_train))]:
+    t, p_val = corrected_ttest(f_net, f_best, n * 4 / 5, n / 5)
+    print(f&quot;{task}: network - best = {f_net.mean() - f_best.mean():+.3f}, p = {p_val:.3f} -&gt; &quot;
+          f&quot;{'significant' if p_val &lt; 0.05 else 'NOT significant'}&quot;)
+</code></pre>
+<p><code>corrected_ttest</code> vine din celula cu funcțiile ajutătoare a exemplului (e permisă).</p>
+<h3>Observații</h3>
+<pre><code class="language-markdown">- **Locul rețelei:** clasificare PR-AUC […] ± […] față de regresia logistică 0,601 ± 0,065; regresie MAE […] ± […] față de HistGB 185,5 ± 12,0. Testul t corectat: p = […] / […].
+- **Timp:** validarea încrucișată a rețelei a durat […] s / […] s, față de ≈ 1 s pentru regresia logistică și ≈ 2 s pentru HistGB (5 fold-uri).
+- **Aș alege rețeaua?** Pentru date tabelare ca ale noastre (≈ 1650 de rânduri, 25 de coloane), **nu**: în cel mai bun caz egalează modelele din L05 (diferență nesemnificativă), e de zeci de ori mai lentă, depinde de seed (sarcina 10) și e mai greu de explicat. Rețelele câștigă la date mari și nestructurate (imagini, text, sunet); pe tabele mici, arborii cu boosting și modelele liniare rămân alegerea standard.
+</code></pre>
+<hr />
+<h2>Sarcina 9 — Căutarea hiperparametrilor (celula 54) ❌</h2>
+<p><strong>Spațiul:</strong> arhitectura (un strat de 16 sau două straturi 32-16), Dropout (0 sau 0,3) și rata de învățare (0,001 sau 0,003): 2 × 2 × 2 = <strong>8 configurații</strong>. Rețeaua mare (64-32) am scos-o: în sarcina 5 rețelele mari doar făceau overfitting. <strong>Bugetul:</strong> 3 fold-uri în loc de 5 și maximum 150 de epoci, adică 8 × 3 = 24 de antrenări per problemă. Pe CPU-ul din Colab, o antrenare durează ≈ 10–30 s, deci căutarea durează ≈ 5–10 minute per problemă.</p>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># SARCINA: cautarea hiperparametrilor retelei (grila mica, evaluata cu bucla proprie pe 3 fold-uri)
+from itertools import product
+
+cv3_c = StratifiedKFold(n_splits=3, shuffle=True, random_state=SEED)
+cv3_r = KFold(n_splits=3, shuffle=True, random_state=SEED)
+grid_net = {&quot;units&quot;: [(16,), (32, 16)], &quot;dropout&quot;: [0.0, 0.3], &quot;lr&quot;: [1e-3, 3e-3]}   # 2 x 2 x 2 = 8 configuratii
+EPOCHS_SEARCH = 150                       # plafon mai mic la cautare; EarlyStopping opreste oricum mai devreme
+
+problems = {&quot;classification&quot;: (Xc_train, yc_train, cv3_c, num_cols_c, None, &quot;PR_AUC&quot;),
+            &quot;regression&quot;:     (Xr_train, yr_train, cv3_r, num_cols_r, &quot;mae&quot;, &quot;MAE&quot;)}
+results_net, search_time = {}, {}
+for task, (X, y, cv, num_cols, loss, main) in problems.items():
+    rows = []
+    t0 = time.time()
+    for units, dropout, lr in product(*grid_net.values()):
+        row, _ = net_cv(X, y, task, cv, num_cols, units=units, dropout=dropout, lr=lr, loss=loss, epochs=EPOCHS_SEARCH)
+        rows.append({&quot;units&quot;: units, &quot;dropout&quot;: dropout, &quot;lr&quot;: lr, **row})        # units ramane tuplu (nu text)
+        print(f&quot;  {task}: units={units}, dropout={dropout}, lr={lr} -&gt; {main} = {row[main]:.3f}&quot;)
+    search_time[task] = time.time() - t0
+    results_net[task] = (pd.DataFrame(rows)
+                         .sort_values(main, ascending=(task == &quot;regression&quot;))   # MAE: mai mic = mai bine
+                         .reset_index(drop=True))
+    print(f&quot;{task}: {len(rows)} configurations x {cv.get_n_splits()} folds in {search_time[task]:.0f} s&quot;)
+    display(results_net[task].head(5).round(3))
+
+best_cfg = {task: res.iloc[0] for task, res in results_net.items()}           # folosita la sarcinile 10-11
+</code></pre>
+<h3>Observații</h3>
+<pre><code class="language-markdown">- **Configurația câștigătoare:** clasificare […]; regresie […]. De obicei nu e aceeași: clasificarea (o clasă rară, puține pozitive) preferă rețele mici sau cu Dropout, regresia (o țintă continuă, mai multă informație pe rând) poate folosi o rețea puțin mai mare.
+- **Diferențele dintre configurații** (primele 5) sunt de ordinul […], comparabile cu abaterea standard dintre fold-uri ([…]): alegerea e în mare parte zgomot (sarcina 10 verifică asta).
+- **Timp:** […] s pentru 24 de antrenări, față de ≈ 20 s pentru 30 de combinații × 5 fold-uri ale `RandomizedSearchCV` pe HistGB în L05: rețeaua e de ≈ […] ori mai scumpă per configurație.
+</code></pre>
+<hr />
+<h2>Sarcina 10 — Variația între seed-uri (celula 59) ❌</h2>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># TODO: configuratia aleasa, 5 seed-uri, pe setul de validare din sarcina 3
+rows = []
+for task, (A_f, t_f, A_v, t_v) in data.items():
+    cfg = best_cfg[task]                                    # din sarcina 9: units e deja un tuplu, ex. (32, 16)
+    for seed in [0, 1, 2, 3, 4]:
+        keras.backend.clear_session()                       # sterge reteaua de la seed-ul anterior
+        keras.utils.set_random_seed(seed)
+        net = make_net(A_f.shape[1], task, units=cfg[&quot;units&quot;], dropout=float(cfg[&quot;dropout&quot;]), lr=float(cfg[&quot;lr&quot;]),
+                       loss=&quot;mae&quot; if task == &quot;regression&quot; else None)
+        net.fit(A_f, t_f, validation_data=(A_v, t_v), epochs=300, batch_size=32, verbose=0, callbacks=[early_stop()],
+                class_weight=balanced_weights(t_f) if task == &quot;classification&quot; else None)
+        p = net.predict(A_v, verbose=0).ravel()
+        score = average_precision_score(t_v, p) if task == &quot;classification&quot; else mean_absolute_error(yr_val, to_money(p))
+        rows.append({&quot;task&quot;: task, &quot;seed&quot;: seed, &quot;score&quot;: score})
+seeds = pd.DataFrame(rows)
+display(seeds.groupby(&quot;task&quot;)[&quot;score&quot;].agg([&quot;mean&quot;, &quot;std&quot;, &quot;min&quot;, &quot;max&quot;]).round(3))
+# comparatie: cat de departe sunt primele configuratii din sarcina 9?
+for task, res in results_net.items():
+    main = &quot;PR_AUC&quot; if task == &quot;classification&quot; else &quot;MAE&quot;
+    print(f&quot;{task}: spread of the top-5 configurations = {res[main].head(5).max() - res[main].head(5).min():.3f}&quot;)
+</code></pre>
+<h3>Observații</h3>
+<pre><code class="language-markdown">- **Variația între seed-uri:** abaterea standard pe 5 seed-uri e […] (clasificare) și […] (regresie); diferența dintre cel mai bun și cel mai slab seed e […].
+- **Comparație:** diferența dintre primele 5 configurații din sarcina 9 e […]. Dacă variația între seed-uri e la fel de mare sau mai mare, **clasamentul configurațiilor e zgomot**: o altă inițializare a ponderilor le-ar ordona altfel.
+- **Ce înseamnă pentru alegere:** nu aleg configurația după un singur scor. Aleg o configurație simplă din grupul de top și raportez media pe mai multe seed-uri (sau fac media predicțiilor mai multor rețele, ca un mic ansamblu).
+</code></pre>
+<hr />
+<h2>Sarcina 11 — Rețelele finale, salvate și reîncărcate (celula 63) ❌</h2>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># SARCINA: retelele finale pe tot train-ul, salvate (.keras + preprocesarea cu joblib), reincarcate si verificate
+final_nets, final_preps = {}, {}
+for task, X, y, num_cols in [(&quot;clf&quot;, Xc_train, yc_train, num_cols_c), (&quot;reg&quot;, Xr_train, yr_train, num_cols_r)]:
+    full_task = &quot;classification&quot; if task == &quot;clf&quot; else &quot;regression&quot;
+    cfg = best_cfg[full_task]
+    units = cfg[&quot;units&quot;]
+    # 15% din train pentru EarlyStopping; preprocesarea invatata pe restul
+    X_f, X_es, y_f, y_es = train_test_split(X, np.asarray(y), test_size=0.15, random_state=SEED,
+                                            stratify=y if task == &quot;clf&quot; else None)
+    prep = make_prep(num_cols).fit(X_f)
+    A_f, A_es = prep.transform(X_f).astype(&quot;float32&quot;), prep.transform(X_es).astype(&quot;float32&quot;)
+    if task == &quot;reg&quot;:
+        ys = StandardScaler().fit(y_f.reshape(-1, 1))
+        t_f, t_es = (ys.transform(d.reshape(-1, 1)).ravel() for d in (y_f, y_es))
+        final_preps[task] = {&quot;prep&quot;: prep, &quot;y_scaler&quot;: ys}
+    else:
+        t_f, t_es = y_f, y_es
+        final_preps[task] = {&quot;prep&quot;: prep, &quot;threshold&quot;: threshold_net}
+    keras.utils.set_random_seed(SEED)
+    net = make_net(A_f.shape[1], full_task, units=units, dropout=cfg[&quot;dropout&quot;], lr=cfg[&quot;lr&quot;],
+                   loss=&quot;mae&quot; if task == &quot;reg&quot; else None)
+    net.fit(A_f, t_f, validation_data=(A_es, t_es), epochs=300, batch_size=32, verbose=0, callbacks=[early_stop()],
+            class_weight=balanced_weights(t_f) if task == &quot;clf&quot; else None)
+    net.save(f&quot;{MODELS_DIR}/L06_{MY_NAME}_net_{task}.keras&quot;)
+    joblib.dump(final_preps[task], f&quot;{MODELS_DIR}/L06_{MY_NAME}_prep_{task}.joblib&quot;)
+    final_nets[task] = net
+
+# reincarcare si verificare pe cateva randuri din train: aceleasi predictii
+for task, X in [(&quot;clf&quot;, Xc_train), (&quot;reg&quot;, Xr_train)]:
+    net_loaded = keras.saving.load_model(f&quot;{MODELS_DIR}/L06_{MY_NAME}_net_{task}.keras&quot;)
+    saved = joblib.load(f&quot;{MODELS_DIR}/L06_{MY_NAME}_prep_{task}.joblib&quot;)
+    A = saved[&quot;prep&quot;].transform(X.head(5)).astype(&quot;float32&quot;)
+    before = final_nets[task].predict(A, verbose=0).ravel()
+    after = net_loaded.predict(A, verbose=0).ravel()
+    if task == &quot;reg&quot;:
+        before, after = (saved[&quot;y_scaler&quot;].inverse_transform(v.reshape(-1, 1)).ravel() for v in (before, after))
+    print(task, &quot;| same predictions after reload:&quot;, np.allclose(before, after), &quot;|&quot;, np.round(after, 3))
+</code></pre>
+<p>Salvez împreună cu preprocesarea și pragul (clasificare) sau scalerul țintei (regresie): fără ele, rețeaua reîncărcată nu poate fi folosită pe date noi.</p>
+<hr />
+<h2>Sarcina 12 — Găsiți greșelile (Keras, celula 66) ❌</h2>
+<pre><code class="language-markdown">**Greșelile găsite** (bloc pentru o clasificare cu 3 clase):
+1. `prep.fit(X)` pe **tot** setul (inclusiv testul): leakage. Corect: `prep.fit(X_train)` (ideal, doar pe partea de antrenare fără validare).
+2. `layers.Dense(3, activation=&quot;sigmoid&quot;)`: pentru 3 clase care se exclud reciproc, ieșirea trebuie să fie **`softmax`** (probabilități care se adună la 1). Sigmoid tratează fiecare clasă separat (multi-label).
+3. `loss=&quot;mse&quot;` pentru clasificare: pierderea corectă e **`sparse_categorical_crossentropy`** (etichete 0, 1, 2) sau `categorical_crossentropy` (etichete one-hot). MSE pe probabilități învață greu și nu e o pierdere de clasificare.
+4. `epochs=500` fără `EarlyStopping`: rețeaua face overfitting. Corect: `callbacks=[EarlyStopping(monitor=&quot;val_loss&quot;, patience=20, restore_best_weights=True)]`.
+5. `validation_data=(prep.transform(X_test), y_test)`: **testul** e folosit ca validare (pentru monitorizare / oprire): testul nu mai e independent. Corect: un set de validare scos din train.
+6. `accuracy_score(y_test, pred)` cu `pred` = **probabilități** (o matrice n × 3): dă eroare. Corect: `pred.argmax(axis=1)`.
+7. `accuracy_score` nu e importat (`from sklearn.metrics import accuracy_score`): **eroare** (`NameError`).
+8. Lipsesc conversia la `float32` și verificarea că `y_train` are etichete 0..K−1 (dacă sunt text, Keras dă eroare; se codifică întâi cu `LabelEncoder`).
+9. (Mai puțin grav) acuratețea simplă pe clase posibil dezechilibrate; mai bine F1 macro / acuratețe echilibrată.
+
+**Varianta corectă:**
+    from sklearn.metrics import accuracy_score, f1_score
+    X_fit, X_val, y_fit, y_val = train_test_split(X_train, y_train, test_size=0.2, stratify=y_train, random_state=SEED)
+    prep.fit(X_fit)
+    model = keras.Sequential([keras.Input(shape=(prep.transform(X_fit[:1]).shape[1],)),
+                              layers.Dense(64, activation=&quot;relu&quot;),
+                              layers.Dense(3, activation=&quot;softmax&quot;)])
+    model.compile(optimizer=&quot;adam&quot;, loss=&quot;sparse_categorical_crossentropy&quot;, metrics=[&quot;accuracy&quot;])
+    model.fit(prep.transform(X_fit).astype(&quot;float32&quot;), y_fit, epochs=500,
+              validation_data=(prep.transform(X_val).astype(&quot;float32&quot;), y_val),
+              callbacks=[keras.callbacks.EarlyStopping(monitor=&quot;val_loss&quot;, patience=20, restore_best_weights=True)])
+    pred = model.predict(prep.transform(X_test).astype(&quot;float32&quot;)).argmax(axis=1)   # o singura data, la final
+    print(accuracy_score(y_test, pred), f1_score(y_test, pred, average=&quot;macro&quot;))
+</code></pre>
+<hr />
+<h2>Contribuția (celula 68) ❌</h2>
+<p><strong>Ipoteză:</strong> un <strong>ansamblu de 5 rețele</strong> (aceeași configurație, seed-uri diferite, media probabilităților / predicțiilor) e mai bun și mai stabil decât o singură rețea, pentru că rețelele cu inițializări diferite greșesc pe exemple diferite (L05, TODO 3). În sarcina 10 am văzut că o singură rețea depinde mult de seed.</p>
+<h3>Cod corect</h3>
+<pre><code class="language-python"># CONTRIBUTIA: o retea vs. media a 5 retele (seed-uri diferite), pe setul de validare din sarcina 3
+def val_score(task, p, t_v):
+    &quot;&quot;&quot;Metrica principala pe validare: PR-AUC (clasificare) / MAE in unitati monetare (regresie).&quot;&quot;&quot;
+    return average_precision_score(t_v, p) if task == &quot;classification&quot; else mean_absolute_error(yr_val, to_money(p))
+
+rows = []
+for task, (A_f, t_f, A_v, t_v) in data.items():
+    cfg = best_cfg[task]                                    # din sarcina 9: units e deja un tuplu, ex. (32, 16)
+    preds = []
+    for seed in range(5):
+        keras.backend.clear_session()                       # sterge reteaua de la seed-ul anterior
+        keras.utils.set_random_seed(seed)
+        net = make_net(A_f.shape[1], task, units=cfg[&quot;units&quot;], dropout=float(cfg[&quot;dropout&quot;]), lr=float(cfg[&quot;lr&quot;]),
+                       loss=&quot;mae&quot; if task == &quot;regression&quot; else None)
+        net.fit(A_f, t_f, validation_data=(A_v, t_v), epochs=300, batch_size=32, verbose=0, callbacks=[early_stop()],
+                class_weight=balanced_weights(t_f) if task == &quot;classification&quot; else None)
+        preds.append(net.predict(A_v, verbose=0).ravel())
+    single = [val_score(task, p, t_v) for p in preds]
+    rows.append({&quot;task&quot;: task, &quot;single net (mean of 5)&quot;: np.mean(single), &quot;single net (std)&quot;: np.std(single),
+                 &quot;ensemble of 5 nets&quot;: val_score(task, np.mean(preds, axis=0), t_v)})   # media predictiilor celor 5 retele
+display(pd.DataFrame(rows).set_index(&quot;task&quot;).round(3))
+</code></pre>
+<blockquote>
+<p>Atenție: setul de validare a fost folosit și pentru <code>EarlyStopping</code>, deci ambele scoruri sunt ușor optimiste în aceeași măsură. Comparația între ele rămâne corectă. Pentru o estimare curată, pune media celor 5 rețele în <code>net_cv</code>.</p>
+</blockquote>
+<h3>Observații</h3>
+<pre><code class="language-markdown">- **Ipoteza:** media a 5 rețele bate o singură rețea.
+- **Experimentul:** aceeași configurație (cea mai bună din sarcina 9), 5 seed-uri, același set de validare; compar media scorurilor rețelelor individuale cu scorul mediei predicțiilor lor.
+- **Rezultatul:** clasificare: o rețea […] ± […], ansamblul […]; regresie: o rețea […] ± […], ansamblul […].
+- **Concluzia:** […] (de așteptat: ansamblul e cel puțin la nivelul celei mai bune rețele individuale și elimină dependența de seed, cu un cost de 5 ori mai mare în timp. Dacă diferența e sub variația dintre seed-uri, câștigul principal e **stabilitatea**, nu scorul).
+</code></pre>
+<hr />
+<h2>Celulele AI</h2>
+<p>Toate sunt goale. Completează-le cinstit dacă ai folosit un asistent.</p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+document.querySelectorAll("pre code").forEach(function (block) {
+  if (window.hljs) hljs.highlightElement(block);
+  var btn = document.createElement("button");
+  btn.className = "copy"; btn.textContent = "Copiază";
+  btn.onclick = function () {
+    navigator.clipboard.writeText(block.innerText).then(function () {
+      btn.textContent = "Copiat ✓"; setTimeout(function () { btn.textContent = "Copiază"; }, 1500);
+    });
+  };
+  block.parentNode.appendChild(btn);
+});
+</script>
+</body></html>
